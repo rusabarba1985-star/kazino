@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бесконечные слоты 5x7</title>
+    <title>🎰 VIP Casino Slots</title>
     <style>
         * {
             margin: 0;
@@ -11,173 +11,243 @@
             box-sizing: border-box;
             user-select: none;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 10px;
         }
-        
+
         .game-container {
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(20, 25, 35, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 30px;
+            border-radius: 40px;
             padding: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
         }
-        
+
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: white;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        
+
         .balance {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 12px 20px;
+            background: linear-gradient(135deg, #2a3b4c, #1a2a3a);
+            padding: 12px 25px;
             border-radius: 40px;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            border: 2px solid gold;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            color: gold;
         }
-        
+
         .stats {
             background: rgba(255, 255, 255, 0.1);
-            padding: 8px 15px;
+            padding: 10px 20px;
             border-radius: 40px;
-            font-size: 14px;
+            font-size: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        
+
         .slot-machine {
-            background: #0f3460;
+            background: #0f1a24;
             border-radius: 30px;
-            padding: 20px;
-            border: 3px solid #e94560;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 10px 20px rgba(233, 69, 96, 0.3);
+            padding: 25px 15px;
+            border: 4px solid #e3b23c;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 15px 30px rgba(227, 178, 60, 0.2);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .slot-machine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(to bottom, rgba(255,215,0,0.3), transparent);
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 6px;
             aspect-ratio: 7/5;
+            position: relative;
         }
-        
+
         .cell {
-            background: #1a1a2e;
+            background: #1e2a36;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
             aspect-ratio: 1;
-            border: 2px solid #0ff;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-            transition: all 0.1s ease;
-            color: white;
-            text-shadow: 0 0 5px currentColor;
+            border: 2px solid #3a4a5a;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
+            overflow: hidden;
+            position: relative;
         }
-        
+
+        .cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
         .cell.win {
-            border-color: gold;
-            box-shadow: 0 0 20px gold;
+            border-color: #ffd700;
+            box-shadow: 0 0 20px #ffd700, 0 0 40px rgba(255,215,0,0.3);
             transform: scale(1.05);
+            z-index: 10;
         }
-        
-        .cell.makvin {
-            background: linear-gradient(45deg, #ffd700, #ffa500);
-            color: black;
-            border-color: white;
+
+        .cell.win img {
+            transform: scale(1.1);
         }
-        
+
+        .cell.spinning {
+            animation: spinImage 0.3s linear infinite;
+        }
+
+        @keyframes spinImage {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(5deg) scale(0.95); }
+            50% { transform: rotate(0deg) scale(1); }
+            75% { transform: rotate(-5deg) scale(0.95); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
         .controls {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin: 20px 0 15px;
         }
-        
+
         button {
             flex: 1;
-            background: linear-gradient(45deg, #e94560, #0f3460);
+            background: linear-gradient(45deg, #2c3e50, #3498db);
             border: none;
-            padding: 15px;
-            border-radius: 50px;
+            padding: 18px 0;
+            border-radius: 60px;
             color: white;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid #e3b23c;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 0 #1a2632, 0 10px 20px rgba(0,0,0,0.4);
         }
-        
+
         button:active {
-            transform: scale(0.95);
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #1a2632, 0 5px 15px rgba(0,0,0,0.4);
         }
-        
+
         button:disabled {
             opacity: 0.5;
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #1a2632;
             pointer-events: none;
         }
-        
+
         .win-message {
             text-align: center;
-            margin-top: 15px;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: gold;
-            text-shadow: 0 0 10px orange;
-            min-height: 40px;
+            text-shadow: 0 0 20px orange, 0 0 40px red;
+            min-height: 60px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px;
+            margin: 10px 0;
+            animation: pulse 1s infinite;
         }
-        
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
         .bet-info {
             text-align: center;
-            color: #aaa;
-            margin-top: 10px;
-            font-size: 14px;
+            color: #aab8c5;
+            font-size: 15px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 30px;
         }
-        
-        @media (max-width: 450px) {
-            .cell {
-                font-size: 18px;
-            }
+
+        .profit {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .loss {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: white;
+            font-size: 14px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 15px;
+            border-radius: 30px;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
         <div class="header">
-            <div class="balance">💰 <span id="balance">10000</span></div>
-            <div class="stats">🎰 <span id="games">0</span>/100</div>
+            <div class="balance">💰 <span id="balance">5000</span></div>
+            <div class="stats">🎰 <span id="games">0</span></div>
         </div>
         
         <div class="slot-machine">
-            <div class="grid" id="slot-grid">
-                <!-- Ячейки будут созданы через JS -->
-            </div>
+            <div class="grid" id="slot-grid"></div>
         </div>
         
-        <div class="win-message" id="win-message"></div>
+        <div class="win-message" id="win-message">⚡ Spin to win ⚡</div>
         
         <div class="controls">
-            <button id="spin-btn" class="spin-btn">🎰 Крутить (100)</button>
-            <button id="reset-btn">🔄 Сброс</button>
+            <button id="spin-btn">🎰 SPIN (100)</button>
+            <button id="reset-btn">🔄 RESET</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div>💰 Общий выигрыш: <span id="totalWin">0</span></div>
+            <div>📊 RTP: <span id="rtp">0%</span></div>
+            <div id="profitDisplay" class="profit">+0</div>
         </div>
         
         <div class="bet-info">
-            ⚡ Бесконечные деньги • Маквин заменяет любой символ • 7+ одинаковых = выигрыш
+            ⭐ 7+ одинаковых фото = выигрыш! ⭐<br>
+            🎯 Казино имеет преимущество, но удача переменчива
         </div>
     </div>
     
