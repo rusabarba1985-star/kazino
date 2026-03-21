@@ -1,256 +1,38 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 VIP Casino Slots</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0f0f 0%, #1a1f2f 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
+# Настройка сцены: черный фон
+fig, ax = plt.subplots(figsize=(6, 4), facecolor='black')
+ax.set_facecolor('black')
+ax.set_xlim(0, 100)
+ax.set_ylim(0, 100)
+ax.axis('off')
 
-        .game-container {
-            max-width: 550px;
-            width: 100%;
-            background: rgba(20, 25, 35, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 40px;
-            padding: 20px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 215, 0, 0.2);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
+# Белый текст "Cartoon Game" (стиль Rubber Hose)
+text = ax.text(50, 50, "Cartoon Game", color='white', fontsize=40,
+               fontweight='bold', fontname='serif', ha='center', va='center')
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            color: white;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
+# Создание "царапин" на пленке (серые полоски)
+num_lines = 5
+lines = [ax.axhline(y=np.random.randint(0, 100), color='gray', alpha=0.3, 
+                    linewidth=np.random.uniform(0.5, 2)) for _ in range(num_lines)]
 
-        .balance {
-            background: linear-gradient(135deg, #2a3b4c, #1a2a3a);
-            padding: 12px 25px;
-            border-radius: 40px;
-            font-size: 24px;
-            font-weight: bold;
-            border: 2px solid gold;
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-            color: gold;
-        }
-
-        .stats {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-size: 16px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .slot-machine {
-            background: #0f1a24;
-            border-radius: 30px;
-            padding: 25px 15px;
-            border: 4px solid #e3b23c;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 15px 30px rgba(227, 178, 60, 0.2);
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slot-machine::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 10px;
-            background: linear-gradient(to bottom, rgba(255,215,0,0.3), transparent);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            aspect-ratio: 7/5;
-            position: relative;
-        }
-
-        .cell {
-            background: #1e2a36;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            aspect-ratio: 1;
-            border: 2px solid #3a4a5a;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            transition: all 0.2s ease;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .cell img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .cell.win {
-            border-color: #ffd700;
-            box-shadow: 0 0 20px #ffd700, 0 0 40px rgba(255,215,0,0.3);
-            transform: scale(1.05);
-            z-index: 10;
-        }
-
-        .cell.win img {
-            transform: scale(1.1);
-        }
-
-        .cell.spinning {
-            animation: spinImage 0.3s linear infinite;
-        }
-
-        @keyframes spinImage {
-            0% { transform: rotate(0deg) scale(1); }
-            25% { transform: rotate(5deg) scale(0.95); }
-            50% { transform: rotate(0deg) scale(1); }
-            75% { transform: rotate(-5deg) scale(0.95); }
-            100% { transform: rotate(0deg) scale(1); }
-        }
-
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0 15px;
-        }
-
-        button {
-            flex: 1;
-            background: linear-gradient(45deg, #2c3e50, #3498db);
-            border: none;
-            padding: 18px 0;
-            border-radius: 60px;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid #e3b23c;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 8px 0 #1a2632, 0 10px 20px rgba(0,0,0,0.4);
-        }
-
-        button:active {
-            transform: translateY(8px);
-            box-shadow: 0 0 0 #1a2632, 0 5px 15px rgba(0,0,0,0.4);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #1a2632;
-            pointer-events: none;
-        }
-
-        .win-message {
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: gold;
-            text-shadow: 0 0 20px orange, 0 0 40px red;
-            min-height: 60px;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 30px;
-            margin: 10px 0;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
-
-        .bet-info {
-            text-align: center;
-            color: #aab8c5;
-            font-size: 15px;
-            margin-top: 15px;
-            padding: 10px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 30px;
-        }
-
-        .profit {
-            color: #2ecc71;
-            font-weight: bold;
-        }
-
-        .loss {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-
-        .stats-grid {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            color: white;
-            font-size: 14px;
-            background: rgba(0,0,0,0.3);
-            padding: 10px 15px;
-            border-radius: 30px;
-        }
-    </style>
-</head>
-<body>
-    <div class="game-container">
-        <div class="header">
-            <div class="balance">💰 <span id="balance">5000</span></div>
-            <div class="stats">🎰 <span id="games">0</span></div>
-        </div>
-        
-        <div class="slot-machine">
-            <div class="grid" id="slot-grid"></div>
-        </div>
-        
-        <div class="win-message" id="win-message">⚡ Spin to win ⚡</div>
-        
-        <div class="controls">
-            <button id="spin-btn">🎰 SPIN (100)</button>
-            <button id="reset-btn">🔄 RESET</button>
-        </div>
-        
-        <div class="stats-grid">
-            <div>💰 Общий выигрыш: <span id="totalWin">0</span></div>
-            <div>📊 RTP: <span id="rtp">0%</span></div>
-            <div id="profitDisplay" class="profit">+0</div>
-        </div>
-        
-        <div class="bet-info">
-            ⭐ 7+ одинаковых фото = выигрыш! ⭐<br>
-            🎯 Казино имеет преимущество, но удача переменчива
-        </div>
-    </div>
+def update(frame):
+    # Движение полосок сверху вниз
+    for line in lines:
+        new_y = line.get_ydata()[0] - 3  # Скорость падения
+        if new_y < 0:
+            new_y = 100
+        line.set_ydata([new_y, new_y])
+        line.set_alpha(np.random.uniform(0.1, 0.4)) # Мерцание
     
-    <script src="game.js"></script>
-</body>
-</html>
+    # Эффект дрожания кадра (jitter)
+    if frame % 2 == 0:
+        text.set_position((50 + np.random.uniform(-0.3, 0.3), 
+                           50 + np.random.uniform(-0.3, 0.3)))
+    return lines + [text]
+
+ani = animation.FuncAnimation(fig, update, frames=60, interval=50, blit=True)
+ani.save('rubber_hose_intro.gif', writer='pillow', fps=20)
+plt.show()
