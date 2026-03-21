@@ -37,18 +37,9 @@
             color: white;
             text-shadow: 4px 4px 0px #3a3a3a;
         }
+        .bar-wrap { width: 200px; height: 3px; background: #1a1a1a; margin-top: 40px; }
+        #bar { width: 0%; height: 100%; background: #fff; transition: width 0.2s linear; }
 
-        /* ЭФФЕКТ ЗАТЕМНЕНИЯ (кружок из угла) */
-        .darkness-overlay {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at var(--x, 0%) var(--y, 0%), transparent 0%, black 0%);
-            pointer-events: none;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.1s linear;
-        }
-        
         /* МЕНЮ */
         #main-menu { 
             display: none; 
@@ -57,7 +48,7 @@
             position: relative; 
             z-index: 50;
             opacity: 0;
-            transition: opacity 1.2s ease-out;
+            transition: opacity 0.5s ease;
         }
         .avatar { 
             position: absolute; top: 20px; right: 20px; 
@@ -92,18 +83,18 @@
     <div class="noise"></div>
     <div class="vignette"></div>
     <div id="film-chaos"></div>
-    <div class="darkness-overlay" id="darknessOverlay"></div>
 
     <div id="loading-screen">
         <h1 class="title">CARTOON<br>GAME</h1>
-        <div class="version">v1.0.7</div>
+        <div class="bar-wrap"><div id="bar"></div></div>
+        <div class="version">v1.0.6</div>
     </div>
 
     <div id="main-menu">
         <div class="avatar" id="avatarBtn">
             <img id="ava" src="" alt="ava">
         </div>
-        <div class="version">v1.0.7</div>
+        <div class="version">v1.0.6</div>
     </div>
 
     <audio id="music1" loop preload="auto">
@@ -121,6 +112,7 @@
                 tg = window.Telegram.WebApp;
                 tg.expand();
             } else {
+                // Загружаем Telegram SDK если его нет
                 const script = document.createElement('script');
                 script.src = 'https://telegram.org/js/telegram-web-app.js';
                 script.onload = () => {
@@ -142,11 +134,11 @@
         
         let audioStarted = false;
         let currentMusic = 'm1';
-        let animationStarted = false;
         
         // Функция запуска музыки
         function initAudio() {
             if (!audioStarted) {
+                // Пытаемся запустить первую музыку
                 m1.play().then(() => {
                     audioStarted = true;
                     currentMusic = 'm1';
@@ -173,15 +165,16 @@
             initAudio();
         }, 100);
         
-        // Запускаем музыку при клике
+        // Запускаем музыку при клике в любом месте (на случай блокировки)
         document.body.addEventListener('click', initAudio);
         document.body.addEventListener('touchstart', initAudio);
         
-        // ПЛАВНАЯ ПЛЕНКА
+        // ПЛАВНАЯ ПЛЕНКА (более плавные эффекты)
         function triggerFilm() {
             const film = document.getElementById('film-chaos');
             film.innerHTML = '';
             
+            // Добавляем пылинки (3-6 штук)
             const dustCount = Math.floor(Math.random() * 4) + 3;
             for(let i = 0; i < dustCount; i++) {
                 const d = document.createElement('div');
@@ -197,6 +190,7 @@
                 film.appendChild(d);
             }
             
+            // Иногда добавляем царапину (30% шанс)
             if (Math.random() > 0.7) {
                 const sc = document.createElement('div');
                 sc.className = 'scratch';
@@ -207,6 +201,7 @@
                 film.appendChild(sc);
             }
             
+            // Удаляем старые эффекты
             setTimeout(() => {
                 if (film.children.length > 20) {
                     film.innerHTML = '';
@@ -214,9 +209,10 @@
             }, 1000);
         }
         
+        // Запускаем эффекты пленки каждые 0.8-1.2 секунды
         setInterval(triggerFilm, Math.random() * 400 + 800);
         
-        // Эффект мерцания
+        // Дополнительный эффект мерцания
         setInterval(() => {
             if (Math.random() > 0.8) {
                 const flicker = document.createElement('div');
@@ -233,87 +229,37 @@
             }
         }, 2000);
         
-        // ЭФФЕКТ ЗАТЕМНЕНИЯ КРУЖКОМ ИЗ УГЛА
-        function startDarknessAnimation() {
-            const overlay = document.getElementById('darknessOverlay');
-            if (!overlay) return;
+        // ЗАГРУЗКА 7 СЕКУНД
+        let p = 0;
+        const loadInt = setInterval(() => {
+            p += 1.43;
+            const bar = document.getElementById('bar');
+            if (bar) bar.style.width = Math.min(p, 100) + '%';
             
-            // Начинаем с левого верхнего угла
-            overlay.style.setProperty('--x', '0%');
-            overlay.style.setProperty('--y', '0%');
-            overlay.style.opacity = '1';
-            
-            let startTime = null;
-            const duration = 2000; // 2 секунды (с 4 по 6 секунду)
-            
-            function animateDarkness(timestamp) {
-                if (!startTime) startTime = timestamp;
-                const elapsed = timestamp - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                // Радиус растет от 0% до 200% (покрывает весь экран)
-                const radius = progress * 250;
-                overlay.style.background = `radial-gradient(circle at 0% 0%, transparent 0%, black ${radius}%)`;
-                
-                if (progress < 1) {
-                    requestAnimationFrame(animateDarkness);
-                } else {
-                    // Полная темнота
-                    overlay.style.background = `radial-gradient(circle at 0% 0%, transparent 0%, black 250%)`;
-                    console.log('Darkness complete');
-                }
+            if (p >= 100) {
+                clearInterval(loadInt);
+                finishLoading();
             }
-            
-            requestAnimationFrame(animateDarkness);
-        }
+        }, 100);
         
-        // ПЛАВНОЕ ПОЯВЛЕНИЕ МЕНЮ
-        function showMenu() {
-            const mainMenu = document.getElementById('main-menu');
-            const loadingScreen = document.getElementById('loading-screen');
+        function finishLoading() {
+            // Переключаем на вторую музыку
+            switchToMusic2();
             
-            // Плавно скрываем экран загрузки
+            // Плавно скрываем загрузку
+            const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.opacity = '0';
             
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
+                const mainMenu = document.getElementById('main-menu');
                 mainMenu.style.display = 'block';
-                
-                // Плавное появление меню
                 setTimeout(() => {
                     mainMenu.style.opacity = '1';
-                    console.log('Menu appeared');
                 }, 50);
-                
-                // Загружаем аватар
                 loadAvatar();
-                
-                // Переключаем музыку
-                switchToMusic2();
             }, 500);
         }
-        
-        // ОСНОВНАЯ ХРОНОЛОГИЯ ЗАГРУЗКИ
-        console.log('Starting 8-second loading sequence');
-        
-        // 4 секунда - начало затемнения
-        setTimeout(() => {
-            console.log('4s: Starting darkness animation');
-            startDarknessAnimation();
-        }, 4000);
-        
-        // 6 секунда - полная темнота (уже достигнута анимацией)
-        
-        // 7 секунда - начало появления меню из тьмы
-        setTimeout(() => {
-            console.log('7s: Showing menu from darkness');
-            showMenu();
-        }, 7000);
-        
-        // 8 секунд - полная загрузка (меню уже показано)
-        setTimeout(() => {
-            console.log('8s: Loading complete');
-        }, 8000);
         
         function loadAvatar() {
             const img = document.getElementById('ava');
@@ -325,12 +271,14 @@
                 }
             } catch(e) {}
             
+            // Если есть фото из Telegram
             if (user && user.photo_url) {
                 img.src = user.photo_url;
                 console.log('Avatar from Telegram');
                 return;
             }
             
+            // Список возможных файлов аватара
             const avatarFiles = [
                 'avatar.png', 'avatar.jpg', 'avatar.jpeg',
                 'profile.png', 'profile.jpg',
@@ -340,8 +288,9 @@
             ];
             
             let found = false;
-            const saved = localStorage.getItem('cartoon_ava');
             
+            // Проверяем сохраненный аватар
+            const saved = localStorage.getItem('cartoon_ava');
             if (saved) {
                 const testImg = new Image();
                 testImg.onload = () => {
@@ -351,10 +300,14 @@
                         console.log('Avatar from localStorage:', saved);
                     }
                 };
+                testImg.onerror = () => {
+                    // Файл не найден, продолжаем поиск
+                };
                 testImg.src = saved;
             }
             
-            avatarFiles.forEach((file) => {
+            // Проверяем все возможные файлы
+            avatarFiles.forEach((file, index) => {
                 const testImg = new Image();
                 testImg.onload = () => {
                     if (!found) {
@@ -367,6 +320,7 @@
                 testImg.src = file;
             });
             
+            // Если ничего не найдено, генерируем аватар
             setTimeout(() => {
                 if (!found && (!img.src || img.src === '')) {
                     generateRubberHoseAvatar(img);
@@ -374,17 +328,20 @@
             }, 500);
         }
         
+        // Генерация аватарки в стиле Rubber Hose
         function generateRubberHoseAvatar(imgElement) {
             const canvas = document.createElement('canvas');
             canvas.width = 60;
             canvas.height = 60;
             const ctx = canvas.getContext('2d');
             
+            // Желтое лицо
             ctx.fillStyle = '#FFD966';
             ctx.beginPath();
             ctx.arc(30, 30, 28, 0, Math.PI * 2);
             ctx.fill();
             
+            // Глаза
             ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.arc(18, 22, 6, 0, Math.PI * 2);
@@ -393,11 +350,13 @@
             ctx.arc(42, 22, 6, 0, Math.PI * 2);
             ctx.fill();
             
+            // Рот
             ctx.fillStyle = '#663300';
             ctx.beginPath();
             ctx.arc(30, 38, 12, 0, Math.PI);
             ctx.fill();
             
+            // Зрачки
             ctx.fillStyle = '#000';
             ctx.beginPath();
             ctx.arc(16, 20, 2.5, 0, Math.PI * 2);
@@ -406,6 +365,7 @@
             ctx.arc(40, 20, 2.5, 0, Math.PI * 2);
             ctx.fill();
             
+            // Блики
             ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.arc(14, 18, 1, 0, Math.PI * 2);
@@ -418,10 +378,11 @@
             console.log('Generated Rubber Hose avatar');
         }
         
+        // Обработка ошибок музыки
         m1.addEventListener('error', () => console.log('music.mp3 not found'));
         m2.addEventListener('error', () => console.log('music2.mp3 not found'));
         
-        console.log('App loaded - v1.0.7 | Loading sequence: 8 seconds');
+        console.log('App loaded - v1.0.6');
     </script>
 </body>
 </html>
