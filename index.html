@@ -1,38 +1,111 @@
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import numpy as np
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartoon Game</title>
+    <style>
+        /* Основной стиль экрана */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
 
-# Настройка сцены: черный фон
-fig, ax = plt.subplots(figsize=(6, 4), facecolor='black')
-ax.set_facecolor('black')
-ax.set_xlim(0, 100)
-ax.set_ylim(0, 100)
-ax.axis('off')
+        /* Контейнер для эффектов */
+        .screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-# Белый текст "Cartoon Game" (стиль Rubber Hose)
-text = ax.text(50, 50, "Cartoon Game", color='white', fontsize=40,
-               fontweight='bold', fontname='serif', ha='center', va='center')
+        /* Текст в стиле Rubber Hose */
+        .title {
+            color: #fff;
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            z-index: 10;
+            user-select: none;
+            /* Дрожание текста */
+            animation: jitter 0.15s infinite;
+            letter-spacing: 2px;
+        }
 
-# Создание "царапин" на пленке (серые полоски)
-num_lines = 5
-lines = [ax.axhline(y=np.random.randint(0, 100), color='gray', alpha=0.3, 
-                    linewidth=np.random.uniform(0.5, 2)) for _ in range(num_lines)]
+        /* Анимированные полоски (царапины на пленке) */
+        .film-scratch {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: rgba(128, 128, 128, 0.3);
+            z-index: 5;
+            pointer-events: none;
+        }
 
-def update(frame):
-    # Движение полосок сверху вниз
-    for line in lines:
-        new_y = line.get_ydata()[0] - 3  # Скорость падения
-        if new_y < 0:
-            new_y = 100
-        line.set_ydata([new_y, new_y])
-        line.set_alpha(np.random.uniform(0.1, 0.4)) # Мерцание
-    
-    # Эффект дрожания кадра (jitter)
-    if frame % 2 == 0:
-        text.set_position((50 + np.random.uniform(-0.3, 0.3), 
-                           50 + np.random.uniform(-0.3, 0.3)))
-    return lines + [text]
+        /* Стили для каждой полоски с разной задержкой */
+        .scratch-1 { left: 20%; animation: scratch-move 0.8s infinite linear; }
+        .scratch-2 { left: 50%; animation: scratch-move 1.2s infinite linear; opacity: 0.5; }
+        .scratch-3 { left: 85%; animation: scratch-move 0.5s infinite linear; }
 
-ani = animation.FuncAnimation(fig, update, frames=60, interval=50, blit=True)
-ani.save('rubber_hose_intro.gif', writer='pillow', fps=20)
-plt.show()
+        /* Анимация падения полосок */
+        @keyframes scratch-move {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        /* Эффект дрожания кадра */
+        @keyframes jitter {
+            0% { transform: translate(0,0); }
+            25% { transform: translate(-1px, 1px); }
+            50% { transform: translate(1px, -1px); }
+            75% { transform: translate(-1px, -1px); }
+            100% { transform: translate(1px, 1px); }
+        }
+
+        /* Эффект виньетки и шума */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 50%, black 120%);
+            pointer-events: none;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="screen">
+        <div class="overlay"></div>
+        
+        <!-- Полоски пленки -->
+        <div class="film-scratch scratch-1"></div>
+        <div class="film-scratch scratch-2"></div>
+        <div class="film-scratch scratch-3"></div>
+
+        <h1 class="title">Cartoon<br>Game</h1>
+    </div>
+
+    <!-- Подключение Telegram Web App SDK -->
+    <script src="https://telegram.org"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Расширить на весь экран
+        tg.headerColor = '#000000';
+    </script>
+</body>
+</html>
