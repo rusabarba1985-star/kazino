@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Cartoon Game</title>
     <style>
         :root { --bg-color: #050505; --text-color: #fff; }
@@ -56,50 +56,48 @@
             border-radius: 50%; overflow: hidden; background: #111;
             cursor: pointer;
             transition: transform 0.3s ease;
+            z-index: 10;
         }
         .avatar:hover {
             transform: scale(1.05);
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* КНОПКИ МЕНЮ */
+        /* КНОПКИ МЕНЮ - ГОРИЗОНТАЛЬНЫЕ, СТИЛЬ КАК У ЗАГОЛОВКА */
         .menu-buttons {
             position: absolute;
-            bottom: 40px;
+            bottom: 30px;
             left: 0;
             right: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
             padding: 0 20px;
+            z-index: 10;
         }
         
         .menu-btn {
-            width: 100%;
-            max-width: 280px;
-            padding: 14px 20px;
             background: transparent;
-            border: 2px solid rgba(255,255,255,0.5);
+            border: none;
             color: white;
             font-family: 'Georgia', serif;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
-            backdrop-filter: blur(4px);
-            border-radius: 40px;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+            padding: 8px 0;
+            text-shadow: 2px 2px 0px #3a3a3a;
+            white-space: nowrap;
         }
         
         .menu-btn:hover {
-            border-color: white;
-            background: rgba(255,255,255,0.1);
-            transform: scale(1.02);
-            letter-spacing: 3px;
+            transform: scale(1.05);
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px #3a3a3a;
         }
         
         .version {
@@ -116,6 +114,67 @@
             0%, 100% { transform: scale(1) translateY(0); } 
             50% { transform: scaleY(1.1) scaleX(0.97) translateY(-15px); } 
         }
+        
+        /* АДАПТИВ ДЛЯ ТЕЛЕФОНОВ */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .menu-buttons {
+                bottom: 20px;
+                gap: 12px;
+                padding: 0 15px;
+            }
+            
+            .menu-btn {
+                font-size: 0.75rem;
+                letter-spacing: 0.5px;
+                padding: 6px 0;
+                text-shadow: 1.5px 1.5px 0px #3a3a3a;
+            }
+            
+            .menu-btn:hover {
+                letter-spacing: 1px;
+            }
+            
+            .avatar {
+                width: 45px;
+                height: 45px;
+                top: 15px;
+                right: 15px;
+            }
+        }
+        
+        /* ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
+        @media (max-width: 480px) {
+            .menu-buttons {
+                gap: 8px;
+                bottom: 15px;
+            }
+            
+            .menu-btn {
+                font-size: 0.65rem;
+                padding: 4px 0;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+        
+        /* ДЛЯ ПЛАНШЕТОВ И БОЛЬШИХ ЭКРАНОВ */
+        @media (min-width: 1200px) {
+            .menu-btn {
+                font-size: 1.2rem;
+                padding: 10px 0;
+            }
+            
+            .menu-buttons {
+                gap: 25px;
+                bottom: 40px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -127,7 +186,7 @@
     <div id="loading-screen">
         <h1 class="title">CARTOON<br>GAME</h1>
         <div class="bar-wrap"><div id="bar"></div></div>
-        <div class="version">v1.0.7</div>
+        <div class="version">v1.0.8</div>
     </div>
 
     <div id="main-menu">
@@ -143,7 +202,7 @@
             <button class="menu-btn">Fight</button>
         </div>
         
-        <div class="version">v1.0.7</div>
+        <div class="version">v1.0.8</div>
     </div>
 
     <audio id="music1" loop preload="auto">
@@ -176,9 +235,9 @@
         const m1 = document.getElementById('music1');
         const m2 = document.getElementById('music2');
         
-        // ГРОМКОСТЬ: первая на 50% больше (0.75), вторая на 50% меньше (0.25)
+        // ГРОМКОСТЬ: первая 75%, вторая 10%
         m1.volume = 0.75;
-        m2.volume = 0.25;
+        m2.volume = 0.10;
         
         let audioStarted = false;
         let currentMusic = 'm1';
@@ -200,7 +259,7 @@
                 m1.pause();
                 m2.play().then(() => {
                     currentMusic = 'm2';
-                    console.log('Switched to music 2 at 25% volume');
+                    console.log('Switched to music 2 at 10% volume');
                 }).catch(e => console.log('Could not switch to music 2'));
             }
         }
@@ -400,7 +459,8 @@
         
         // Обработка кликов на кнопки
         document.querySelectorAll('.menu-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 console.log(`Button clicked: ${btn.textContent}`);
             });
         });
@@ -408,7 +468,7 @@
         m1.addEventListener('error', () => console.log('music.mp3 not found'));
         m2.addEventListener('error', () => console.log('music2.mp3 not found'));
         
-        console.log('App loaded - v1.0.7 | Music volumes: first 75%, second 25%');
+        console.log('App loaded - v1.0.8 | Music volumes: first 75%, second 10%');
     </script>
 </body>
 </html>
