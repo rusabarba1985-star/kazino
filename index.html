@@ -63,7 +63,7 @@
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* КНОПКИ МЕНЮ - ГОРИЗОНТАЛЬНЫЕ, СТИЛЬ КАК У ЗАГОЛОВКА */
+        /* КНОПКИ МЕНЮ */
         .menu-buttons {
             position: absolute;
             bottom: 30px;
@@ -100,6 +100,111 @@
             text-shadow: 3px 3px 0px #3a3a3a;
         }
         
+        /* ПРОФИЛЬ */
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+        
+        .profile-content {
+            background: rgba(10,10,10,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 85%;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 3px solid #fff;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            background: #111;
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #3a3a3a;
+        }
+        
+        .profile-id {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+        
+        .profile-stats {
+            text-align: left;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #ccc;
+        }
+        
+        .stat-value {
+            font-weight: 900;
+            color: #ffd966;
+        }
+        
+        .close-profile {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .close-profile:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+        
         .version {
             position: fixed;
             bottom: 5px;
@@ -115,65 +220,25 @@
             50% { transform: scaleY(1.1) scaleX(0.97) translateY(-15px); } 
         }
         
-        /* АДАПТИВ ДЛЯ ТЕЛЕФОНОВ */
         @media (max-width: 768px) {
-            .title {
-                font-size: 2.5rem;
-            }
-            
-            .menu-buttons {
-                bottom: 20px;
-                gap: 12px;
-                padding: 0 15px;
-            }
-            
-            .menu-btn {
-                font-size: 0.75rem;
-                letter-spacing: 0.5px;
-                padding: 6px 0;
-                text-shadow: 1.5px 1.5px 0px #3a3a3a;
-            }
-            
-            .menu-btn:hover {
-                letter-spacing: 1px;
-            }
-            
-            .avatar {
-                width: 45px;
-                height: 45px;
-                top: 15px;
-                right: 15px;
-            }
+            .title { font-size: 2.5rem; }
+            .menu-buttons { bottom: 20px; gap: 12px; padding: 0 15px; }
+            .menu-btn { font-size: 0.75rem; letter-spacing: 0.5px; padding: 6px 0; text-shadow: 1.5px 1.5px 0px #3a3a3a; }
+            .avatar { width: 45px; height: 45px; top: 15px; right: 15px; }
+            .profile-content { padding: 20px; width: 90%; }
+            .profile-avatar { width: 80px; height: 80px; }
+            .profile-name { font-size: 1.2rem; }
         }
         
-        /* ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
         @media (max-width: 480px) {
-            .menu-buttons {
-                gap: 8px;
-                bottom: 15px;
-            }
-            
-            .menu-btn {
-                font-size: 0.65rem;
-                padding: 4px 0;
-            }
-            
-            .title {
-                font-size: 2rem;
-            }
+            .menu-buttons { gap: 8px; bottom: 15px; }
+            .menu-btn { font-size: 0.65rem; padding: 4px 0; }
+            .title { font-size: 2rem; }
         }
         
-        /* ДЛЯ ПЛАНШЕТОВ И БОЛЬШИХ ЭКРАНОВ */
         @media (min-width: 1200px) {
-            .menu-btn {
-                font-size: 1.2rem;
-                padding: 10px 0;
-            }
-            
-            .menu-buttons {
-                gap: 25px;
-                bottom: 40px;
-            }
+            .menu-btn { font-size: 1.2rem; padding: 10px 0; }
+            .menu-buttons { gap: 25px; bottom: 40px; }
         }
     </style>
 </head>
@@ -186,7 +251,7 @@
     <div id="loading-screen">
         <h1 class="title">CARTOON<br>GAME</h1>
         <div class="bar-wrap"><div id="bar"></div></div>
-        <div class="version">v1.0.8</div>
+        <div class="version">v1.0.9</div>
     </div>
 
     <div id="main-menu">
@@ -195,14 +260,40 @@
         </div>
         
         <div class="menu-buttons">
-            <button class="menu-btn">Fast Game</button>
-            <button class="menu-btn">Slots</button>
-            <button class="menu-btn">Bonus</button>
-            <button class="menu-btn">Profile</button>
-            <button class="menu-btn">Fight</button>
+            <button class="menu-btn" data-action="fastgame">Fast Game</button>
+            <button class="menu-btn" data-action="slots">Slots</button>
+            <button class="menu-btn" data-action="bonus">Bonus</button>
+            <button class="menu-btn" data-action="profile">Profile</button>
+            <button class="menu-btn" data-action="fight">Fight</button>
         </div>
         
-        <div class="version">v1.0.8</div>
+        <div class="version">v1.0.9</div>
+    </div>
+    
+    <!-- МОДАЛЬНОЕ ОКНО ПРОФИЛЯ -->
+    <div id="profileModal" class="profile-modal">
+        <div class="profile-content">
+            <div class="profile-avatar" id="profileAvatarBtn">
+                <img id="profileAvatar" src="" alt="avatar">
+            </div>
+            <div class="profile-name" id="profileName">Player</div>
+            <div class="profile-id" id="profileId">ID: 71831</div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-label">🎮 Games Played (Fast Game):</span>
+                    <span class="stat-value" id="statGames">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">💰 Total Deposits:</span>
+                    <span class="stat-value" id="statDeposits">$0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">💸 Total Withdrawals:</span>
+                    <span class="stat-value" id="statWithdrawals">$0</span>
+                </div>
+            </div>
+            <button class="close-profile" id="closeProfile">Close</button>
+        </div>
     </div>
 
     <audio id="music1" loop preload="auto">
@@ -215,16 +306,22 @@
     <script>
         // Инициализация Telegram WebApp
         let tg = null;
+        let userData = null;
+        
         try {
             if (window.Telegram?.WebApp) {
                 tg = window.Telegram.WebApp;
                 tg.expand();
+                userData = tg.initDataUnsafe?.user;
             } else {
                 const script = document.createElement('script');
                 script.src = 'https://telegram.org/js/telegram-web-app.js';
                 script.onload = () => {
                     tg = window.Telegram.WebApp;
-                    if (tg) tg.expand();
+                    if (tg) {
+                        tg.expand();
+                        userData = tg.initDataUnsafe?.user;
+                    }
                 };
                 document.head.appendChild(script);
             }
@@ -232,10 +329,229 @@
             console.log('Telegram not available');
         }
         
+        // СИСТЕМА ПОЛЬЗОВАТЕЛЯ
+        let currentUser = {
+            id: null,
+            name: 'Player',
+            avatar: null,
+            gamesPlayed: 0,
+            deposits: 0,
+            withdrawals: 0
+        };
+        
+        // Функция генерации ID начиная с 71831
+        function generateUserId() {
+            let lastId = localStorage.getItem('lastUserId');
+            let newId;
+            
+            if (!lastId) {
+                newId = 71831;
+            } else {
+                newId = parseInt(lastId) + 1;
+            }
+            
+            localStorage.setItem('lastUserId', newId);
+            return newId;
+        }
+        
+        // Получение или создание пользователя
+        function getOrCreateUser() {
+            let userId = null;
+            let userName = 'Player';
+            
+            // Пытаемся получить данные из Telegram
+            if (userData) {
+                if (userData.id) {
+                    userId = userData.id;
+                }
+                if (userData.first_name) {
+                    userName = userData.first_name;
+                    if (userData.last_name) {
+                        userName += ' ' + userData.last_name;
+                    }
+                }
+            }
+            
+            // Если нет Telegram ID, создаем локальный
+            if (!userId) {
+                const savedUserId = localStorage.getItem('localUserId');
+                if (savedUserId) {
+                    userId = parseInt(savedUserId);
+                } else {
+                    userId = generateUserId();
+                    localStorage.setItem('localUserId', userId);
+                }
+            }
+            
+            // Загружаем статистику пользователя
+            const userKey = `user_${userId}`;
+            let savedUser = localStorage.getItem(userKey);
+            
+            if (savedUser) {
+                const userStats = JSON.parse(savedUser);
+                currentUser = {
+                    id: userId,
+                    name: userName,
+                    avatar: userStats.avatar,
+                    gamesPlayed: userStats.gamesPlayed || 0,
+                    deposits: userStats.deposits || 0,
+                    withdrawals: userStats.withdrawals || 0
+                };
+            } else {
+                currentUser = {
+                    id: userId,
+                    name: userName,
+                    avatar: null,
+                    gamesPlayed: 0,
+                    deposits: 0,
+                    withdrawals: 0
+                };
+            }
+            
+            return currentUser;
+        }
+        
+        // Сохранение пользователя
+        function saveUser() {
+            const userKey = `user_${currentUser.id}`;
+            localStorage.setItem(userKey, JSON.stringify({
+                avatar: currentUser.avatar,
+                gamesPlayed: currentUser.gamesPlayed,
+                deposits: currentUser.deposits,
+                withdrawals: currentUser.withdrawals
+            }));
+        }
+        
+        // Рандомный аватар из 1-5.png
+        function getRandomAvatar() {
+            const randomNum = Math.floor(Math.random() * 5) + 1;
+            return `${randomNum}.png`;
+        }
+        
+        // Загрузка аватара с проверкой существования
+        function loadAvatar(imgElement, avatarName) {
+            if (!avatarName) {
+                avatarName = getRandomAvatar();
+                currentUser.avatar = avatarName;
+                saveUser();
+            }
+            
+            const testImg = new Image();
+            testImg.onload = () => {
+                imgElement.src = avatarName;
+            };
+            testImg.onerror = () => {
+                // Если файл не найден, генерируем canvas аватар
+                generateCanvasAvatar(imgElement);
+            };
+            testImg.src = avatarName;
+        }
+        
+        // Генерация аватарки на canvas (запасной вариант)
+        function generateCanvasAvatar(imgElement) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+            
+            const colors = ['#FFD966', '#66FF99', '#66CCFF', '#FF99CC', '#FF9966'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            ctx.fillStyle = randomColor;
+            ctx.beginPath();
+            ctx.arc(50, 50, 48, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(30, 35, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(70, 35, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(27, 32, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(67, 32, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#663300';
+            ctx.beginPath();
+            ctx.arc(50, 65, 15, 0, Math.PI);
+            ctx.fill();
+            
+            imgElement.src = canvas.toDataURL();
+        }
+        
+        // Обновление профиля в модальном окне
+        function updateProfileModal() {
+            document.getElementById('profileName').textContent = currentUser.name;
+            document.getElementById('profileId').textContent = `ID: ${currentUser.id}`;
+            document.getElementById('statGames').textContent = currentUser.gamesPlayed;
+            document.getElementById('statDeposits').textContent = `$${currentUser.deposits.toFixed(2)}`;
+            document.getElementById('statWithdrawals').textContent = `$${currentUser.withdrawals.toFixed(2)}`;
+            
+            loadAvatar(document.getElementById('profileAvatar'), currentUser.avatar);
+        }
+        
+        // Смена аватара
+        function changeAvatar() {
+            const newAvatar = getRandomAvatar();
+            currentUser.avatar = newAvatar;
+            saveUser();
+            
+            // Обновляем аватар в меню и в профиле
+            loadAvatar(document.getElementById('ava'), currentUser.avatar);
+            loadAvatar(document.getElementById('profileAvatar'), currentUser.avatar);
+            
+            console.log(`Avatar changed to: ${newAvatar}`);
+        }
+        
+        // Показать профиль
+        function showProfile() {
+            updateProfileModal();
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+        
+        // Скрыть профиль
+        function hideProfile() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+        
+        // Обработка действий кнопок
+        function handleAction(action) {
+            console.log(`Action: ${action}`);
+            
+            switch(action) {
+                case 'fastgame':
+                    currentUser.gamesPlayed++;
+                    saveUser();
+                    alert(`🎮 Fast Game started!\nGames played: ${currentUser.gamesPlayed}`);
+                    break;
+                case 'slots':
+                    alert('🎰 Slots game - Coming soon!');
+                    break;
+                case 'bonus':
+                    alert('🎁 Bonus - Coming soon!');
+                    break;
+                case 'profile':
+                    showProfile();
+                    break;
+                case 'fight':
+                    alert('⚔️ Fight mode - Coming soon!');
+                    break;
+                default:
+                    console.log('Unknown action');
+            }
+        }
+        
+        // МУЗЫКА
         const m1 = document.getElementById('music1');
         const m2 = document.getElementById('music2');
         
-        // ГРОМКОСТЬ: первая 75%, вторая 10%
         m1.volume = 0.75;
         m2.volume = 0.10;
         
@@ -247,7 +563,7 @@
                 m1.play().then(() => {
                     audioStarted = true;
                     currentMusic = 'm1';
-                    console.log('Music 1 started at 75% volume');
+                    console.log('Music started');
                 }).catch(e => {
                     console.log('Autoplay blocked');
                 });
@@ -259,18 +575,16 @@
                 m1.pause();
                 m2.play().then(() => {
                     currentMusic = 'm2';
-                    console.log('Switched to music 2 at 10% volume');
-                }).catch(e => console.log('Could not switch to music 2'));
+                    console.log('Switched to music 2');
+                }).catch(e => console.log('Could not switch'));
             }
         }
         
-        setTimeout(() => {
-            initAudio();
-        }, 100);
-        
+        setTimeout(() => initAudio(), 100);
         document.body.addEventListener('click', initAudio);
         document.body.addEventListener('touchstart', initAudio);
         
+        // ЭФФЕКТЫ ПЛЕНКИ
         function triggerFilm() {
             const film = document.getElementById('film-chaos');
             film.innerHTML = '';
@@ -301,9 +615,7 @@
             }
             
             setTimeout(() => {
-                if (film.children.length > 20) {
-                    film.innerHTML = '';
-                }
+                if (film.children.length > 20) film.innerHTML = '';
             }, 1000);
         }
         
@@ -325,6 +637,7 @@
             }
         }, 2000);
         
+        // ЗАГРУЗКА
         let p = 0;
         const loadInt = setInterval(() => {
             p += 1.43;
@@ -340,6 +653,12 @@
         function finishLoading() {
             switchToMusic2();
             
+            // Инициализируем пользователя
+            getOrCreateUser();
+            
+            // Загружаем аватар
+            loadAvatar(document.getElementById('ava'), currentUser.avatar);
+            
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.opacity = '0';
             
@@ -350,125 +669,40 @@
                 setTimeout(() => {
                     mainMenu.style.opacity = '1';
                 }, 50);
-                loadAvatar();
             }, 500);
         }
         
-        function loadAvatar() {
-            const img = document.getElementById('ava');
-            let user = null;
-            
-            try {
-                if (tg?.initDataUnsafe?.user) {
-                    user = tg.initDataUnsafe.user;
-                }
-            } catch(e) {}
-            
-            if (user && user.photo_url) {
-                img.src = user.photo_url;
-                console.log('Avatar from Telegram');
-                return;
-            }
-            
-            const avatarFiles = [
-                'avatar.png', 'avatar.jpg', 'avatar.jpeg',
-                'profile.png', 'profile.jpg',
-                'user.png', 'user.jpg',
-                'photo.png', 'photo.jpg',
-                '1.png', '2.png', '3.png'
-            ];
-            
-            let found = false;
-            const saved = localStorage.getItem('cartoon_ava');
-            
-            if (saved) {
-                const testImg = new Image();
-                testImg.onload = () => {
-                    if (!found) {
-                        found = true;
-                        img.src = saved;
-                        console.log('Avatar from localStorage:', saved);
-                    }
-                };
-                testImg.src = saved;
-            }
-            
-            avatarFiles.forEach((file) => {
-                const testImg = new Image();
-                testImg.onload = () => {
-                    if (!found) {
-                        found = true;
-                        img.src = file;
-                        localStorage.setItem('cartoon_ava', file);
-                        console.log('Avatar loaded:', file);
-                    }
-                };
-                testImg.src = file;
-            });
-            
-            setTimeout(() => {
-                if (!found && (!img.src || img.src === '')) {
-                    generateRubberHoseAvatar(img);
-                }
-            }, 500);
-        }
-        
-        function generateRubberHoseAvatar(imgElement) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 60;
-            canvas.height = 60;
-            const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = '#FFD966';
-            ctx.beginPath();
-            ctx.arc(30, 30, 28, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.arc(18, 22, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(42, 22, 6, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#663300';
-            ctx.beginPath();
-            ctx.arc(30, 38, 12, 0, Math.PI);
-            ctx.fill();
-            
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(16, 20, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(40, 20, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.arc(14, 18, 1, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(38, 18, 1, 0, Math.PI * 2);
-            ctx.fill();
-            
-            imgElement.src = canvas.toDataURL();
-            console.log('Generated Rubber Hose avatar');
-        }
-        
-        // Обработка кликов на кнопки
+        // НАСТРОЙКА ОБРАБОТЧИКОВ
         document.querySelectorAll('.menu-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                console.log(`Button clicked: ${btn.textContent}`);
+                const action = btn.getAttribute('data-action');
+                if (action) handleAction(action);
             });
+        });
+        
+        document.getElementById('avatarBtn').addEventListener('click', () => {
+            showProfile();
+        });
+        
+        document.getElementById('profileAvatarBtn').addEventListener('click', () => {
+            changeAvatar();
+            updateProfileModal();
+        });
+        
+        document.getElementById('closeProfile').addEventListener('click', hideProfile);
+        
+        // Закрытие по клику вне окна
+        document.getElementById('profileModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('profileModal')) {
+                hideProfile();
+            }
         });
         
         m1.addEventListener('error', () => console.log('music.mp3 not found'));
         m2.addEventListener('error', () => console.log('music2.mp3 not found'));
         
-        console.log('App loaded - v1.0.8 | Music volumes: first 75%, second 10%');
+        console.log('App loaded - v1.0.9');
     </script>
 </body>
 </html>
