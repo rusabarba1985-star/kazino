@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartoon Game</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <title>Cartoon Game - Rubber Hose Style</title>
+    
     <style>
         :root { --bg-color: #050505; --text-color: #fff; }
         
@@ -14,29 +19,33 @@
             overflow: hidden; 
         }
 
-        /* ЭФФЕКТЫ ГРЯЗНОЙ ПЛЕНКИ */
-        .noise { position: fixed; inset: 0; opacity: 0.08; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .noise { 
+            position: fixed; inset: 0; opacity: 0.08; pointer-events: none; z-index: 500; 
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); 
+        }
+        
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
         .dust { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
         .scratch { position: absolute; background: rgba(255,255,255,0.2); width: 1.5px; height: 100%; }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, black 140%); z-index: 510; pointer-events: none; }
 
-        /* ЭКРАН ЗАГРУЗКИ */
         #loading-screen { 
             position: fixed; inset: 0; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; 
             background: #050505;
         }
+        
         .title { 
             font-size: 3.5rem; text-align: center; text-transform: uppercase; 
             font-weight: 900; margin: 0; line-height: 0.9;
             animation: rubber-jump 1s infinite ease-in-out;
             color: white;
+            text-shadow: 4px 4px 0px #3a3a3a;
         }
+        
         .bar-wrap { width: 200px; height: 4px; background: #222; margin-top: 40px; }
         #bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 10px #fff; transition: width 0.1s linear; }
 
-        /* ГЛАВНОЕ МЕНЮ */
         #main-menu { display: none; width: 100%; height: 100%; position: relative; z-index: 50; }
         .avatar { 
             position: absolute; top: 20px; right: 20px; 
@@ -50,26 +59,14 @@
             50% { transform: scaleY(1.1) scaleX(0.95) translateY(-20px); }
         }
         
-        /* Подсказка для музыки */
-        .music-hint {
+        .version {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: white;
+            bottom: 5px;
+            right: 5px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
             z-index: 600;
-            pointer-events: none;
-            backdrop-filter: blur(4px);
-            white-space: nowrap;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
+            font-family: monospace;
         }
     </style>
 </head>
@@ -79,184 +76,88 @@
     <div class="vignette"></div>
     <div id="film-chaos"></div>
 
-    <!-- Загрузка -->
     <div id="loading-screen">
         <h1 class="title">CARTOON<br>GAME</h1>
         <div class="bar-wrap"><div id="bar"></div></div>
-        <div class="music-hint" style="margin-top: 30px; position: relative; bottom: auto; left: auto; transform: none;">
-            🎵 Нажмите в любом месте, чтобы включить музыку 🎵
-        </div>
+        <div class="version">v1.0.3</div>
     </div>
 
-    <!-- Меню -->
     <div id="main-menu">
         <div class="avatar"><img id="ava" src="" alt=""></div>
-        <div class="music-hint">
-            🎵 Музыка играет 🎵
-        </div>
+        <div class="version">v1.0.3</div>
     </div>
 
-    <audio id="bgMusic" loop></audio>
+    <audio id="bgMusic" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио.
+    </audio>
 
     <script>
-        // Создаем встроенную музыку (синтезированная мелодия в стиле Rubber Hose)
-        function createRubberHoseMusic() {
-            try {
-                // Создаем AudioContext для генерации музыки
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                const audioCtx = new AudioContext();
-                
-                // Создаем источник для работы с аудио
-                const audioElement = document.getElementById('bgMusic');
-                
-                // Если браузер поддерживает MediaSession API, используем его
-                if (audioCtx.state === 'suspended') {
-                    // Ждем взаимодействия
-                }
-                
-                // Создаем простой генератор музыки (чтобы не зависеть от внешних файлов)
-                const playSynthesizedMusic = () => {
-                    if (audioCtx.state === 'suspended') {
-                        audioCtx.resume();
-                    }
-                    
-                    // Создаем осцилляторы для ретро-мелодии
-                    const now = audioCtx.currentTime;
-                    
-                    // Основной бас-линия (повторяющаяся)
-                    const scheduleNote = (time, frequency, duration, volume = 0.3) => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.type = 'sawtooth'; // грубый звук, как в старых мультфильмах
-                        osc.frequency.value = frequency;
-                        gain.gain.value = volume;
-                        
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        
-                        osc.start(time);
-                        gain.gain.exponentialRampToValueAtTime(0.00001, time + duration);
-                        osc.stop(time + duration);
-                    };
-                    
-                    // Простая мелодия в стиле Rubber Hose (веселая, немного жутковатая)
-                    const melody = [
-                        { time: 0, freq: 261.63, dur: 0.3 },  // C4
-                        { time: 0.3, freq: 293.66, dur: 0.3 }, // D4
-                        { time: 0.6, freq: 329.63, dur: 0.3 }, // E4
-                        { time: 0.9, freq: 349.23, dur: 0.3 }, // F4
-                        { time: 1.2, freq: 392.00, dur: 0.4 }, // G4
-                        { time: 1.6, freq: 349.23, dur: 0.3 }, // F4
-                        { time: 1.9, freq: 329.63, dur: 0.3 }, // E4
-                        { time: 2.2, freq: 293.66, dur: 0.3 }, // D4
-                        { time: 2.5, freq: 261.63, dur: 0.6 }, // C4
-                        { time: 3.1, freq: 329.63, dur: 0.25 }, // E4
-                        { time: 3.35, freq: 349.23, dur: 0.25 }, // F4
-                        { time: 3.6, freq: 392.00, dur: 0.5 }, // G4
-                        { time: 4.1, freq: 440.00, dur: 0.4 }, // A4
-                        { time: 4.5, freq: 392.00, dur: 0.4 }, // G4
-                        { time: 4.9, freq: 349.23, dur: 0.4 }, // F4
-                        { time: 5.3, freq: 329.63, dur: 0.6 }, // E4
-                    ];
-                    
-                    let startTime = audioCtx.currentTime;
-                    melody.forEach(note => {
-                        scheduleNote(startTime + note.time, note.freq, note.dur, 0.25);
-                    });
-                    
-                    // Повторяем мелодию каждые 6 секунд
-                    return setInterval(() => {
-                        if (audioCtx.state === 'running') {
-                            const now = audioCtx.currentTime;
-                            melody.forEach(note => {
-                                scheduleNote(now + note.time, note.freq, note.dur, 0.25);
-                            });
-                        }
-                    }, 6000);
-                };
-                
-                return { audioCtx, playSynthesizedMusic };
-            } catch (e) {
-                console.log('Web Audio API не поддерживается, использую альтернативный метод');
-                return null;
+        (function() {
+            console.log('App version: 1.0.3 - ' + new Date().toISOString());
+            
+            const currentVersion = '1.0.3';
+            const storedVersion = localStorage.getItem('app_version');
+            
+            if (storedVersion !== currentVersion) {
+                console.log('New version detected!');
+                localStorage.setItem('app_version', currentVersion);
             }
-        }
+        })();
         
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.expand();
-        }
-
+        // Telegram WebApp
+        let tg = null;
+        try {
+            if (window.Telegram?.WebApp) {
+                tg = window.Telegram.WebApp;
+                tg.expand();
+            }
+        } catch(e) {}
+        
         const audio = document.getElementById('bgMusic');
         const film = document.getElementById('film-chaos');
         const bar = document.getElementById('bar');
         let musicStarted = false;
-        let musicInterval = null;
-        let audioContext = null;
         
-        // Попытка запустить музыку при клике
+        // Функция для запуска музыки
         function tryPlayMusic() {
             if (!musicStarted) {
-                // Вариант 1: используем синтезированную музыку
-                if (!audioContext) {
-                    const musicGenerator = createRubberHoseMusic();
-                    if (musicGenerator) {
-                        audioContext = musicGenerator.audioCtx;
-                        musicInterval = musicGenerator.playSynthesizedMusic();
-                        musicStarted = true;
-                        
-                        // Запускаем аудиоконтекст
-                        if (audioContext.state === 'suspended') {
-                            audioContext.resume();
-                        }
-                        
-                        console.log('🎵 Музыка запущена!');
-                    } else {
-                        // Вариант 2: пытаемся использовать встроенный MIDI-звук через Web Audio
-                        console.log('Пробуем альтернативный способ...');
-                        musicStarted = true;
-                    }
-                } else {
-                    if (audioContext.state === 'suspended') {
-                        audioContext.resume();
-                        musicStarted = true;
-                    }
-                }
-                
-                // Обновляем подсказку
-                const hints = document.querySelectorAll('.music-hint');
-                hints.forEach(hint => {
-                    hint.innerHTML = '🎵 Музыка играет! 🎵';
-                    hint.style.animation = 'pulse 1s ease-in-out';
+                audio.play().then(() => {
+                    musicStarted = true;
+                    console.log('🎵 Music started playing');
+                }).catch(e => {
+                    console.log('Autoplay blocked, waiting for user interaction');
+                    // Если автовоспроизведение заблокировано, ждем клика
                 });
             }
         }
         
-        // Запускаем музыку при любом клике
+        // Пытаемся запустить музыку сразу (если разрешено)
+        tryPlayMusic();
+        
+        // Запускаем музыку при любом клике/тапе (на случай блокировки автовоспроизведения)
         document.body.addEventListener('click', tryPlayMusic);
         document.body.addEventListener('touchstart', tryPlayMusic);
         
-        // 1. ГРЯЗНАЯ ПЛЕНКА (РИТМ 1 СЕК)
+        // Эффекты грязной пленки
         function triggerChaos() {
             film.innerHTML = '';
-            for(let i=0; i<5; i++) {
+            for(let i = 0; i < 5; i++) {
                 const d = document.createElement('div');
                 d.className = 'dust';
-                const s = Math.random()*6+2;
-                d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:#aaa;`;
+                const s = Math.random() * 6 + 2;
+                d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random() * 100}%;top:${Math.random() * 100}%;background:#aaa;`;
                 film.appendChild(d);
             }
             const sc = document.createElement('div');
             sc.className = 'scratch';
-            sc.style.left = Math.random()*100+'%';
+            sc.style.left = Math.random() * 100 + '%';
             film.appendChild(sc);
-            setTimeout(() => { 
-                if(film.children.length > 10) film.innerHTML = ''; 
-            }, 100);
+            setTimeout(() => { if(film.children.length > 10) film.innerHTML = ''; }, 100);
         }
         setInterval(triggerChaos, 1000);
         
-        // Дополнительные эффекты пленки
+        // Дополнительный эффект мерцания пленки
         setInterval(() => {
             if (Math.random() > 0.7) {
                 const flicker = document.createElement('div');
@@ -271,27 +172,27 @@
                 setTimeout(() => flicker.remove(), 50);
             }
         }, 200);
-
-        // 2. ЗАГРУЗКА (7 СЕКУНД)
+        
+        // Загрузка (7 секунд)
         let prog = 0;
         const loadInterval = setInterval(() => {
-            prog += 1.43; 
+            prog += 1.43;
             bar.style.width = Math.min(prog, 100) + '%';
             if (prog >= 100) {
                 clearInterval(loadInterval);
                 finishLoading();
             }
         }, 100);
-
+        
         function finishLoading() {
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('main-menu').style.display = 'block';
-
+            
             const img = document.getElementById('ava');
             let user = null;
             
             try {
-                if (tg && tg.initDataUnsafe?.user) {
+                if (tg?.initDataUnsafe?.user) {
                     user = tg.initDataUnsafe.user;
                 }
             } catch(e) {}
@@ -299,18 +200,19 @@
             if (user && user.photo_url) {
                 img.src = user.photo_url;
             } else {
-                // Генерируем аватарку с помощью canvas
+                // Рисуем мультяшную аватарку в стиле Rubber Hose
                 const canvas = document.createElement('canvas');
                 canvas.width = 60;
                 canvas.height = 60;
                 const ctx = canvas.getContext('2d');
                 
-                // Рисуем мультяшное лицо в стиле Rubber Hose
+                // Лицо
                 ctx.fillStyle = '#FFD966';
                 ctx.beginPath();
                 ctx.arc(30, 30, 28, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Белки глаз
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
                 ctx.arc(18, 22, 6, 0, Math.PI * 2);
@@ -319,11 +221,13 @@
                 ctx.arc(42, 22, 6, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Рот (широкая улыбка в стиле Rubber Hose)
                 ctx.fillStyle = '#663300';
                 ctx.beginPath();
                 ctx.arc(30, 38, 12, 0, Math.PI);
                 ctx.fill();
                 
+                // Зрачки
                 ctx.fillStyle = '#000';
                 ctx.beginPath();
                 ctx.arc(16, 20, 2, 0, Math.PI * 2);
@@ -332,19 +236,34 @@
                 ctx.arc(40, 20, 2, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Брови (удивленные)
+                ctx.beginPath();
+                ctx.moveTo(10, 14);
+                ctx.quadraticCurveTo(18, 10, 26, 14);
+                ctx.strokeStyle = '#4a2a00';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(34, 14);
+                ctx.quadraticCurveTo(42, 10, 50, 14);
+                ctx.stroke();
+                
                 img.src = canvas.toDataURL();
             }
         }
         
-        // Убираем подсказку после запуска музыки
-        setTimeout(() => {
-            if (!musicStarted) {
-                const hints = document.querySelectorAll('.music-hint');
-                hints.forEach(hint => {
-                    hint.style.animation = 'pulse 1s infinite';
-                });
-            }
-        }, 2000);
+        console.log('App loaded! Version: 1.0.3 | Music file: music.mp3');
+        
+        // Обработка ошибок загрузки музыки
+        audio.addEventListener('error', (e) => {
+            console.error('Music loading error:', e);
+            console.log('Please make sure music.mp3 file exists in the same folder');
+        });
+        
+        audio.addEventListener('canplaythrough', () => {
+            console.log('Music file loaded successfully');
+        });
     </script>
 </body>
 </html>
