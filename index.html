@@ -6,65 +6,36 @@
     <title>Cartoon Game</title>
     <style>
         :root { --bg-color: #050505; --text-color: #fff; }
-        
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             background: var(--bg-color); color: var(--text-color); 
-            font-family: 'Georgia', serif;
-            overflow: hidden; 
-            user-select: none;
+            font-family: 'Georgia', serif; overflow: hidden; user-select: none;
         }
 
-        /* ЭФФЕКТЫ ПЛЕНКИ (ПЛАВНЫЕ) */
-        .noise { position: fixed; inset: 0; opacity: 0.06; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        /* ПЛАВНАЯ ПЛЕНКА */
+        .noise { position: fixed; inset: 0; opacity: 0.05; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
-        
-        /* Стили для плавных пятен и полосок */
-        .dust, .scratch {
-            position: absolute;
-            background: #fff;
-            opacity: 0;
-            animation: film-flash 0.8s ease-out forwards; /* Плавное исчезновение за 0.8с */
-        }
+        .dust, .scratch { position: absolute; background: #fff; opacity: 0; animation: fadeOut 0.9s ease-out forwards; }
         .dust { border-radius: 50%; }
-        .scratch { background: rgba(255,255,255,0.3); width: 1.5px; height: 100%; }
-
-        @keyframes film-flash {
-            0% { opacity: 0.5; }
-            100% { opacity: 0; }
-        }
-
+        .scratch { background: rgba(255,255,255,0.2); width: 1.5px; height: 100%; }
+        @keyframes fadeOut { 0% { opacity: 0.4; } 100% { opacity: 0; } }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, black 150%); z-index: 510; pointer-events: none; }
 
         /* ЗАГРУЗКА */
-        #loading-screen { 
-            position: fixed; inset: 0; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; 
-        }
-        .title { 
-            font-size: 3.5rem; text-align: center; text-transform: uppercase; 
-            font-weight: 900; margin: 0; line-height: 0.9;
-            animation: rubber-jump 1s infinite ease-in-out;
-        }
-        .bar-wrap { width: 200px; height: 3px; background: #1a1a1a; margin-top: 40px; border-radius: 2px; overflow: hidden; }
+        #loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .title { font-size: 3.5rem; text-align: center; text-transform: uppercase; font-weight: 900; animation: rubber-jump 1s infinite ease-in-out; }
+        .bar-wrap { width: 200px; height: 3px; background: #1a1a1a; margin-top: 40px; }
         #bar { width: 0%; height: 100%; background: #fff; transition: width 0.2s linear; }
 
         /* МЕНЮ */
         #main-menu { display: none; width: 100%; height: 100%; position: relative; z-index: 50; }
-        .avatar { 
-            position: absolute; top: 20px; right: 20px; 
-            width: 55px; height: 55px; border: 2px solid #fff; 
-            border-radius: 50%; overflow: hidden; background: #111;
-        }
+        .avatar { position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; border: 2px solid #fff; border-radius: 50%; overflow: hidden; background: #111; }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        @keyframes rubber-jump {
-            0%, 100% { transform: scale(1) translateY(0); }
-            50% { transform: scaleY(1.08) scaleX(0.97) translateY(-15px); }
-        }
+        @keyframes rubber-jump { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scaleY(1.1) scaleX(0.97) translateY(-15px); } }
     </style>
 </head>
-<body>
+<body onclick="initAudio()">
 
     <div class="noise"></div>
     <div class="vignette"></div>
@@ -76,31 +47,33 @@
     </div>
 
     <div id="main-menu">
-        <div class="avatar"><img id="ava" src="" alt=""></div>
+        <div class="avatar"><img id="ava" src="" alt="ava"></div>
     </div>
 
-    <audio id="bgMusic" loop src="music.mp3"></audio>
+    <audio id="music1" loop src="music.mp3"></audio>
+    <audio id="music2" loop src="music2.mp3"></audio>
 
     <script src="https://telegram.org"></script>
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const audio = document.getElementById('bgMusic');
-        const film = document.getElementById('film-chaos');
-        const bar = document.getElementById('bar');
-        let isStarted = false;
+        const m1 = document.getElementById('music1');
+        const m2 = document.getElementById('music2');
+        m1.volume = 0.5; // Громкость 50%
+        m2.volume = 0.5;
 
-        // ЗАПУСК МУЗЫКИ ПРИ ЛЮБОМ НАЖАТИИ
-        document.addEventListener('pointerdown', () => {
-            if (!isStarted) {
-                audio.play().catch(e => console.log("Нужен клик"));
-                isStarted = true;
+        let audioStarted = false;
+        function initAudio() {
+            if (!audioStarted) {
+                m1.play();
+                audioStarted = true;
             }
-        }, { once: true }); // Сработает только один раз
+        }
 
-        // ПЛАВНАЯ ПЛЕНКА (РИТМ 1 СЕК)
-        function triggerChaos() {
+        // РИТМИЧНАЯ ПЛЕНКА
+        function triggerFilm() {
+            const film = document.getElementById('film-chaos');
             film.innerHTML = '';
             for(let i=0; i<4; i++) {
                 const d = document.createElement('div');
@@ -110,37 +83,46 @@
                 film.appendChild(d);
             }
             const sc = document.createElement('div');
-            sc.className = 'scratch';
-            sc.style.left = Math.random()*100+'%';
+            sc.className = 'scratch'; sc.style.left = Math.random()*100+'%';
             film.appendChild(sc);
         }
-        setInterval(triggerChaos, 1000);
+        setInterval(triggerFilm, 1000);
 
         // ЗАГРУЗКА 7 СЕКУНД
-        let prog = 0;
-        const loadInterval = setInterval(() => {
-            prog += 1.43; 
-            bar.style.width = prog + '%';
-            if (prog >= 100) {
-                clearInterval(loadInterval);
-                audio.pause();
+        let p = 0;
+        const loadInt = setInterval(() => {
+            p += 1.43;
+            document.getElementById('bar').style.width = p + '%';
+            if (p >= 100) {
+                clearInterval(loadInt);
+                m1.pause(); 
+                m2.play(); // Запуск второй музыки в меню
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('main-menu').style.display = 'block';
-
-                const img = document.getElementById('ava');
-                const user = tg.initDataUnsafe?.user;
-                if (user && user.photo_url) {
-                    img.src = user.photo_url;
-                } else {
-                    let saved = localStorage.getItem('userAva');
-                    if(!saved) {
-                        saved = (Math.floor(Math.random() * 3) + 1) + '.png';
-                        localStorage.setItem('userAva', saved);
-                    }
-                    img.src = saved;
-                }
+                loadAvatar();
             }
         }, 100);
+
+        function loadAvatar() {
+            const img = document.getElementById('ava');
+            const user = tg.initDataUnsafe?.user;
+            
+            if (user && user.photo_url) {
+                img.src = user.photo_url;
+            } else {
+                // Если нет авы, проверяем память или выбираем новую
+                let saved = localStorage.getItem('cartoon_ava');
+                if (!saved) {
+                    saved = Math.floor(Math.random() * 3) + 1 + ".png";
+                    localStorage.setItem('cartoon_ava', saved);
+                }
+                // Добавляем проверку на случай, если файлы на гитхабе
+                img.src = "./" + saved; 
+            }
+            
+            // Если картинка не загрузилась, ставим заглушку
+            img.onerror = () => { img.src = "1.png"; };
+        }
     </script>
 </body>
 </html>
