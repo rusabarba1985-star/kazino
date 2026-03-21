@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cuphead Loading Pro</title>
+    <title>Cuphead Rhythmic Loading</title>
     <style>
         body, html {
             margin: 0; padding: 0;
@@ -13,39 +13,41 @@
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* Общий контейнер для фильтров */
-        .film-container {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        /* Постоянное легкое зерно */
+        /* Постоянная текстура старой бумаги/зерна */
         .noise {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            opacity: 0.05;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.06;
+            z-index: 100;
+            pointer-events: none;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* Контейнер для вспышек */
+        #film-effects {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
             z-index: 110;
         }
 
-        /* Стили для динамических элементов (создаются через JS) */
-        .dust {
+        /* Стили элементов */
+        .dust-spot {
             position: absolute;
             background: #fff;
             border-radius: 50%;
-            opacity: 0.4;
+            opacity: 0.5;
+            filter: blur(1px);
         }
 
-        .scratch {
+        .film-scratch {
             position: absolute;
-            background: rgba(255, 255, 255, 0.15);
-            width: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 1.5px;
             height: 100%;
         }
 
-        /* ТЕКСТ */
+        /* ТЕКСТ: Ритм 1 секунда */
         .title {
             color: #fff;
             font-family: 'Georgia', serif;
@@ -54,20 +56,21 @@
             text-align: center;
             text-transform: uppercase;
             z-index: 50;
-            /* Замедляем основную анимацию */
-            animation: rubber-slow 1.2s infinite ease-in-out alternate;
+            /* Анимация длится 1с (0.5с туда, 0.5с обратно) */
+            animation: rubber-beat 1s infinite ease-in-out;
         }
 
-        @keyframes rubber-slow {
-            from { transform: scaleY(1) translateY(0); }
-            to { transform: scaleY(1.05) scaleX(0.98) translateY(-10px); }
+        @keyframes rubber-beat {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scaleY(1.08) scaleX(0.96) translateY(-15px); }
         }
 
         .vignette {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 40%, black 150%);
+            background: radial-gradient(circle, transparent 30%, black 140%);
             z-index: 120;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -75,55 +78,46 @@
 
     <div class="noise"></div>
     <div class="vignette"></div>
-    <div class="film-container" id="film"></div>
+    <div id="film-effects"></div>
 
     <h1 class="title">Cartoon<br>Game</h1>
 
     <script>
-        const container = document.getElementById('film');
+        const container = document.getElementById('film-effects');
 
-        // Функция для создания случайной пылинки
-        function createDust() {
-            const dust = document.createElement('div');
-            dust.className = 'dust';
-            
-            // Рандомный размер и позиция
-            const size = Math.random() * 4 + 1;
-            dust.style.width = size + 'px';
-            dust.style.height = size + 'px';
-            dust.style.left = Math.random() * 100 + '%';
-            dust.style.top = Math.random() * 100 + '%';
-            
-            container.appendChild(dust);
+        function triggerFlash() {
+            // Очищаем предыдущие вспышки
+            container.innerHTML = '';
 
-            // Удаляем через мгновение (эффект вспышки)
-            setTimeout(() => {
-                dust.remove();
-            }, 60); 
-        }
+            // 1. Создаем группу пылинок (3-5 штук в разных местах)
+            for(let i = 0; i < 4; i++) {
+                const dust = document.createElement('div');
+                dust.className = 'dust-spot';
+                const size = Math.random() * 6 + 2;
+                dust.style.width = size + 'px';
+                dust.style.height = size + 'px';
+                dust.style.left = Math.random() * 100 + '%';
+                dust.style.top = Math.random() * 100 + '%';
+                container.appendChild(dust);
+            }
 
-        // Функция для создания вертикальной полоски
-        function createScratch() {
+            // 2. Создаем одну случайную полоску-царапину
             const scratch = document.createElement('div');
-            scratch.className = 'scratch';
+            scratch.className = 'film-scratch';
             scratch.style.left = Math.random() * 100 + '%';
-            
             container.appendChild(scratch);
 
+            // Удаляем всё через 100мс, чтобы был эффект короткой вспышки
             setTimeout(() => {
-                scratch.remove();
-            }, 80);
+                container.innerHTML = '';
+            }, 100);
         }
 
-        // Зацикливаем создание эффектов с разными интервалами
-        // Пылинки появляются чаще
-        setInterval(createDust, 150); 
-        
-        // Полоски появляются реже и хаотично
-        setInterval(() => {
-            if(Math.random() > 0.5) createScratch();
-        }, 400);
+        // Запуск цикла ровно каждые 1000мс (1 секунда)
+        setInterval(triggerFlash, 1000);
 
+        // Первый запуск сразу
+        triggerFlash();
     </script>
 </body>
 </html>
