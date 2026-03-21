@@ -13,29 +13,72 @@
         }
 
         /* ПЛАВНАЯ ПЛЕНКА */
-        .noise { position: fixed; inset: 0; opacity: 0.05; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .noise { position: fixed; inset: 0; opacity: 0.05; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
         .dust, .scratch { position: absolute; background: #fff; opacity: 0; animation: fadeOut 0.9s ease-out forwards; }
-        .dust { border-radius: 50%; }
-        .scratch { background: rgba(255,255,255,0.2); width: 1.5px; height: 100%; }
-        @keyframes fadeOut { 0% { opacity: 0.4; } 100% { opacity: 0; } }
+        .dust { border-radius: 50%; background: rgba(200,200,200,0.7); }
+        .scratch { background: rgba(255,255,255,0.3); width: 2px; height: 100%; top: 0; }
+        @keyframes fadeOut { 
+            0% { opacity: 0.6; transform: scale(0.8); } 
+            100% { opacity: 0; transform: scale(1.2); } 
+        }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, black 150%); z-index: 510; pointer-events: none; }
 
         /* ЗАГРУЗКА */
-        #loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .title { font-size: 3.5rem; text-align: center; text-transform: uppercase; font-weight: 900; animation: rubber-jump 1s infinite ease-in-out; }
+        #loading-screen { 
+            position: fixed; inset: 0; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 100; background: #050505;
+            transition: opacity 0.5s ease;
+        }
+        .title { 
+            font-size: 3.5rem; text-align: center; text-transform: uppercase; 
+            font-weight: 900; animation: rubber-jump 1s infinite ease-in-out;
+            color: white;
+            text-shadow: 4px 4px 0px #3a3a3a;
+        }
         .bar-wrap { width: 200px; height: 3px; background: #1a1a1a; margin-top: 40px; }
         #bar { width: 0%; height: 100%; background: #fff; transition: width 0.2s linear; }
 
         /* МЕНЮ */
-        #main-menu { display: none; width: 100%; height: 100%; position: relative; z-index: 50; }
-        .avatar { position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; border: 2px solid #fff; border-radius: 50%; overflow: hidden; background: #111; }
+        #main-menu { 
+            display: none; 
+            width: 100%; 
+            height: 100%; 
+            position: relative; 
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .avatar { 
+            position: absolute; top: 20px; right: 20px; 
+            width: 60px; height: 60px; border: 2px solid #fff; 
+            border-radius: 50%; overflow: hidden; background: #111;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .avatar:hover {
+            transform: scale(1.05);
+        }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .version {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            font-size: 9px;
+            color: rgba(255,255,255,0.3);
+            z-index: 600;
+            font-family: monospace;
+        }
 
-        @keyframes rubber-jump { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scaleY(1.1) scaleX(0.97) translateY(-15px); } }
+        @keyframes rubber-jump { 
+            0%, 100% { transform: scale(1) translateY(0); } 
+            50% { transform: scaleY(1.1) scaleX(0.97) translateY(-15px); } 
+        }
     </style>
 </head>
-<body onclick="initAudio()">
+<body>
 
     <div class="noise"></div>
     <div class="vignette"></div>
@@ -44,85 +87,302 @@
     <div id="loading-screen">
         <h1 class="title">CARTOON<br>GAME</h1>
         <div class="bar-wrap"><div id="bar"></div></div>
+        <div class="version">v1.0.6</div>
     </div>
 
     <div id="main-menu">
-        <div class="avatar"><img id="ava" src="" alt="ava"></div>
+        <div class="avatar" id="avatarBtn">
+            <img id="ava" src="" alt="ava">
+        </div>
+        <div class="version">v1.0.6</div>
     </div>
 
-    <audio id="music1" loop src="music.mp3"></audio>
-    <audio id="music2" loop src="music2.mp3"></audio>
+    <audio id="music1" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="music2" loop preload="auto">
+        <source src="music2.mp3" type="audio/mpeg">
+    </audio>
 
-    <script src="https://telegram.org"></script>
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
+        // Инициализация Telegram WebApp
+        let tg = null;
+        try {
+            if (window.Telegram?.WebApp) {
+                tg = window.Telegram.WebApp;
+                tg.expand();
+            } else {
+                // Загружаем Telegram SDK если его нет
+                const script = document.createElement('script');
+                script.src = 'https://telegram.org/js/telegram-web-app.js';
+                script.onload = () => {
+                    tg = window.Telegram.WebApp;
+                    if (tg) tg.expand();
+                };
+                document.head.appendChild(script);
+            }
+        } catch(e) {
+            console.log('Telegram not available');
+        }
+        
         const m1 = document.getElementById('music1');
         const m2 = document.getElementById('music2');
-        m1.volume = 0.5; // Громкость 50%
+        
+        // Устанавливаем громкость 50%
+        m1.volume = 0.5;
         m2.volume = 0.5;
-
+        
         let audioStarted = false;
+        let currentMusic = 'm1';
+        
+        // Функция запуска музыки
         function initAudio() {
             if (!audioStarted) {
-                m1.play();
-                audioStarted = true;
+                // Пытаемся запустить первую музыку
+                m1.play().then(() => {
+                    audioStarted = true;
+                    currentMusic = 'm1';
+                    console.log('Music 1 started');
+                }).catch(e => {
+                    console.log('Autoplay blocked, will start on next interaction');
+                });
             }
         }
-
-        // РИТМИЧНАЯ ПЛЕНКА
+        
+        // Функция переключения на вторую музыку
+        function switchToMusic2() {
+            if (currentMusic === 'm1' && audioStarted) {
+                m1.pause();
+                m2.play().then(() => {
+                    currentMusic = 'm2';
+                    console.log('Switched to music 2');
+                }).catch(e => console.log('Could not switch to music 2'));
+            }
+        }
+        
+        // Пытаемся запустить музыку сразу
+        setTimeout(() => {
+            initAudio();
+        }, 100);
+        
+        // Запускаем музыку при клике в любом месте (на случай блокировки)
+        document.body.addEventListener('click', initAudio);
+        document.body.addEventListener('touchstart', initAudio);
+        
+        // ПЛАВНАЯ ПЛЕНКА (более плавные эффекты)
         function triggerFilm() {
             const film = document.getElementById('film-chaos');
             film.innerHTML = '';
-            for(let i=0; i<4; i++) {
+            
+            // Добавляем пылинки (3-6 штук)
+            const dustCount = Math.floor(Math.random() * 4) + 3;
+            for(let i = 0; i < dustCount; i++) {
                 const d = document.createElement('div');
                 d.className = 'dust';
-                const s = Math.random()*5+2;
-                d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%`;
+                const s = Math.random() * 6 + 2;
+                d.style.cssText = `
+                    width: ${s}px;
+                    height: ${s}px;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    animation-duration: ${Math.random() * 0.8 + 0.6}s;
+                `;
                 film.appendChild(d);
             }
-            const sc = document.createElement('div');
-            sc.className = 'scratch'; sc.style.left = Math.random()*100+'%';
-            film.appendChild(sc);
+            
+            // Иногда добавляем царапину (30% шанс)
+            if (Math.random() > 0.7) {
+                const sc = document.createElement('div');
+                sc.className = 'scratch';
+                sc.style.left = Math.random() * 100 + '%';
+                sc.style.height = Math.random() * 60 + 20 + '%';
+                sc.style.top = Math.random() * 40 + 20 + '%';
+                sc.style.animationDuration = (Math.random() * 0.8 + 0.7) + 's';
+                film.appendChild(sc);
+            }
+            
+            // Удаляем старые эффекты
+            setTimeout(() => {
+                if (film.children.length > 20) {
+                    film.innerHTML = '';
+                }
+            }, 1000);
         }
-        setInterval(triggerFilm, 1000);
-
+        
+        // Запускаем эффекты пленки каждые 0.8-1.2 секунды
+        setInterval(triggerFilm, Math.random() * 400 + 800);
+        
+        // Дополнительный эффект мерцания
+        setInterval(() => {
+            if (Math.random() > 0.8) {
+                const flicker = document.createElement('div');
+                flicker.style.cssText = `
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(255,255,255,0.03);
+                    pointer-events: none;
+                    z-index: 520;
+                    animation: fadeOut 0.3s ease-out forwards;
+                `;
+                document.body.appendChild(flicker);
+                setTimeout(() => flicker.remove(), 300);
+            }
+        }, 2000);
+        
         // ЗАГРУЗКА 7 СЕКУНД
         let p = 0;
         const loadInt = setInterval(() => {
             p += 1.43;
-            document.getElementById('bar').style.width = p + '%';
+            const bar = document.getElementById('bar');
+            if (bar) bar.style.width = Math.min(p, 100) + '%';
+            
             if (p >= 100) {
                 clearInterval(loadInt);
-                m1.pause(); 
-                m2.play(); // Запуск второй музыки в меню
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('main-menu').style.display = 'block';
-                loadAvatar();
+                finishLoading();
             }
         }, 100);
-
+        
+        function finishLoading() {
+            // Переключаем на вторую музыку
+            switchToMusic2();
+            
+            // Плавно скрываем загрузку
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                const mainMenu = document.getElementById('main-menu');
+                mainMenu.style.display = 'block';
+                setTimeout(() => {
+                    mainMenu.style.opacity = '1';
+                }, 50);
+                loadAvatar();
+            }, 500);
+        }
+        
         function loadAvatar() {
             const img = document.getElementById('ava');
-            const user = tg.initDataUnsafe?.user;
+            let user = null;
             
+            try {
+                if (tg?.initDataUnsafe?.user) {
+                    user = tg.initDataUnsafe.user;
+                }
+            } catch(e) {}
+            
+            // Если есть фото из Telegram
             if (user && user.photo_url) {
                 img.src = user.photo_url;
-            } else {
-                // Если нет авы, проверяем память или выбираем новую
-                let saved = localStorage.getItem('cartoon_ava');
-                if (!saved) {
-                    saved = Math.floor(Math.random() * 3) + 1 + ".png";
-                    localStorage.setItem('cartoon_ava', saved);
-                }
-                // Добавляем проверку на случай, если файлы на гитхабе
-                img.src = "./" + saved; 
+                console.log('Avatar from Telegram');
+                return;
             }
             
-            // Если картинка не загрузилась, ставим заглушку
-            img.onerror = () => { img.src = "1.png"; };
+            // Список возможных файлов аватара
+            const avatarFiles = [
+                'avatar.png', 'avatar.jpg', 'avatar.jpeg',
+                'profile.png', 'profile.jpg',
+                'user.png', 'user.jpg',
+                'photo.png', 'photo.jpg',
+                '1.png', '2.png', '3.png'
+            ];
+            
+            let found = false;
+            
+            // Проверяем сохраненный аватар
+            const saved = localStorage.getItem('cartoon_ava');
+            if (saved) {
+                const testImg = new Image();
+                testImg.onload = () => {
+                    if (!found) {
+                        found = true;
+                        img.src = saved;
+                        console.log('Avatar from localStorage:', saved);
+                    }
+                };
+                testImg.onerror = () => {
+                    // Файл не найден, продолжаем поиск
+                };
+                testImg.src = saved;
+            }
+            
+            // Проверяем все возможные файлы
+            avatarFiles.forEach((file, index) => {
+                const testImg = new Image();
+                testImg.onload = () => {
+                    if (!found) {
+                        found = true;
+                        img.src = file;
+                        localStorage.setItem('cartoon_ava', file);
+                        console.log('Avatar loaded:', file);
+                    }
+                };
+                testImg.src = file;
+            });
+            
+            // Если ничего не найдено, генерируем аватар
+            setTimeout(() => {
+                if (!found && (!img.src || img.src === '')) {
+                    generateRubberHoseAvatar(img);
+                }
+            }, 500);
         }
+        
+        // Генерация аватарки в стиле Rubber Hose
+        function generateRubberHoseAvatar(imgElement) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 60;
+            canvas.height = 60;
+            const ctx = canvas.getContext('2d');
+            
+            // Желтое лицо
+            ctx.fillStyle = '#FFD966';
+            ctx.beginPath();
+            ctx.arc(30, 30, 28, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Глаза
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(18, 22, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(42, 22, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Рот
+            ctx.fillStyle = '#663300';
+            ctx.beginPath();
+            ctx.arc(30, 38, 12, 0, Math.PI);
+            ctx.fill();
+            
+            // Зрачки
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(16, 20, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(40, 20, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Блики
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(14, 18, 1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(38, 18, 1, 0, Math.PI * 2);
+            ctx.fill();
+            
+            imgElement.src = canvas.toDataURL();
+            console.log('Generated Rubber Hose avatar');
+        }
+        
+        // Обработка ошибок музыки
+        m1.addEventListener('error', () => console.log('music.mp3 not found'));
+        m2.addEventListener('error', () => console.log('music2.mp3 not found'));
+        
+        console.log('App loaded - v1.0.6');
     </script>
 </body>
 </html>
