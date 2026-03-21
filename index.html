@@ -3,127 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartoon Game - Rubber Hose</title>
-    <!-- Шрифт как на фото -->
+    <title>Cartoon Game</title>
+    <!-- Подключаем шрифт максимально похожий на шрифт с картинки -->
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
-        :root { --bg-color: #050505; --text-color: #fff; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-color); color: var(--text-color); font-family: 'Limelight', cursive; overflow: hidden; }
+        :root { --bg-color: #000; --text-color: #fff; }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--bg-color); color: var(--text-color); 
+            font-family: 'Limelight', cursive; overflow: hidden; 
+        }
 
-        /* ЭФФЕКТЫ ГРЯЗНОЙ ПЛЕНКИ (Старый стиль) */
-        .noise-overlay { position: fixed; inset: 0; opacity: 0.08; pointer-events: none; z-index: 200; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 190; }
-        .dust { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; filter: blur(0.5px); }
-        .scratch { position: absolute; background: rgba(255,255,255,0.2); width: 1.5px; height: 100%; }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, black 140%); z-index: 210; pointer-events: none; }
+        /* КНОПКА ЗАПУСКА (ОБЯЗАТЕЛЬНО ДЛЯ МУЗЫКИ) */
+        #start-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+        }
+        #start-overlay span { border: 2px solid #fff; padding: 10px 20px; font-size: 1.5rem; }
+
+        /* ЭФФЕКТЫ ГРЯЗНОЙ ПЛЕНКИ (МЕРЦАНИЕ) */
+        .noise { position: fixed; inset: 0; opacity: 0.1; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
+        .dust { position: absolute; background: #fff; border-radius: 50%; opacity: 0.6; }
+        .scratch { position: absolute; background: rgba(255,255,255,0.3); width: 2px; height: 100%; }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, black 150%); z-index: 510; pointer-events: none; }
 
         /* ЭКРАН ЗАГРУЗКИ */
-        #loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .title { font-size: 3.5rem; text-align: center; text-transform: uppercase; animation: rubber-jump 1s infinite ease-in-out; margin: 0; line-height: 0.9; }
-        .progress-bar-wrap { width: 200px; height: 4px; background: #222; margin-top: 40px; position: relative; }
-        #bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 10px #fff; }
+        #loading-screen { 
+            display: none; position: fixed; inset: 0; 
+            flex-direction: column; justify-content: center; align-items: center; z-index: 100; 
+        }
+        .title { 
+            font-size: 3.5rem; text-align: center; text-transform: uppercase; 
+            margin: 0; line-height: 0.85; letter-spacing: -2px;
+            animation: rubber-jump 1s infinite ease-in-out;
+            text-shadow: 2px 2px 0px #333;
+        }
+        .bar-container { width: 200px; height: 6px; background: #222; margin-top: 50px; }
+        #bar { width: 0%; height: 100%; background: #fff; }
 
         /* ГЛАВНОЕ МЕНЮ */
         #main-menu { display: none; width: 100%; height: 100%; position: relative; z-index: 50; }
-        .tg-avatar { position: absolute; top: 20px; right: 20px; width: 65px; height: 65px; border: 3px solid #fff; border-radius: 50%; overflow: hidden; background: #111; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-        .tg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar { 
+            position: absolute; top: 20px; right: 20px; 
+            width: 60px; height: 60px; border: 3px solid #fff; 
+            border-radius: 50%; overflow: hidden; background: #111;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         @keyframes rubber-jump {
             0%, 100% { transform: scale(1) translateY(0); }
-            50% { transform: scaleY(1.1) scaleX(0.95) translateY(-20px); }
+            50% { transform: scaleY(1.15) scaleX(0.9) translateY(-25px); }
         }
     </style>
 </head>
-<body onclick="startMusic()">
+<body>
 
-    <div class="noise-overlay"></div>
+    <div id="start-overlay" onclick="startApp()"><span>START GAME</span></div>
+
+    <div class="noise"></div>
     <div class="vignette"></div>
     <div id="film-chaos"></div>
 
-    <!-- Загрузка -->
     <div id="loading-screen">
-        <h1 class="title">Cartoon<br>Game</h1>
-        <div class="progress-bar-wrap"><div id="bar"></div></div>
+        <h1 class="title">CARTOON<br>GAME</h1>
+        <div class="bar-container"><div id="bar"></div></div>
     </div>
 
-    <!-- Меню -->
     <div id="main-menu">
-        <div class="tg-avatar">
-            <img id="avatar-img" src="" alt="Avatar">
-        </div>
+        <div class="avatar"><img id="ava" src="" alt=""></div>
     </div>
 
-    <audio id="bgMusic" loop>
-        <source src="music.mp3" type="audio/mpeg">
-    </audio>
+    <!-- Музыка -->
+    <audio id="audio" loop><source src="music.mp3" type="audio/mpeg"></audio>
 
     <script src="https://telegram.org"></script>
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#050505';
 
-        const music = document.getElementById('bgMusic');
+        const audio = document.getElementById('audio');
         const film = document.getElementById('film-chaos');
-        let musicStarted = false;
+        const bar = document.getElementById('bar');
 
-        // Включение музыки (нужен клик пользователя)
-        function startMusic() {
-            if (!musicStarted) {
-                music.play();
-                musicStarted = true;
-            }
+        // 1. ЗАПУСК ПРИЛОЖЕНИЯ ПО КЛИКУ
+        function startApp() {
+            document.getElementById('start-overlay').style.display = 'none';
+            document.getElementById('loading-screen').style.display = 'flex';
+            audio.play().catch(e => console.log("Музыка заблокирована:", e));
+            runLoading();
         }
 
-        // 1. ГРЯЗНАЯ ПЛЕНКА (Твой ритм каждые 1 сек)
-        function triggerFilmChaos() {
+        // 2. ГРЯЗНАЯ ПЛЕНКА (РИТМ 1 СЕК)
+        function triggerChaos() {
             film.innerHTML = '';
-            // Пятна пыли
-            for(let i=0; i<5; i++) {
+            for(let i=0; i<6; i++) {
                 const d = document.createElement('div');
                 d.className = 'dust';
-                const s = Math.random()*6+2;
-                d.style.width = s+'px'; d.style.height = s+'px';
-                d.style.left = Math.random()*100+'%'; d.style.top = Math.random()*100+'%';
+                const s = Math.random()*7+2;
+                d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%`;
                 film.appendChild(d);
             }
-            // Полоски
             const sc = document.createElement('div');
             sc.className = 'scratch';
             sc.style.left = Math.random()*100+'%';
             film.appendChild(sc);
-            
-            // Вспышка на 100мс
             setTimeout(() => { film.innerHTML = ''; }, 100);
         }
-        setInterval(triggerFilmChaos, 1000);
+        setInterval(triggerChaos, 1000);
 
-        // 2. ЛОГИКА ЗАГРУЗКИ (7 секунд)
-        let prog = 0;
-        const bar = document.getElementById('bar');
-        const loadInterval = setInterval(() => {
-            prog += 1.43; // Рассчитано на ~7 секунд (100 / 70 шагов по 100мс)
-            bar.style.width = prog + '%';
-            if (prog >= 100) {
-                clearInterval(loadInterval);
-                enterMenu();
-            }
-        }, 100);
+        // 3. ЗАГРУЗКА (7 СЕКУНД)
+        function runLoading() {
+            let p = 0;
+            const interval = setInterval(() => {
+                p += 1.43; 
+                bar.style.width = p + '%';
+                if (p >= 100) {
+                    clearInterval(interval);
+                    showMenu();
+                }
+            }, 100);
+        }
 
-        function enterMenu() {
-            music.pause(); // Музыка прекращается
-            music.currentTime = 0;
+        function showMenu() {
+            audio.pause(); // Музыка стоп
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('main-menu').style.display = 'block';
-            
-            // Работа с аватаркой
-            const img = document.getElementById('avatar-img');
+
+            // Аватарка
+            const img = document.getElementById('ava');
             const user = tg.initDataUnsafe?.user;
+            
             if (user && user.photo_url) {
                 img.src = user.photo_url;
             } else {
-                const rand = Math.floor(Math.random() * 3) + 1;
-                img.src = rand + '.png'; // 1.png, 2.png или 3.png
+                // Если нет в TG, берем 1, 2 или 3.png
+                let savedAva = localStorage.getItem('userAva');
+                if(!savedAva) {
+                    savedAva = Math.floor(Math.random() * 3) + 1 + '.png';
+                    localStorage.setItem('userAva', savedAva);
+                }
+                img.src = savedAva;
             }
         }
     </script>
