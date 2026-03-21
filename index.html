@@ -3,42 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cartoon Game</title>
+    <title>Cartoon Game - Rubber Hose Style</title>
     <style>
-        :root { --bg-color: #050505; --text-color: #fff; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        
         body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: var(--bg-color); color: var(--text-color); 
-            font-family: 'Georgia', serif; overflow: hidden; user-select: none;
+            width: 100%; 
+            height: 100%; 
+            background: #000;
+            overflow: hidden;
         }
 
-        /* ПЛАВНАЯ ПЛЕНКА */
-        .noise { position: fixed; inset: 0; opacity: 0.05; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
-        .dust, .scratch { position: absolute; background: #fff; opacity: 0; animation: fadeOut 0.9s ease-out forwards; }
-        .dust { border-radius: 50%; background: rgba(200,200,200,0.7); }
-        .scratch { background: rgba(255,255,255,0.3); width: 2px; height: 100%; top: 0; }
-        @keyframes fadeOut { 
-            0% { opacity: 0.6; transform: scale(0.8); } 
-            100% { opacity: 0; transform: scale(1.2); } 
+        /* ОСНОВНОЙ ЭКРАН */
+        .screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
         }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, black 150%); z-index: 510; pointer-events: none; }
+
+        /* СТИЛЬ RUBBER HOSE ДЛЯ ТЕКСТА */
+        .rubber-text {
+            font-family: 'Impact', 'Bangers', 'Fredoka One', 'Courier New', cursive;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 5px 5px 0px #3a3a3a;
+            letter-spacing: 2px;
+        }
 
         /* ЗАГРУЗКА */
         #loading-screen { 
-            position: fixed; inset: 0; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 100; background: #050505;
-            transition: opacity 0.5s ease;
+            position: fixed; 
+            inset: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 100; 
+            background: #000;
         }
+        
         .title { 
-            font-size: 3.5rem; text-align: center; text-transform: uppercase; 
-            font-weight: 900; animation: rubber-jump 1s infinite ease-in-out;
+            font-size: 4rem; 
+            text-align: center; 
+            font-family: 'Impact', 'Bangers', 'Fredoka One', cursive;
+            font-weight: 900;
+            text-transform: uppercase;
             color: white;
-            text-shadow: 4px 4px 0px #3a3a3a;
+            text-shadow: 6px 6px 0px #3a3a3a;
+            animation: rubber-shake 0.8s infinite ease-in-out;
+            letter-spacing: 4px;
         }
-        .bar-wrap { width: 200px; height: 3px; background: #1a1a1a; margin-top: 40px; }
-        #bar { width: 0%; height: 100%; background: #fff; transition: width 0.2s linear; }
+        
+        .bar-wrap { 
+            width: 200px; 
+            height: 4px; 
+            background: #222; 
+            margin-top: 40px;
+        }
+        #bar { 
+            width: 0%; 
+            height: 100%; 
+            background: #fff; 
+            transition: width 0.1s linear;
+            box-shadow: 0 0 5px #fff;
+        }
 
         /* МЕНЮ */
         #main-menu { 
@@ -47,31 +83,43 @@
             height: 100%; 
             position: relative; 
             z-index: 50;
-            opacity: 0;
-            transition: opacity 0.5s ease;
         }
+        
         .avatar { 
-            position: absolute; top: 20px; right: 20px; 
-            width: 60px; height: 60px; border: 2px solid #fff; 
-            border-radius: 50%; overflow: hidden; background: #111;
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            width: 60px; 
+            height: 60px; 
+            border: 3px solid #fff; 
+            border-radius: 50%; 
+            overflow: hidden; 
+            background: #111;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: transform 0.2s ease;
             z-index: 10;
+            box-shadow: 3px 3px 0px #3a3a3a;
         }
+        
         .avatar:hover {
             transform: scale(1.05);
         }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* КНОПКИ МЕНЮ */
+        .avatar img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        
+        /* КНОПКИ МЕНЮ - RUBBER HOSE СТИЛЬ */
         .menu-buttons {
             position: absolute;
-            bottom: 30px;
+            bottom: 40px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
             flex-wrap: wrap;
             padding: 0 20px;
             z-index: 10;
@@ -80,50 +128,46 @@
         .menu-btn {
             background: transparent;
             border: none;
-            color: white;
-            font-family: 'Georgia', serif;
-            font-size: 1rem;
+            font-family: 'Impact', 'Bangers', 'Fredoka One', cursive;
+            font-size: 1.2rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            color: white;
+            text-shadow: 3px 3px 0px #3a3a3a;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
+            transition: all 0.2s ease;
             padding: 8px 0;
-            text-shadow: 2px 2px 0px #3a3a3a;
-            white-space: nowrap;
+            letter-spacing: 2px;
         }
         
         .menu-btn:hover {
-            transform: scale(1.05);
-            letter-spacing: 2px;
-            text-shadow: 3px 3px 0px #3a3a3a;
+            transform: scale(1.1);
+            text-shadow: 4px 4px 0px #3a3a3a;
+            letter-spacing: 3px;
         }
         
-        /* ПРОФИЛЬ */
+        /* ПРОФИЛЬ - RUBBER HOSE СТИЛЬ */
         .profile-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.98);
             z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(8px);
         }
         
         .profile-content {
-            background: rgba(10,10,10,0.95);
-            border-radius: 20px;
+            background: #000;
+            border: 3px solid #fff;
             padding: 30px;
             max-width: 400px;
             width: 85%;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            box-shadow: 10px 10px 0px #3a3a3a;
         }
         
         .profile-avatar {
@@ -133,8 +177,9 @@
             margin: 0 auto 20px;
             border: 3px solid #fff;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: transform 0.2s ease;
             background: #111;
+            box-shadow: 5px 5px 0px #3a3a3a;
         }
         
         .profile-avatar:hover {
@@ -149,32 +194,35 @@
         }
         
         .profile-name {
-            font-size: 1.5rem;
+            font-family: 'Impact', 'Bangers', 'Fredoka One', cursive;
+            font-size: 1.8rem;
             font-weight: 900;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 0px #3a3a3a;
+            text-shadow: 3px 3px 0px #3a3a3a;
+            color: white;
         }
         
         .profile-id {
+            font-family: monospace;
             font-size: 0.9rem;
             color: #aaa;
             margin-bottom: 20px;
-            font-family: monospace;
         }
         
         .profile-stats {
             text-align: left;
             margin: 20px 0;
             padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
+            background: #111;
+            border: 1px solid #333;
         }
         
         .stat-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+            font-family: monospace;
         }
         
         .stat-label {
@@ -185,126 +233,179 @@
         .stat-value {
             font-weight: 900;
             color: #ffd966;
+            font-family: monospace;
         }
         
         .close-profile {
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 2px solid #fff;
             color: white;
-            padding: 10px 20px;
+            padding: 10px 30px;
             margin-top: 20px;
             cursor: pointer;
-            font-family: 'Georgia', serif;
-            font-weight: bold;
-            border-radius: 30px;
-            transition: all 0.3s ease;
+            font-family: 'Impact', 'Bangers', 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
         }
         
         .close-profile:hover {
             background: rgba(255,255,255,0.1);
-            border-color: white;
+            transform: scale(1.05);
+        }
+        
+        /* ЭФФЕКТЫ ПЛЕНКИ - РЕЗКИЕ ПОЯВЛЕНИЯ И ИСЧЕЗНОВЕНИЯ */
+        #film-chaos { 
+            position: fixed; 
+            inset: 0; 
+            pointer-events: none; 
+            z-index: 450; 
+        }
+        
+        .dust-flash {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            width: 4px;
+            height: 4px;
+            pointer-events: none;
+        }
+        
+        .scratch-flash {
+            position: absolute;
+            background: #fff;
+            width: 2px;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .stripe-flash {
+            position: absolute;
+            background: #fff;
+            width: 4px;
+            height: 100%;
+            top: 0;
+            pointer-events: none;
+        }
+        
+        .full-flash {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.15);
+            pointer-events: none;
+            z-index: 520;
+        }
+        
+        .vignette { 
+            position: fixed; 
+            inset: 0; 
+            background: radial-gradient(circle, transparent 40%, black 150%); 
+            z-index: 510; 
+            pointer-events: none; 
+        }
+        
+        .noise { 
+            position: fixed; 
+            inset: 0; 
+            opacity: 0.05; 
+            pointer-events: none; 
+            z-index: 500; 
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); 
         }
         
         .version {
             position: fixed;
             bottom: 5px;
             right: 5px;
-            font-size: 9px;
+            font-size: 8px;
             color: rgba(255,255,255,0.3);
             z-index: 600;
             font-family: monospace;
         }
 
-        @keyframes rubber-jump { 
+        @keyframes rubber-shake { 
             0%, 100% { transform: scale(1) translateY(0); } 
-            50% { transform: scaleY(1.1) scaleX(0.97) translateY(-15px); } 
+            50% { transform: scaleY(1.08) scaleX(0.96) translateY(-12px); } 
         }
         
         @media (max-width: 768px) {
             .title { font-size: 2.5rem; }
-            .menu-buttons { bottom: 20px; gap: 12px; padding: 0 15px; }
-            .menu-btn { font-size: 0.75rem; letter-spacing: 0.5px; padding: 6px 0; text-shadow: 1.5px 1.5px 0px #3a3a3a; }
-            .avatar { width: 45px; height: 45px; top: 15px; right: 15px; }
-            .profile-content { padding: 20px; width: 90%; }
-            .profile-avatar { width: 80px; height: 80px; }
-            .profile-name { font-size: 1.2rem; }
-        }
-        
-        @media (max-width: 480px) {
-            .menu-buttons { gap: 8px; bottom: 15px; }
-            .menu-btn { font-size: 0.65rem; padding: 4px 0; }
-            .title { font-size: 2rem; }
+            .menu-btn { font-size: 0.8rem; letter-spacing: 1px; }
+            .menu-buttons { gap: 12px; bottom: 25px; }
+            .avatar { width: 45px; height: 45px; }
+            .profile-name { font-size: 1.3rem; }
+            .profile-content { padding: 20px; }
         }
         
         @media (min-width: 1200px) {
-            .menu-btn { font-size: 1.2rem; padding: 10px 0; }
-            .menu-buttons { gap: 25px; bottom: 40px; }
+            .menu-btn { font-size: 1.4rem; }
+            .menu-buttons { gap: 35px; bottom: 50px; }
         }
     </style>
 </head>
 <body>
+    <div class="screen">
+        <div class="noise"></div>
+        <div class="vignette"></div>
+        <div id="film-chaos"></div>
 
-    <div class="noise"></div>
-    <div class="vignette"></div>
-    <div id="film-chaos"></div>
+        <div id="loading-screen">
+            <h1 class="title">CARTOON<br>GAME</h1>
+            <div class="bar-wrap"><div id="bar"></div></div>
+            <div class="version">v2.0</div>
+        </div>
 
-    <div id="loading-screen">
-        <h1 class="title">CARTOON<br>GAME</h1>
-        <div class="bar-wrap"><div id="bar"></div></div>
-        <div class="version">v1.0.9</div>
-    </div>
-
-    <div id="main-menu">
-        <div class="avatar" id="avatarBtn">
-            <img id="ava" src="" alt="ava">
+        <div id="main-menu">
+            <div class="avatar" id="avatarBtn">
+                <img id="ava" src="" alt="ava">
+            </div>
+            
+            <div class="menu-buttons">
+                <button class="menu-btn" data-action="fastgame">FAST GAME</button>
+                <button class="menu-btn" data-action="slots">SLOTS</button>
+                <button class="menu-btn" data-action="bonus">BONUS</button>
+                <button class="menu-btn" data-action="profile">PROFILE</button>
+                <button class="menu-btn" data-action="fight">FIGHT</button>
+            </div>
+            
+            <div class="version">v2.0</div>
         </div>
         
-        <div class="menu-buttons">
-            <button class="menu-btn" data-action="fastgame">Fast Game</button>
-            <button class="menu-btn" data-action="slots">Slots</button>
-            <button class="menu-btn" data-action="bonus">Bonus</button>
-            <button class="menu-btn" data-action="profile">Profile</button>
-            <button class="menu-btn" data-action="fight">Fight</button>
-        </div>
-        
-        <div class="version">v1.0.9</div>
-    </div>
-    
-    <!-- МОДАЛЬНОЕ ОКНО ПРОФИЛЯ -->
-    <div id="profileModal" class="profile-modal">
-        <div class="profile-content">
-            <div class="profile-avatar" id="profileAvatarBtn">
-                <img id="profileAvatar" src="" alt="avatar">
+        <div id="profileModal" class="profile-modal">
+            <div class="profile-content">
+                <div class="profile-avatar" id="profileAvatarBtn">
+                    <img id="profileAvatar" src="" alt="avatar">
+                </div>
+                <div class="profile-name" id="profileName">PLAYER</div>
+                <div class="profile-id" id="profileId">ID: 71831</div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">FAST GAMES:</span>
+                        <span class="stat-value" id="statGames">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">DEPOSITS:</span>
+                        <span class="stat-value" id="statDeposits">$0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">WITHDRAWALS:</span>
+                        <span class="stat-value" id="statWithdrawals">$0</span>
+                    </div>
+                </div>
+                <button class="close-profile" id="closeProfile">CLOSE</button>
             </div>
-            <div class="profile-name" id="profileName">Player</div>
-            <div class="profile-id" id="profileId">ID: 71831</div>
-            <div class="profile-stats">
-                <div class="stat-item">
-                    <span class="stat-label">🎮 Games Played (Fast Game):</span>
-                    <span class="stat-value" id="statGames">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">💰 Total Deposits:</span>
-                    <span class="stat-value" id="statDeposits">$0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">💸 Total Withdrawals:</span>
-                    <span class="stat-value" id="statWithdrawals">$0</span>
-                </div>
-            </div>
-            <button class="close-profile" id="closeProfile">Close</button>
         </div>
-    </div>
 
-    <audio id="music1" loop preload="auto">
-        <source src="music.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="music2" loop preload="auto">
-        <source src="music2.mp3" type="audio/mpeg">
-    </audio>
+        <audio id="music1" loop preload="auto">
+            <source src="music.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="music2" loop preload="auto">
+            <source src="music2.mp3" type="audio/mpeg">
+        </audio>
+    </div>
 
     <script>
-        // Инициализация Telegram WebApp
+        // Telegram WebApp
         let tg = null;
         let userData = null;
         
@@ -329,50 +430,40 @@
             console.log('Telegram not available');
         }
         
-        // СИСТЕМА ПОЛЬЗОВАТЕЛЯ
+        // ПОЛЬЗОВАТЕЛЬ
         let currentUser = {
             id: null,
-            name: 'Player',
+            name: 'PLAYER',
             avatar: null,
             gamesPlayed: 0,
             deposits: 0,
             withdrawals: 0
         };
         
-        // Функция генерации ID начиная с 71831
         function generateUserId() {
             let lastId = localStorage.getItem('lastUserId');
             let newId;
-            
             if (!lastId) {
                 newId = 71831;
             } else {
                 newId = parseInt(lastId) + 1;
             }
-            
             localStorage.setItem('lastUserId', newId);
             return newId;
         }
         
-        // Получение или создание пользователя
         function getOrCreateUser() {
             let userId = null;
-            let userName = 'Player';
+            let userName = 'PLAYER';
             
-            // Пытаемся получить данные из Telegram
             if (userData) {
-                if (userData.id) {
-                    userId = userData.id;
-                }
+                if (userData.id) userId = userData.id;
                 if (userData.first_name) {
-                    userName = userData.first_name;
-                    if (userData.last_name) {
-                        userName += ' ' + userData.last_name;
-                    }
+                    userName = userData.first_name.toUpperCase();
+                    if (userData.last_name) userName += ' ' + userData.last_name.toUpperCase();
                 }
             }
             
-            // Если нет Telegram ID, создаем локальный
             if (!userId) {
                 const savedUserId = localStorage.getItem('localUserId');
                 if (savedUserId) {
@@ -383,7 +474,6 @@
                 }
             }
             
-            // Загружаем статистику пользователя
             const userKey = `user_${userId}`;
             let savedUser = localStorage.getItem(userKey);
             
@@ -407,11 +497,9 @@
                     withdrawals: 0
                 };
             }
-            
             return currentUser;
         }
         
-        // Сохранение пользователя
         function saveUser() {
             const userKey = `user_${currentUser.id}`;
             localStorage.setItem(userKey, JSON.stringify({
@@ -422,131 +510,133 @@
             }));
         }
         
-        // Рандомный аватар из 1-5.png
         function getRandomAvatar() {
             const randomNum = Math.floor(Math.random() * 5) + 1;
             return `${randomNum}.png`;
         }
         
-        // Загрузка аватара с проверкой существования
         function loadAvatar(imgElement, avatarName) {
             if (!avatarName) {
                 avatarName = getRandomAvatar();
                 currentUser.avatar = avatarName;
                 saveUser();
             }
-            
-            const testImg = new Image();
-            testImg.onload = () => {
-                imgElement.src = avatarName;
+            imgElement.src = avatarName;
+            imgElement.onerror = () => {
+                imgElement.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%23FFD966"/%3E%3Ccircle cx="35" cy="40" r="8" fill="white"/%3E%3Ccircle cx="65" cy="40" r="8" fill="white"/%3E%3Ccircle cx="32" cy="37" r="3" fill="black"/%3E%3Ccircle cx="62" cy="37" r="3" fill="black"/%3E%3Cpath d="M35 65 Q50 75 65 65" fill="%23663300"/%3E%3C/svg%3E';
             };
-            testImg.onerror = () => {
-                // Если файл не найден, генерируем canvas аватар
-                generateCanvasAvatar(imgElement);
-            };
-            testImg.src = avatarName;
         }
         
-        // Генерация аватарки на canvas (запасной вариант)
-        function generateCanvasAvatar(imgElement) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 100;
-            canvas.height = 100;
-            const ctx = canvas.getContext('2d');
-            
-            const colors = ['#FFD966', '#66FF99', '#66CCFF', '#FF99CC', '#FF9966'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            
-            ctx.fillStyle = randomColor;
-            ctx.beginPath();
-            ctx.arc(50, 50, 48, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.arc(30, 35, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(70, 35, 10, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(27, 32, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(67, 32, 3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#663300';
-            ctx.beginPath();
-            ctx.arc(50, 65, 15, 0, Math.PI);
-            ctx.fill();
-            
-            imgElement.src = canvas.toDataURL();
-        }
-        
-        // Обновление профиля в модальном окне
         function updateProfileModal() {
             document.getElementById('profileName').textContent = currentUser.name;
             document.getElementById('profileId').textContent = `ID: ${currentUser.id}`;
             document.getElementById('statGames').textContent = currentUser.gamesPlayed;
             document.getElementById('statDeposits').textContent = `$${currentUser.deposits.toFixed(2)}`;
             document.getElementById('statWithdrawals').textContent = `$${currentUser.withdrawals.toFixed(2)}`;
-            
             loadAvatar(document.getElementById('profileAvatar'), currentUser.avatar);
         }
         
-        // Смена аватара
         function changeAvatar() {
             const newAvatar = getRandomAvatar();
             currentUser.avatar = newAvatar;
             saveUser();
-            
-            // Обновляем аватар в меню и в профиле
             loadAvatar(document.getElementById('ava'), currentUser.avatar);
             loadAvatar(document.getElementById('profileAvatar'), currentUser.avatar);
-            
-            console.log(`Avatar changed to: ${newAvatar}`);
         }
         
-        // Показать профиль
         function showProfile() {
             updateProfileModal();
             document.getElementById('profileModal').style.display = 'flex';
         }
         
-        // Скрыть профиль
         function hideProfile() {
             document.getElementById('profileModal').style.display = 'none';
         }
         
-        // Обработка действий кнопок
         function handleAction(action) {
-            console.log(`Action: ${action}`);
-            
             switch(action) {
                 case 'fastgame':
                     currentUser.gamesPlayed++;
                     saveUser();
-                    alert(`🎮 Fast Game started!\nGames played: ${currentUser.gamesPlayed}`);
-                    break;
-                case 'slots':
-                    alert('🎰 Slots game - Coming soon!');
-                    break;
-                case 'bonus':
-                    alert('🎁 Bonus - Coming soon!');
                     break;
                 case 'profile':
                     showProfile();
                     break;
+                case 'slots':
+                case 'bonus':
                 case 'fight':
-                    alert('⚔️ Fight mode - Coming soon!');
                     break;
-                default:
-                    console.log('Unknown action');
             }
         }
+        
+        // ЭФФЕКТЫ ПЛЕНКИ - РЕЗКИЕ ПОЯВЛЕНИЯ И ИСЧЕЗНОВЕНИЯ
+        function addRandomEffect() {
+            const container = document.getElementById('film-chaos');
+            const type = Math.floor(Math.random() * 4);
+            
+            if (type === 0) {
+                // ТОЧКИ
+                const count = Math.floor(Math.random() * 15) + 5;
+                for(let i = 0; i < count; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dust-flash';
+                    const size = Math.random() * 8 + 2;
+                    dot.style.width = size + 'px';
+                    dot.style.height = size + 'px';
+                    dot.style.left = Math.random() * 100 + '%';
+                    dot.style.top = Math.random() * 100 + '%';
+                    dot.style.background = `rgba(255,255,255,${Math.random() * 0.8 + 0.2})`;
+                    container.appendChild(dot);
+                    setTimeout(() => dot.remove(), 80);
+                }
+            } 
+            else if (type === 1) {
+                // ЦАРАПИНЫ
+                const count = Math.floor(Math.random() * 3) + 1;
+                for(let i = 0; i < count; i++) {
+                    const scratch = document.createElement('div');
+                    scratch.className = 'scratch-flash';
+                    scratch.style.left = Math.random() * 100 + '%';
+                    scratch.style.width = Math.random() * 4 + 1 + 'px';
+                    scratch.style.height = Math.random() * 80 + 20 + '%';
+                    scratch.style.top = Math.random() * 60 + 20 + '%';
+                    scratch.style.background = `rgba(255,255,255,${Math.random() * 0.6 + 0.2})`;
+                    container.appendChild(scratch);
+                    setTimeout(() => scratch.remove(), 100);
+                }
+            }
+            else if (type === 2) {
+                // ПОЛОСКИ СВЕРХУ ВНИЗ
+                const stripe = document.createElement('div');
+                stripe.className = 'stripe-flash';
+                stripe.style.left = Math.random() * 100 + '%';
+                stripe.style.width = Math.random() * 10 + 2 + 'px';
+                stripe.style.height = '100%';
+                stripe.style.top = '0';
+                stripe.style.background = `rgba(255,255,255,${Math.random() * 0.7 + 0.2})`;
+                container.appendChild(stripe);
+                setTimeout(() => stripe.remove(), 70);
+            }
+            else {
+                // ВСПЫШКА НА ВСЕМ ЭКРАНЕ
+                const flash = document.createElement('div');
+                flash.className = 'full-flash';
+                flash.style.background = `rgba(255,255,255,${Math.random() * 0.25 + 0.05})`;
+                document.body.appendChild(flash);
+                setTimeout(() => flash.remove(), 50);
+            }
+        }
+        
+        // ЗАПУСК ЭФФЕКТОВ В РАНДОМНЫЕ МОМЕНТЫ
+        function scheduleRandomEffect() {
+            const delay = Math.random() * 800 + 200;
+            setTimeout(() => {
+                addRandomEffect();
+                scheduleRandomEffect();
+            }, delay);
+        }
+        
+        scheduleRandomEffect();
         
         // МУЗЫКА
         const m1 = document.getElementById('music1');
@@ -563,10 +653,7 @@
                 m1.play().then(() => {
                     audioStarted = true;
                     currentMusic = 'm1';
-                    console.log('Music started');
-                }).catch(e => {
-                    console.log('Autoplay blocked');
-                });
+                }).catch(e => {});
             }
         }
         
@@ -575,8 +662,7 @@
                 m1.pause();
                 m2.play().then(() => {
                     currentMusic = 'm2';
-                    console.log('Switched to music 2');
-                }).catch(e => console.log('Could not switch'));
+                }).catch(e => {});
             }
         }
         
@@ -584,66 +670,12 @@
         document.body.addEventListener('click', initAudio);
         document.body.addEventListener('touchstart', initAudio);
         
-        // ЭФФЕКТЫ ПЛЕНКИ
-        function triggerFilm() {
-            const film = document.getElementById('film-chaos');
-            film.innerHTML = '';
-            
-            const dustCount = Math.floor(Math.random() * 4) + 3;
-            for(let i = 0; i < dustCount; i++) {
-                const d = document.createElement('div');
-                d.className = 'dust';
-                const s = Math.random() * 6 + 2;
-                d.style.cssText = `
-                    width: ${s}px;
-                    height: ${s}px;
-                    left: ${Math.random() * 100}%;
-                    top: ${Math.random() * 100}%;
-                    animation-duration: ${Math.random() * 0.8 + 0.6}s;
-                `;
-                film.appendChild(d);
-            }
-            
-            if (Math.random() > 0.7) {
-                const sc = document.createElement('div');
-                sc.className = 'scratch';
-                sc.style.left = Math.random() * 100 + '%';
-                sc.style.height = Math.random() * 60 + 20 + '%';
-                sc.style.top = Math.random() * 40 + 20 + '%';
-                sc.style.animationDuration = (Math.random() * 0.8 + 0.7) + 's';
-                film.appendChild(sc);
-            }
-            
-            setTimeout(() => {
-                if (film.children.length > 20) film.innerHTML = '';
-            }, 1000);
-        }
-        
-        setInterval(triggerFilm, Math.random() * 400 + 800);
-        
-        setInterval(() => {
-            if (Math.random() > 0.8) {
-                const flicker = document.createElement('div');
-                flicker.style.cssText = `
-                    position: fixed;
-                    inset: 0;
-                    background: rgba(255,255,255,0.03);
-                    pointer-events: none;
-                    z-index: 520;
-                    animation: fadeOut 0.3s ease-out forwards;
-                `;
-                document.body.appendChild(flicker);
-                setTimeout(() => flicker.remove(), 300);
-            }
-        }, 2000);
-        
         // ЗАГРУЗКА
         let p = 0;
         const loadInt = setInterval(() => {
             p += 1.43;
             const bar = document.getElementById('bar');
             if (bar) bar.style.width = Math.min(p, 100) + '%';
-            
             if (p >= 100) {
                 clearInterval(loadInt);
                 finishLoading();
@@ -652,11 +684,7 @@
         
         function finishLoading() {
             switchToMusic2();
-            
-            // Инициализируем пользователя
             getOrCreateUser();
-            
-            // Загружаем аватар
             loadAvatar(document.getElementById('ava'), currentUser.avatar);
             
             const loadingScreen = document.getElementById('loading-screen');
@@ -666,13 +694,10 @@
                 loadingScreen.style.display = 'none';
                 const mainMenu = document.getElementById('main-menu');
                 mainMenu.style.display = 'block';
-                setTimeout(() => {
-                    mainMenu.style.opacity = '1';
-                }, 50);
             }, 500);
         }
         
-        // НАСТРОЙКА ОБРАБОТЧИКОВ
+        // ОБРАБОТЧИКИ
         document.querySelectorAll('.menu-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -681,28 +706,14 @@
             });
         });
         
-        document.getElementById('avatarBtn').addEventListener('click', () => {
-            showProfile();
-        });
-        
-        document.getElementById('profileAvatarBtn').addEventListener('click', () => {
-            changeAvatar();
-            updateProfileModal();
-        });
-        
+        document.getElementById('avatarBtn').addEventListener('click', () => showProfile());
+        document.getElementById('profileAvatarBtn').addEventListener('click', () => changeAvatar());
         document.getElementById('closeProfile').addEventListener('click', hideProfile);
-        
-        // Закрытие по клику вне окна
         document.getElementById('profileModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('profileModal')) {
-                hideProfile();
-            }
+            if (e.target === document.getElementById('profileModal')) hideProfile();
         });
         
-        m1.addEventListener('error', () => console.log('music.mp3 not found'));
-        m2.addEventListener('error', () => console.log('music2.mp3 not found'));
-        
-        console.log('App loaded - v1.0.9');
+        console.log('Rubber Hose Style - v2.0');
     </script>
 </body>
 </html>
