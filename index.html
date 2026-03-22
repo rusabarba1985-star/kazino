@@ -1,265 +1,139 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cartoon Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartoon Game</title>
+    <style>
+        :root { --bg-color: #050505; --text-color: #fff; }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--bg-color); color: var(--text-color); 
+            font-family: 'Georgia', serif; /* Возвращен стандартный винтажный шрифт */
+            overflow: hidden; 
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+        /* ЭФФЕКТЫ ГРЯЗНОЙ ПЛЕНКИ */
+        .noise { position: fixed; inset: 0; opacity: 0.08; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
+        .dust { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
+        .scratch { position: absolute; background: rgba(255,255,255,0.2); width: 1.5px; height: 100%; }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, black 140%); z-index: 510; pointer-events: none; }
 
-<style>
-:root { --bg:#050505; --text:#fff; }
+        /* ЭКРАН ЗАГРУЗКИ */
+        #loading-screen { 
+            position: fixed; inset: 0; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; 
+        }
+        .title { 
+            font-size: 3.5rem; text-align: center; text-transform: uppercase; 
+            font-weight: 900; margin: 0; line-height: 0.9;
+            animation: rubber-jump 1s infinite ease-in-out;
+        }
+        .bar-wrap { width: 200px; height: 4px; background: #222; margin-top: 40px; }
+        #bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 10px #fff; }
 
-body,html{
-margin:0;height:100%;background:var(--bg);color:#fff;
-font-family:'Luckiest Guy',cursive;overflow:hidden;
-}
+        /* ГЛАВНОЕ МЕНЮ */
+        #main-menu { display: none; width: 100%; height: 100%; position: relative; z-index: 50; }
+        .avatar { 
+            position: absolute; top: 20px; right: 20px; 
+            width: 60px; height: 60px; border: 3px solid #fff; 
+            border-radius: 50%; overflow: hidden; background: #111;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ПЛЕНКА */
-.noise{
-position:fixed;inset:0;opacity:0.12;
-filter:contrast(180%);
-background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-pointer-events:none;
-}
-
-/* LOADING */
-#loading{
-position:fixed;inset:0;display:flex;flex-direction:column;
-align-items:center;justify-content:center;
-}
-.title{
-font-size:3rem;
-animation:rubber 1s infinite;
-text-shadow:4px 4px #333;
-}
-@keyframes rubber{
-0%,100%{transform:scale(1)}
-50%{transform:scale(1.1,.9)}
-}
-
-/* MENU */
-#menu{display:none;height:100%;}
-.menu-buttons{
-position:absolute;bottom:30px;width:100%;
-display:flex;justify-content:center;gap:15px;
-}
-.menu-btn{
-background:none;border:none;color:white;
-font-size:1rem;cursor:pointer;
-text-shadow:2px 2px #333;
-transition:.2s;
-}
-.menu-btn:hover{transform:scale(1.1);}
-
-.avatar{
-position:absolute;top:20px;right:20px;
-width:60px;height:60px;border-radius:50%;
-border:2px solid white;cursor:pointer;
-}
-
-/* FAST PANEL */
-#fastPanel{
-position:absolute;bottom:80px;left:50%;
-transform:translateX(-50%) scaleY(0);
-transform-origin:bottom;
-background:#111;padding:10px 20px;
-border:2px solid white;border-radius:10px;
-display:flex;gap:10px;transition:.3s;
-}
-
-/* MODAL */
-.modal{
-position:fixed;inset:0;background:rgba(0,0,0,.8);
-display:none;justify-content:center;align-items:center;
-}
-.modal-content{
-background:#111;padding:20px;border-radius:15px;
-text-align:center;
-}
-
-/* DICE */
-#cube{
-width:80px;height:80px;background:white;color:black;
-display:flex;align-items:center;justify-content:center;
-font-size:30px;margin:auto;border-radius:10px;
-}
-
-.grid{
-display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
-margin-top:10px;
-}
-
-/* RESULT */
-.result{
-position:fixed;inset:0;background:rgba(0,0,0,.7);
-display:flex;justify-content:center;align-items:center;
-}
-.result-box{
-background:#111;padding:20px;border-radius:15px;
-animation:rubber .5s infinite alternate;
-}
-</style>
-
+        @keyframes rubber-jump {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scaleY(1.1) scaleX(0.95) translateY(-20px); }
+        }
+    </style>
 </head>
+<body onclick="tryPlayMusic()">
 
-<body>
+    <div class="noise"></div>
+    <div class="vignette"></div>
+    <div id="film-chaos"></div>
 
-<div class="noise"></div>
+    <!-- Загрузка -->
+    <div id="loading-screen">
+        <h1 class="title">CARTOON<br>GAME</h1>
+        <div class="bar-wrap"><div id="bar"></div></div>
+    </div>
 
-<div id="loading">
-<div class="title">CARTOON GAME</div>
-</div>
+    <!-- Меню -->
+    <div id="main-menu">
+        <div class="avatar"><img id="ava" src="" alt=""></div>
+    </div>
 
-<div id="menu">
+    <audio id="bgMusic" loop src="music.mp3"></audio>
 
-<img id="avatar" class="avatar">
+    <script src="https://telegram.org"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-<div id="fastPanel">
-<button class="menu-btn" onclick="openDice()">Dice</button>
-</div>
+        const audio = document.getElementById('bgMusic');
+        const film = document.getElementById('film-chaos');
+        const bar = document.getElementById('bar');
+        let musicStarted = false;
 
-<div class="menu-buttons">
-<button class="menu-btn" onclick="toggleFast()">Fast Game</button>
-<button class="menu-btn">Slots</button>
-<button class="menu-btn">Bonus</button>
-<button class="menu-btn" onclick="openStat()">Stat</button>
-<button class="menu-btn">Fight</button>
-</div>
+        // Попытка запустить музыку при клике
+        function tryPlayMusic() {
+            if (!musicStarted) {
+                audio.play().then(() => { musicStarted = true; }).catch(e => console.log(e));
+            }
+        }
 
-</div>
+        // 1. ГРЯЗНАЯ ПЛЕНКА (РИТМ 1 СЕК)
+        function triggerChaos() {
+            film.innerHTML = '';
+            for(let i=0; i<5; i++) {
+                const d = document.createElement('div');
+                d.className = 'dust';
+                const s = Math.random()*6+2;
+                d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%`;
+                film.appendChild(d);
+            }
+            const sc = document.createElement('div');
+            sc.className = 'scratch';
+            sc.style.left = Math.random()*100+'%';
+            film.appendChild(sc);
+            setTimeout(() => { film.innerHTML = ''; }, 100);
+        }
+        setInterval(triggerChaos, 1000);
 
-<!-- STAT -->
+        // 2. ЗАГРУЗКА (7 СЕКУНД)
+        let prog = 0;
+        const loadInterval = setInterval(() => {
+            prog += 1.43; 
+            bar.style.width = prog + '%';
+            if (prog >= 100) {
+                clearInterval(loadInterval);
+                finishLoading();
+            }
+        }, 100);
 
-<div id="stat" class="modal">
-<div class="modal-content">
-<h2>STAT</h2>
-<button class="menu-btn">Deposit</button>
-<button class="menu-btn">Withdraw</button>
-</div>
-</div>
+        function finishLoading() {
+            audio.pause(); 
+            audio.currentTime = 0;
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
 
-<!-- DICE -->
-
-<div id="dice" class="modal">
-<div class="modal-content">
-
-<div id="cube">?</div>
-
-<div class="grid">
-<button onclick="bet('even')" class="menu-btn">even</button>
-<button onclick="bet('odd')" class="menu-btn">odd</button>
-<button onclick="bet(1)" class="menu-btn">1</button>
-<button onclick="bet(2)" class="menu-btn">2</button>
-<button onclick="bet(3)" class="menu-btn">3</button>
-<button onclick="bet(4)" class="menu-btn">4</button>
-<button onclick="bet(5)" class="menu-btn">5</button>
-<button onclick="bet(6)" class="menu-btn">6</button>
-</div>
-
-<div style="margin-top:10px;display:flex;justify-content:space-between;">
-<button onclick="undo()" class="menu-btn">←</button>
-<div onclick="chip()" id="chip" class="menu-btn">0.1$</div>
-</div>
-
-</div>
-</div>
-
-<script>
-
-/* LOAD */
-setTimeout(()=>{
-document.getElementById('loading').style.display='none';
-document.getElementById('menu').style.display='block';
-initUser();
-},1500);
-
-/* USER */
-let user={games:0,money:1000,avatar:null};
-let chips=[0.1,0.5,1,5,10];
-let chipIndex=0;
-let history=[];
-
-/* AVATAR */
-function randAvatar(){
-return "https://api.dicebear.com/7.x/fun-emoji/svg?seed="+Math.random();
-}
-function initUser(){
-user.avatar=randAvatar();
-document.getElementById('avatar').src=user.avatar;
-}
-
-/* FAST */
-let open=false;
-function toggleFast(){
-open=!open;
-document.getElementById('fastPanel').style.transform=
-open?'translateX(-50%) scaleY(1)':'translateX(-50%) scaleY(0)';
-}
-
-/* MODALS */
-function openDice(){document.getElementById('dice').style.display='flex';}
-function openStat(){document.getElementById('stat').style.display='flex';}
-
-/* CHIP */
-function chip(){
-chipIndex=(chipIndex+1)%chips.length;
-document.getElementById('chip').innerText=chips[chipIndex]+'$';
-}
-
-/* BET */
-function bet(type){
-let amount=chips[chipIndex];
-history.push({type,amount});
-
-setTimeout(()=>roll(type,amount),3000);
-}
-
-function undo(){history.pop();}
-
-/* ROLL */
-function roll(type,amount){
-let d=Math.floor(Math.random()*6)+1;
-document.getElementById('cube').innerText=d;
-
-let win=false;
-
-if(type==='even') win=d%2===0;
-else if(type==='odd') win=d%2!==0;
-else win=d===type;
-
-if(win){
-let mult=(type==='even'||type==='odd')?2:3.5;
-let winAmount=amount*mult;
-user.money+=winAmount;
-show(true,winAmount);
-}else{
-show(false,0);
-}
-
-user.games++;
-}
-
-/* RESULT */
-function show(win,amount){
-let div=document.createElement('div');
-div.className='result';
-
-let texts=["Nice try","No luck","Not your day"];
-
-div.innerHTML=`
-<div class="result-box">
-<img src="${win?'Dicewin.gif':'Dicelose.gif'}" width="120"><br>
-${win?amount+'$':texts[Math.floor(Math.random()*texts.length)]}
-</div>`;
-
-document.body.appendChild(div);
-
-setTimeout(()=>div.remove(),2000);
-}
-
-</script>
-
+            const img = document.getElementById('ava');
+            const user = tg.initDataUnsafe?.user;
+            
+            if (user && user.photo_url) {
+                img.src = user.photo_url;
+            } else {
+                let saved = localStorage.getItem('userAva');
+                if(!saved) {
+                    saved = Math.floor(Math.random() * 3) + 1 + '.png';
+                    localStorage.setItem('userAva', saved);
+                }
+                img.src = saved;
+            }
+        }
+    </script>
 </body>
 </html>
