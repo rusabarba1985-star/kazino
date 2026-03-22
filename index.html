@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cartoon Game - Noir Pro Roulette</title>
+    <title>Cartoon Game - Pro Noir Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
 
@@ -16,81 +16,68 @@
 
         body, html { margin:0; padding:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:var(--font); overflow:hidden; user-select:none; }
 
+        /* ЭФФЕКТЫ ПЛЕНКИ */
         .noise { position:fixed; inset:0; opacity:0.12; pointer-events:none; z-index:2000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         .vignette { position:fixed; inset:0; background:radial-gradient(circle, transparent 20%, black 150%); z-index:2001; pointer-events:none; }
 
         .btn-cartoon { background:#000; color:#fff; border:4px solid #fff; padding:8px 15px; font-family:var(--font); font-size:0.8rem; border-radius:15px; cursor:pointer; text-transform:uppercase; box-shadow:0 4px 0 #333; transition:0.3s var(--spring); }
+        .btn-cartoon:active { transform:scale(0.9); }
 
         /* ЭКРАНЫ */
-        .modal { position:fixed; inset:0; background:#000; display:none; flex-direction:column; z-index:800; }
+        .modal { position:fixed; inset:0; background:#000; display:none; flex-direction:column; z-index:800; overflow:hidden; }
         .modal.show { display:flex; }
 
+        /* РУЛЕТКА */
         .roulette-screen { position:relative; height:100%; display:flex; flex-direction:column; overflow:hidden; }
-        
-        /* Таймер: Слева на ПК, Слева вверху на телефоне */
-        .timer-val { position: absolute; z-index: 1000; color: #ff0; text-shadow: 3px 3px 0 #000; pointer-events: none; }
+        .timer-val { position: absolute; z-index: 1000; color: #ff0; text-shadow: 3px 3px 0 #000; }
         @media (min-width: 1024px) { .timer-val { left: 50px; top: 50%; transform: translateY(-50%); font-size: 5rem; } }
         @media (max-width: 1023px) { .timer-val { left: 20px; top: 20px; font-size: 2.5rem; } }
 
-        .roulette-header { display:flex; justify-content:space-between; padding:15px; z-index:100; align-items: center; }
-
         .wheel-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
-        .mickey-side { width:80px; height:100px; position:absolute; left:10px; bottom:150px; background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><circle cx="50" cy="50" r="30" fill="white" stroke="black" stroke-width="4"/><circle cx="25" cy="25" r="15" fill="black"/><circle cx="75" cy="25" r="15" fill="black"/><ellipse cx="40" cy="45" rx="5" ry="8" fill="black"/><ellipse cx="60" cy="45" rx="5" ry="8" fill="black"/><path d="M35 70 Q50 85 65 70" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/></svg>') no-repeat center; animation: bounce 0.5s infinite alternate; z-index: 5; }
-        @keyframes bounce { from { transform:translateY(0); } to { transform:translateY(-10px); } }
-
-        /* КОЛЕСО */
         .wheel-wrap { position:relative; border:10px solid #fff; border-radius:50%; box-shadow:0 0 40px rgba(255,255,255,0.2); z-index: 2; }
-        @media (min-width: 1024px) { .wheel-wrap { width: 450px; height: 450px; } }
-        @media (max-width: 1023px) { .wheel-wrap { width: 300px; height: 300px; } }
-        
-        #wheel { width:100%; height:100%; border-radius:50%; transition:transform 4s cubic-bezier(0.1, 0, 0.1, 1); background:#222; position: relative; }
-        
-        /* СТРЕЛКА НАД КОЛЕСОМ */
+        @media (min-width: 1024px) { .wheel-wrap { width: 420px; height: 420px; } }
+        @media (max-width: 1023px) { .wheel-wrap { width: 280px; height: 280px; } }
+        #wheel { width:100%; height:100%; border-radius:50%; transition:transform 4s cubic-bezier(0.1, 0, 0.1, 1); background:#222; }
         .wheel-ptr { position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:30px; height:40px; background:#fff; clip-path:polygon(50% 100%, 0 0, 100% 0); z-index:10; border: 2px solid #000; }
 
-        /* СТОЛ СТАВОК (ПЕРЕКРЫВАЕТ КОЛЕСО) */
-        .bet-board { 
-            position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.9); border-top:6px solid #fff; 
-            border-radius:40px 40px 0 0; transition: transform 0.6s var(--spring); 
-            padding:10px 5px 120px; box-sizing:border-box; z-index:150;
-            transform: translateY(100%);
-        }
-        .bet-board.active { transform: translateY(10%); /* Выше, перекрывая колесо */ }
-        
-        /* Сетка как на картинке */
+        /* СТОЛ РУЛЕТКИ */
+        .bet-board { position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.95); border-top:6px solid #fff; border-radius:40px 40px 0 0; transition: 0.6s var(--spring); padding:10px 5px 130px; box-sizing:border-box; z-index:150; transform: translateY(105%); }
+        .bet-board.active { transform: translateY(15%); }
         .board-layout { display:flex; gap:5px; justify-content:center; max-width:450px; margin:0 auto; transform: scale(0.85); transform-origin: top; }
         .num-grid-container { display: flex; flex-direction: column; flex: 1; }
         .num-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; }
-        .side-panel { display:flex; flex-direction:column; gap:4px; width:70px; }
-        .column-bets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 4px; }
-
-        .cell { height:38px; border:2px solid #fff; border-radius:8px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; font-size:0.9rem; transition: 0.1s; }
-        .cell.green { background:var(--green); border-radius: 40% 40% 0 0; height:45px; font-size: 1.3rem; margin-bottom: 4px; }
+        .cell { height:38px; border:2px solid #fff; border-radius:8px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; font-size:0.9rem; }
+        .cell.green { background:var(--green); border-radius: 40% 40% 0 0; height:45px; font-size:1.3rem; margin-bottom:4px; grid-column: span 3; }
         .cell.red { background:var(--red); }
         .cell.black { background:var(--black); }
-        .cell.outside { background:#111; font-size:0.6rem; height:45px; text-transform: uppercase; }
-        .cell.col-bet { background: #222; font-size: 0.7rem; height: 35px; }
+        .cell.outside { background:#111; font-size:0.6rem; height:45px; width:70px; }
 
-        .chip-on-board { position:absolute; width:24px; height:24px; background:#fff; border:2px solid #000; border-radius:50%; color:#000; font-size:8px; display:flex; align-items:center; justify-content:center; z-index:10; pointer-events:none; }
+        /* DICE MODAL */
+        .dice-container { background:#0a0a0a; border:8px solid #fff; border-radius:50px; width:90%; max-width:400px; padding:40px 20px; text-align:center; transform: scale(1); }
+        #the-dice { width:110px; height:110px; background:#fff; border:8px solid #000; border-radius:20px; color:#000; font-size:4.5rem; display:flex; align-items:center; justify-content:center; margin:0 auto 30px; box-shadow: 0 10px 0 #ccc; }
+        .dice-anim { animation: dice-toss 1s var(--soft); }
+        @keyframes dice-toss { 0% { transform:translateY(0) rotate(0); } 30% { transform:translateY(-150px) rotate(180deg) scale(1.2); } 60% { transform:translateY(10px) rotate(300deg) scale(0.9,1.1); } 100% { transform:translateY(0) rotate(360deg) scale(1); } }
 
-        /* УПРАВЛЕНИЕ */
+        .dice-bets { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin:20px 0; }
+        .d-btn { background:#000; border:4px solid #fff; color:#fff; border-radius:15px; padding:10px 0; font-family:var(--font); cursor:pointer; font-size:1rem; position:relative; }
+        .d-btn.selected { background:#fff; color:#000; }
+
+        /* УПРАВЛЕНИЕ СТАВКАМИ */
         .controls { position:fixed; bottom:95px; right:20px; display:flex; flex-direction:column; align-items:center; gap:12px; z-index:200; }
         .undo-btn { width:55px; height:55px; background:#fff; color:#000; border:4px solid #000; border-radius:50%; font-size:2.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 0 #333; }
-        
         .chip-sel { width:80px; height:80px; background:#111; border:5px solid #fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
         .chip-sel::after { content:''; position:absolute; inset:0; border:8px dashed #fff; border-radius:50%; }
-        
         .sub-chip-list { position:absolute; bottom:0; left:0; width:100%; height:100%; pointer-events:none; }
         .sub-chip { position:absolute; width:60px; height:60px; border:4px solid #fff; border-radius:50%; background:#222; display:flex; align-items:center; justify-content:center; opacity:0; transition:0.5s var(--spring); transform:scale(0); font-size:0.8rem; pointer-events:auto; }
         .active .sub-chip { opacity:1; transform:scale(1); }
 
-        .win-stats-feed { position:absolute; top:85px; left:50%; transform: translateX(-50%); font-size:0.9rem; color:#ffd966; text-align:center; width:100%; z-index: 10; }
+        .chip-on-board { position:absolute; width:26px; height:26px; background:#fff; border:2px solid #000; border-radius:50%; color:#000; font-size:8px; display:flex; align-items:center; justify-content:center; z-index:10; pointer-events:none; }
 
-        #res-pop { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:#fff; border:8px solid #000; border-radius:30px; padding:25px; z-index:3000; text-align:center; color:#000; transition:0.6s var(--spring); width:240px; }
+        /* РЕЗУЛЬТАТ */
+        #res-pop { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:#fff; border:8px solid #000; border-radius:35px; padding:25px; z-index:3000; text-align:center; color:#000; transition:0.6s var(--spring); width:260px; }
         #res-pop img { width:150px; height:150px; border:5px solid #000; border-radius:20px; object-fit:cover; margin-bottom:15px; }
-        #res-pop.show { transform:translate(-50%,-50%) scale(1); }
 
-        .menu-bar { position:fixed; bottom:20px; width:100%; display:flex; justify-content:center; gap:8px; z-index:100; padding:0 10px; box-sizing:border-box; }
+        .menu-bar { position:fixed; bottom:20px; width:100%; display:flex; justify-content:center; gap:8px; z-index:100; }
         #fast-game-sub { position:fixed; bottom:85px; left:50%; transform:translateX(-50%) scale(0); background:#000; border:5px solid #fff; border-radius:20px; padding:10px; display:flex; gap:10px; transition:0.4s var(--spring); transform-origin:bottom; z-index:100; }
         #fast-game-sub.active { transform:translateX(-50%) scale(1); }
     </style>
@@ -100,8 +87,7 @@
     <div class="noise"></div>
     <div class="vignette"></div>
 
-    <audio id="music1" loop><source src="music.mp3" type="audio/mpeg"></audio>
-    <audio id="music2" loop><source src="music2.mp3" type="audio/mpeg"></audio>
+    <audio id="music2" loop preload="auto"><source src="music2.mp3" type="audio/mpeg"></audio>
 
     <div id="loading-screen" style="position:fixed; inset:0; background:#000; z-index:2000; display:flex; flex-direction:column; justify-content:center; align-items:center;">
         <h1 style="font-size:4rem; text-align:center;">CARTOON<br>GAME</h1>
@@ -114,12 +100,32 @@
     <div id="main-menu" style="display:none; height:100vh;">
         <div style="display:flex; justify-content:space-between; padding:20px; align-items:center;">
             <div style="font-size:2.2rem;">$<span id="bal-val">1000</span></div>
-            <div id="avaBtn" style="width:70px; height:70px; border:5px solid #fff; border-radius:50%; overflow:hidden; cursor:pointer;"><img id="m-ava" src="" style="width:100%; height:100%; object-fit:cover;"></div>
+            <div id="avaBtn" onclick="changeAva()" style="width:70px; height:70px; border:5px solid #fff; border-radius:50%; overflow:hidden; cursor:pointer;"><img id="m-ava" src="" style="width:100%; height:100%; object-fit:cover;"></div>
         </div>
-        <div id="fast-game-sub"><button class="btn-cartoon" id="openRoulette">ROULETTE</button><button class="btn-cartoon" id="openDice">DICE</button></div>
+        <div id="fast-game-sub">
+            <button class="btn-cartoon" onclick="openRoulette()">ROULETTE</button>
+            <button class="btn-cartoon" onclick="showModal('diceModal')">DICE</button>
+        </div>
         <div class="menu-bar">
             <button class="btn-cartoon" id="fastGameBtn">FAST GAME</button>
-            <button class="btn-cartoon">SLOTS</button><button class="btn-cartoon">BONUS</button><button class="btn-cartoon" id="statBtn">STAT</button>
+            <button class="btn-cartoon">SLOTS</button>
+            <button class="btn-cartoon">BONUS</button>
+            <button class="btn-cartoon" onclick="showModal('statModal')">STAT</button>
+        </div>
+    </div>
+
+    <!-- DICE MODAL -->
+    <div id="diceModal" class="modal" style="justify-content:center; align-items:center; background:rgba(0,0,0,0.96);">
+        <div class="dice-container">
+            <h2 style="font-size:2rem; margin:0 0 20px;">LUCKY DICE</h2>
+            <div id="the-dice">?</div>
+            <div class="dice-bets">
+                <button class="d-btn" data-bet="even">EVEN</button><button class="d-btn" data-bet="odd">ODD</button>
+                <button class="d-btn" data-bet="1">1</button><button class="d-btn" data-bet="2">2</button>
+                <button class="d-btn" data-bet="3">3</button><button class="d-btn" data-bet="4">4</button>
+                <button class="d-btn" data-bet="5">5</button><button class="d-btn" data-bet="6">6</button>
+            </div>
+            <button class="btn-cartoon" style="width:100%;" onclick="hideModal('diceModal')">CLOSE</button>
         </div>
     </div>
 
@@ -129,37 +135,18 @@
             <div class="timer-val" id="roulTimer">10</div>
             <div class="roulette-header">
                 <div style="font-size: 1.8rem;">$<span id="roul-bal">1000</span></div>
-                <button class="btn-cartoon" onclick="exitRoul()">EXIT</button>
+                <button class="btn-cartoon" onclick="hideModal('rouletteModal')">EXIT</button>
             </div>
-            <div class="win-stats-feed" id="roulFeed"></div>
+            <div id="roulFeed" style="position:absolute; top:85px; width:100%; text-align:center; color:#ffd966; font-size:0.9rem;"></div>
             <div class="wheel-area">
-                <div class="mickey-side"></div>
                 <div class="wheel-wrap">
                     <div class="wheel-ptr"></div>
                     <div id="wheel"></div>
                 </div>
             </div>
-
-            <!-- УПРАВЛЕНИЕ -->
-            <div class="controls">
-                <button class="undo-btn" id="undoBet">↩</button>
-                <div class="chip-sel" id="mainChip">
-                    <span id="curBetTxt">$0.1</span>
-                    <div class="sub-chip-list" id="radialChips">
-                        <div class="sub-chip" data-val="0.1">$0.1</div>
-                        <div class="sub-chip" data-val="0.5">$0.5</div>
-                        <div class="sub-chip" data-val="1">$1</div>
-                        <div class="sub-chip" data-val="5">$5</div>
-                        <div class="sub-chip" data-val="10">$10</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ПОЛЕ СТАВОК (ДИЗАЙН С ФОТО) -->
             <div class="bet-board active" id="betBoard">
                 <div class="board-layout">
-                    <!-- Левая вертикальная панель -->
-                    <div class="side-panel">
+                    <div style="display:flex; flex-direction:column; gap:4px;">
                         <div class="cell outside" data-target="1-18">1to18</div>
                         <div class="cell outside" data-target="even">EVEN</div>
                         <div class="cell outside" style="background:var(--red)" data-target="red">RED</div>
@@ -167,31 +154,95 @@
                         <div class="cell outside" data-target="odd">ODD</div>
                         <div class="cell outside" data-target="19-36">19to36</div>
                     </div>
-                    <!-- Центральная сетка -->
                     <div class="num-grid-container">
                         <div class="cell green" data-target="0">0</div>
                         <div class="num-grid" id="numGrid"></div>
-                        <!-- Нижние ставки -->
-                        <div class="column-bets">
-                            <div class="cell col-bet" data-target="col1">2to1</div>
-                            <div class="cell col-bet" data-target="col2">2to1</div>
-                            <div class="cell col-bet" data-target="col3">2to1</div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="res-pop"><img id="res-img" src="" alt=""><div id="res-txt">WIN!</div></div>
+    <!-- ОБЩИЕ ЭЛЕМЕНТЫ -->
+    <div class="controls" id="globalControls">
+        <button class="undo-btn" id="undoBtn">↩</button>
+        <div class="chip-sel" id="mainChip">
+            <span id="curBetTxt">$0.1</span>
+            <div class="sub-chip-list" id="radialChips">
+                <div class="sub-chip" data-val="0.1">$0.1</div>
+                <div class="sub-chip" data-val="0.5">$0.5</div>
+                <div class="sub-chip" data-val="1">$1</div>
+                <div class="sub-chip" data-val="5">$5</div>
+                <div class="sub-chip" data-val="10">$10</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAT MODAL -->
+    <div id="statModal" class="modal" style="justify-content:center; align-items:center;">
+        <div style="background:#0a0a0a; border:8px solid #fff; border-radius:40px; padding:40px; width:80%; text-align:center;">
+            <h2 style="font-size:2.5rem;">STATISTICS</h2>
+            <p style="font-size:1.5rem;">GAMES: <span id="s-games">0</span></p>
+            <button class="btn-cartoon" onclick="hideModal('statModal')">BACK</button>
+        </div>
+    </div>
+
+    <div id="res-pop"><img id="res-img" src="" alt=""><div id="res-txt" style="font-size:1.8rem;">WIN!</div></div>
 
     <script>
-        let balance = 1000, betVal = 0.1, timer = 10, isRolling = false, activeBets = [], betHistory = [], audioStarted = false, lastWinsStats = { players: 0, amount: 0 }, gamesCount = 0;
-        const m1 = document.getElementById('music1'), m2 = document.getElementById('music2');
+        let balance = 1000, betVal = 0.1, timer = 10, isRolling = false, gamesCount = 0;
+        let activeBets = [], betHistory = [], audioStarted = false;
+        const m2 = document.getElementById('music2');
 
-        function initAudio() { if(!audioStarted) { m1.volume=0.4; m2.volume=0.4; m1.play(); audioStarted=true; } }
-        function switchMusic() { m1.pause(); m2.play(); }
+        function initAudio() { if(!audioStarted) { m2.volume=0.4; m2.play(); audioStarted=true; } }
 
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+        function updateUI() {
+            document.getElementById('bal-val').innerText = balance.toFixed(2);
+            document.getElementById('roul-bal').innerText = balance.toFixed(2);
+            document.getElementById('s-games').innerText = gamesCount;
+        }
+
+        // --- DICE LOGIC ---
+        document.querySelectorAll('.d-btn').forEach(btn => {
+            btn.onclick = () => {
+                if(isRolling || balance < betVal) return;
+                const type = btn.dataset.bet;
+                isRolling = true;
+                const dice = document.getElementById('the-dice');
+                dice.classList.add('dice-anim');
+
+                // Шансы: 40% на чет/нечет, 20% на цифры
+                const win = Math.random() < (isNaN(type) ? 0.4 : 0.2);
+                let finalFace;
+                if(win) {
+                    if(type === 'even') finalFace = [2,4,6][Math.floor(Math.random()*3)];
+                    else if(type === 'odd') finalFace = [1,3,5][Math.floor(Math.random()*3)];
+                    else finalFace = parseInt(type);
+                } else {
+                    do { finalFace = Math.floor(Math.random()*6)+1; } 
+                    while((type === 'even' && finalFace % 2 === 0) || (type === 'odd' && finalFace % 2 !== 0) || (type == finalFace));
+                }
+
+                let ticks = 0;
+                const t = setInterval(() => { dice.innerText = Math.floor(Math.random()*6)+1; ticks++; if(ticks > 10) clearInterval(t); }, 80);
+
+                setTimeout(() => {
+                    dice.classList.remove('dice-anim');
+                    dice.innerText = finalFace;
+                    balance -= betVal;
+                    gamesCount++;
+                    if(win) {
+                        const winAmt = betVal * (isNaN(type) ? 2 : 10);
+                        balance += winAmt;
+                        showResult(true, winAmt.toFixed(1) + "$");
+                    } else showResult(false);
+                    updateUI(); isRolling = false;
+                }, 1000);
+            };
+        });
+
+        // --- ROULETTE LOGIC ---
         function setupRoulette() {
             const wheel = document.getElementById('wheel'), grid = document.getElementById('numGrid');
             const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
@@ -204,62 +255,41 @@
                 div.innerText = n; wheel.appendChild(div);
             });
             grid.innerHTML = '';
-            // Создаем 12 рядов по 3 числа
-            for(let row=0; row<12; row++) {
-                for(let col=1; col<=3; col++) {
-                    let n = row * 3 + col;
-                    const cell = document.createElement('div');
-                    // Стандартные цвета рулетки
-                    const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-                    cell.className = `cell ${reds.includes(n) ? 'red' : 'black'}`;
-                    cell.innerText = n; cell.dataset.target = n;
-                    grid.appendChild(cell);
-                }
+            for(let i=1; i<=36; i++) {
+                const c = document.createElement('div');
+                const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+                c.className = `cell ${reds.includes(i) ? 'red' : 'black'}`;
+                c.innerText = i; c.dataset.target = i;
+                c.onclick = () => placeBet(c);
+                grid.appendChild(c);
             }
-            document.querySelectorAll('.cell').forEach(el => el.onclick = () => placeBet(el));
+            document.querySelectorAll('.outside, .green').forEach(el => el.onclick = () => placeBet(el));
         }
 
         function placeBet(el) {
-            if(isRolling || timer <= 0) return;
+            if(isRolling || timer <= 0 || balance < betVal) return;
             const target = el.dataset.target;
-            if(target === 'even' && activeBets.some(b => b.target === 'odd')) return;
-            if(target === 'odd' && activeBets.some(b => b.target === 'even')) return;
-            if(target === 'red' && activeBets.some(b => b.target === 'black')) return;
-            if(target === 'black' && activeBets.some(b => b.target === 'red')) return;
-            if(balance < betVal) return;
+            if(activeBets.length >= 5 && !activeBets.find(b => b.target === target)) return;
             balance -= betVal;
-            let existing = activeBets.find(b => b.target === target);
-            if(existing) {
-                existing.amount += betVal;
-                existing.el.innerText = existing.amount.toFixed(1);
+            let bet = activeBets.find(b => b.target === target);
+            if(bet) {
+                bet.amount += betVal;
+                bet.el.innerText = bet.amount.toFixed(1);
             } else {
-                if(activeBets.length >= 5) { balance += betVal; return alert("MAX 5 SLOTS!"); }
                 const chip = document.createElement('div');
                 chip.className = 'chip-on-board'; chip.innerText = betVal.toFixed(1);
                 el.appendChild(chip);
-                existing = { target, amount: betVal, el: chip };
-                activeBets.push(existing);
+                activeBets.push({ target, amount: betVal, el: chip });
             }
             betHistory.push({ target, amount: betVal });
             updateUI();
         }
 
-        document.getElementById('undoBet').onclick = () => {
-            if(isRolling || betHistory.length === 0) return;
-            const last = betHistory.pop();
-            const bObj = activeBets.find(b => b.target === last.target);
-            balance += last.amount; bObj.amount -= last.amount;
-            if(bObj.amount <= 0) { bObj.el.remove(); activeBets = activeBets.filter(b => b.target !== last.target); }
-            else bObj.el.innerText = bObj.amount.toFixed(1);
-            updateUI();
-        };
-
-        function startTimer() {
-            const timerEl = document.getElementById('roulTimer'), board = document.getElementById('betBoard'), feed = document.getElementById('roulFeed');
-            if(gamesCount > 0) feed.innerText = `${lastWinsStats.players} players won $${lastWinsStats.amount.toFixed(1)} last round`;
+        function startRoulTimer() {
+            const tEl = document.getElementById('roulTimer');
             const countdown = setInterval(() => {
-                timer--; timerEl.innerText = timer;
-                if(timer <= 0) { clearInterval(countdown); board.classList.remove('active'); spinWheel(); }
+                timer--; tEl.innerText = timer;
+                if(timer <= 0) { clearInterval(countdown); document.getElementById('betBoard').classList.remove('active'); spinWheel(); }
             }, 1000);
         }
 
@@ -267,67 +297,73 @@
             isRolling = true;
             const wheel = document.getElementById('wheel');
             const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
-            let resIdx, resNum;
-            if(Math.random() < 0.01) { resNum = 0; resIdx = 0; }
-            else { resIdx = Math.floor(Math.random()*36) + 1; resNum = nums[resIdx]; }
-            const rot = (360 * 5) + (resIdx * (360/37));
-            wheel.style.transform = `rotate(-${rot}deg)`;
+            let resIdx = Math.random() < 0.01 ? 0 : Math.floor(Math.random()*36)+1;
+            const resNum = nums[resIdx];
+            wheel.style.transform = `rotate(-${(360*5) + (resIdx * (360/37))}deg)`;
             setTimeout(() => {
-                isRolling = false; processRoulResult(resNum);
+                isRolling = false; finishRoulette(resNum);
                 wheel.style.transition = 'none'; wheel.style.transform = `rotate(-${resIdx * (360/37)}deg)`;
-                setTimeout(() => { wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0, 0.1, 1)'; timer = 10; activeBets.forEach(b => b.el.remove()); activeBets = []; betHistory = []; document.getElementById('betBoard').classList.add('active'); startTimer(); }, 100);
+                setTimeout(() => { wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0, 0.1, 1)'; timer = 10; activeBets.forEach(b => b.el.remove()); activeBets = []; betHistory = []; document.getElementById('betBoard').classList.add('active'); startRoulTimer(); }, 100);
             }, 4500);
         }
 
-        function processRoulResult(res) {
-            let userWin = 0;
-            const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-            activeBets.forEach(bet => {
+        function finishRoulette(res) {
+            let winSum = 0;
+            activeBets.forEach(b => {
                 let win = false, mult = 0;
-                if(bet.target == res) { win = true; mult = res == 0 ? 20 : 10; }
-                else if(bet.target === 'even' && res !== 0 && res % 2 === 0) { win = true; mult = 2; }
-                else if(bet.target === 'odd' && res % 2 !== 0) { win = true; mult = 2; }
-                else if(bet.target === 'red' && reds.includes(res)) { win = true; mult = 2; }
-                else if(bet.target === 'black' && !reds.includes(res) && res !== 0) { win = true; mult = 2; }
-                else if(bet.target === '1-18' && res >= 1 && res <= 18) { win = true; mult = 2; }
-                else if(bet.target === '19-36' && res >= 19 && res <= 36) { win = true; mult = 2; }
-                else if(bet.target === 'col1' && res % 3 === 1) { win = true; mult = 3; }
-                else if(bet.target === 'col2' && res % 3 === 2) { win = true; mult = 3; }
-                else if(bet.target === 'col3' && res % 3 === 0 && res !== 0) { win = true; mult = 3; }
-                if(win) userWin += bet.amount * mult;
+                if(b.target == res) { win=true; mult=res==0?20:10; }
+                else if(b.target==='even'&&res!==0&&res%2===0) { win=true; mult=2; }
+                else if(b.target==='odd'&&res%2!==0) { win=true; mult=2; }
+                if(win) winSum += b.amount * mult;
             });
-            lastWinsStats.players = Math.floor(Math.random() * 20); lastWinsStats.amount = Math.random() * 60;
-            if(userWin > 0) { lastWinsStats.players++; lastWinsStats.amount += userWin; }
-            const pop = document.getElementById('res-pop'), img = document.getElementById('res-img'), txt = document.getElementById('res-txt');
-            if(userWin > 0) { balance += userWin; img.src = "Dicewin.gif"; txt.innerText = "WON $" + userWin.toFixed(1); }
-            else { img.src = "Dicelose.jpg"; txt.innerText = "LOST!"; }
-            pop.classList.add('show'); setTimeout(() => pop.classList.remove('show'), 2500);
+            if(winSum > 0) { balance += winSum; showResult(true, winSum.toFixed(1)+"$"); } else showResult(false);
             gamesCount++; updateUI();
         }
 
+        // --- ОБЩИЕ ФУНКЦИИ ---
+        function showResult(win, txt="") {
+            const pop = document.getElementById('res-pop');
+            pop.querySelector('img').src = win ? "Dicewin.gif" : "Dicelose.jpg";
+            pop.querySelector('#res-txt').innerText = win ? "YOU WIN " + txt : "NO LUCK!";
+            pop.style.transform = "translate(-50%,-50%) scale(1)";
+            setTimeout(() => pop.style.transform = "translate(-50%,-50%) scale(0)", 2500);
+        }
+
+        function showModal(id) { document.getElementById(id).classList.add('show'); if(id==='diceModal'||id==='rouletteModal') document.getElementById('globalControls').style.display='flex'; }
+        function hideModal(id) { if(isRolling) return; document.getElementById(id).classList.remove('show'); document.getElementById('globalControls').style.display='none'; }
+
+        function openRoulette() { showModal('rouletteModal'); setupRoulette(); timer = 10; startRoulTimer(); }
+
+        // ФИШКИ
         const mainChip = document.getElementById('mainChip'), radial = document.getElementById('radialChips');
         mainChip.onclick = (e) => {
             e.stopPropagation(); const act = radial.classList.toggle('active');
             radial.querySelectorAll('.sub-chip').forEach((c, i) => {
-                if(act) { const angle = (i * 40) - 120; c.style.transform = `translate(${Math.cos(angle*Math.PI/180)*110}px, ${Math.sin(angle*Math.PI/180)*110}px) scale(1)`; }
+                if(act) { const a = (i * 40) - 120; c.style.transform = `translate(${Math.cos(a*Math.PI/180)*110}px, ${Math.sin(a*Math.PI/180)*110}px) scale(1)`; }
                 else c.style.transform = 'translate(0,0) scale(0)';
             });
         };
         radial.querySelectorAll('.sub-chip').forEach(sc => {
-            sc.onclick = (e) => { e.stopPropagation(); betVal = parseFloat(sc.dataset.val); document.getElementById('curBetTxt').innerText = '$' + betVal; radial.classList.remove('active'); };
+            sc.onclick = (e) => { e.stopPropagation(); betVal = parseFloat(sc.dataset.val); document.getElementById('curBetTxt').innerText = '$'+betVal; radial.classList.remove('active'); };
         });
 
-        function updateUI() { document.getElementById('bal-val').innerText = balance.toFixed(2); document.getElementById('roul-bal').innerText = balance.toFixed(2); }
-        function exitRoul() { if(isRolling) return; document.getElementById('rouletteModal').classList.remove('show'); }
         document.getElementById('fastGameBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('fast-game-sub').classList.toggle('active'); };
-        document.getElementById('openRoulette').onclick = () => { document.getElementById('rouletteModal').classList.add('show'); setupRoulette(); timer = 10; startTimer(); };
         window.onclick = () => { document.getElementById('fast-game-sub').classList.remove('active'); radial.classList.remove('active'); };
 
+        // LOAD
         let p = 0;
         const loader = setInterval(() => {
-            p += 5; document.getElementById('bar').style.width = p + '%';
-            if(p >= 100) { clearInterval(loader); switchMusic(); document.getElementById('loading-screen').style.display = 'none'; document.getElementById('main-menu').style.display = 'block'; setTimeout(() => document.getElementById('main-menu').style.opacity = '1', 50); document.getElementById('m-ava').src = localStorage.getItem('userAva') || '1.png'; updateUI(); }
-        }, 40);
+            p += 5; document.getElementById('bar').style.width = p+'%';
+            if(p >= 100) {
+                clearInterval(loader); initAudio();
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('main-menu').style.display = 'block';
+                setTimeout(() => document.getElementById('main-menu').style.opacity = '1', 50);
+                document.getElementById('m-ava').src = '1.png';
+                updateUI();
+            }
+        }, 50);
+
     </script>
 </body>
 </html>
