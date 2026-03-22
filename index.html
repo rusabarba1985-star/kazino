@@ -3,80 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cartoon Game - Vintage Edition</title>
+    <title>Cartoon Game - Mobile Noir</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
 
         :root { 
-            --bg: #000; --text: #fff; --font-main: 'Luckiest Guy', cursive;
+            --bg: #000; 
+            --text: #fff; 
+            --font-main: 'Luckiest Guy', cursive;
             --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6);
-            --soft: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --grey: #555; --black: #1a1a1a;
+            --soft-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             background: var(--bg); color: var(--text); 
             font-family: var(--font-main); overflow: hidden; user-select: none;
+            touch-action: manipulation;
         }
 
-        /* ГРЯЗНАЯ ПЛЕНКА (ВСЕГДА ПОВЕРХ ВСЕГО) */
-        .noise { position: fixed; inset: 0; opacity: 0.18; pointer-events: none; z-index: 5000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 5001; }
+        /* ПЛЕНКА И ВИЗУАЛ */
+        .noise { position: fixed; inset: 0; opacity: 0.15; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
-        .scratch { width: 1px; height: 100%; opacity: 0.3; }
-        @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; transform: scale(1.2); } }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 5002; pointer-events: none; }
+        .scratch { width: 1px; height: 100%; opacity: 0.2; }
+        @keyframes fadeOut { 0% { opacity: 0.5; } 100% { opacity: 0; } }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 510; pointer-events: none; }
 
-        /* ЗАГРУЗКА */
-        #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 4000; }
-        .loading-title { font-size: 4.5rem; text-align: center; animation: title-jump 0.8s infinite var(--spring); text-shadow: 6px 6px 0 #333; }
-        @keyframes title-jump { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.1, 0.9) rotate(3deg); } }
-
-        /* КНОПКИ */
-        .btn-cartoon {
-            background: #000; color: #fff; border: 5px solid #fff;
-            padding: 10px 15px; font-family: var(--font-main); font-size: 0.9rem;
-            border-radius: 20px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 5px 0 #333; transition: 0.2s;
+        /* ЭКРАН ЗАГРУЗКИ */
+        #loading-screen { 
+            position: fixed; inset: 0; background: #000; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
         }
-        .btn-cartoon:active { transform: translateY(4px); box-shadow: 0 1px 0 #333; }
-
-        @media (min-width: 1024px) {
-            .btn-cartoon { padding: 15px 35px; font-size: 1.4rem; border-radius: 25px; }
-            .menu-buttons-container { gap: 20px !important; bottom: 60px !important; }
+        .loading-title {
+            font-size: 3.5rem; text-align: center; line-height: 0.9;
+            animation: title-jump 0.8s infinite var(--spring);
+            text-shadow: 5px 5px 0 #333;
         }
+        @keyframes title-jump {
+            0%, 100% { transform: scale(1) rotate(-3deg); }
+            50% { transform: scale(1.1, 0.9) rotate(3deg); }
+        }
+        .loader-bar-container {
+            width: 70%; max-width: 250px; height: 15px; border: 4px solid #fff;
+            border-radius: 20px; margin-top: 30px; overflow: hidden; background: #222;
+        }
+        #bar { height: 100%; width: 0%; background: #fff; }
 
-        /* МЕНЮ */
-        #main-menu { display: none; height: 100vh; position: relative; opacity: 0; transition: 0.8s; }
-        .header { display: flex; justify-content: space-between; padding: 25px; align-items: center; }
-        .avatar-box { width: 85px; height: 85px; border: 6px solid #fff; border-radius: 50%; overflow: hidden; cursor: pointer; box-shadow: 6px 6px 0 #333; }
+        /* ГЛАВНЫЙ ИНТЕРФЕЙС */
+        #main-menu { display: none; height: 100vh; display: flex; flex-direction: column; opacity: 0; transition: opacity 0.8s; z-index: 50; }
+        
+        .header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
+        .balance-box { font-size: 2rem; text-shadow: 3px 3px 0 #333; }
+        .avatar-box { width: 70px; height: 70px; border: 5px solid #fff; border-radius: 50%; overflow: hidden; cursor: pointer; box-shadow: 4px 4px 0 #333; }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
 
         .menu-buttons-container {
-            position: absolute; bottom: 30px; width: 100%;
-            display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 0 10px; box-sizing: border-box;
+            margin-top: auto; padding-bottom: 40px;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
         }
 
-        /* DICE MODAL */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal.show { display: flex; }
-        .dice-content { background: #000; border: 8px solid #fff; border-radius: 50px; width: 90%; max-width: 420px; padding: 40px 20px; text-align: center; }
-        
-        #the-dice { width: 110px; height: 110px; background: #fff; border: 8px solid #000; border-radius: 22px; color: #000; font-size: 4.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; box-shadow: 0 10px 0 #ccc; }
-        .dice-anim { animation: dice-toss 1s var(--soft); }
-        @keyframes dice-toss { 0% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-160px) rotate(180deg) scale(1.2); } 60% { transform: translateY(10px) rotate(300deg) scale(0.9, 1.1); } 100% { transform: translateY(0) rotate(360deg) scale(1); } }
+        .btn-cartoon {
+            background: #000; color: #fff; border: 5px solid #fff;
+            padding: 12px 24px; font-family: var(--font-main); font-size: 1.1rem;
+            border-radius: 20px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 5px 0 #333; transition: transform 0.2s var(--spring);
+            width: 80%; max-width: 280px; text-align: center;
+        }
+        .btn-active { animation: btn-bounce 0.4s var(--spring); }
+        @keyframes btn-bounce {
+            0% { transform: scale(1); }
+            40% { transform: scale(0.8) translateY(4px); }
+            100% { transform: scale(1) translateY(0); }
+        }
 
-        /* ФИШКИ (КРУГЛЫЕ) */
-        .chip-container { position: relative; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; }
-        .chip-main { width: 85px; height: 85px; background: #111; border: 5px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; position: relative; }
-        .chip-main::after { content: ''; position: absolute; inset: 0; border: 10px dashed #fff; border-radius: 50%; }
+        /* ПОДМЕНЮ FAST GAME */
+        #fast-game-sub {
+            position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%) scale(0);
+            background: #000; border: 5px solid #fff; border-radius: 25px; padding: 15px;
+            display: flex; gap: 15px; transition: transform 0.5s var(--spring); transform-origin: bottom;
+            z-index: 60;
+        }
+        #fast-game-sub.active { transform: translateX(-50%) scale(1); }
+
+        /* DICE MODAL */
+        .modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
+            display: none; justify-content: center; align-items: center; z-index: 800; 
+        }
+        .modal.show { display: flex; }
+        .modal-content { 
+            background: #000; border: 6px solid #fff; border-radius: 40px; 
+            width: 90%; max-width: 380px; padding: 30px 15px; text-align: center;
+            transform: scale(0.8); transition: transform 0.5s var(--spring);
+        }
+        .modal.show .modal-content { transform: scale(1); }
+
+        .dice-row { display: flex; align-items: center; justify-content: space-around; margin: 30px 0; position: relative; }
+        #the-dice { 
+            width: 90px; height: 90px; background: #fff; border-radius: 18px; 
+            border: 6px solid #000; color: #000; font-size: 3.5rem; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 0 #ccc;
+        }
+        .dice-anim { animation: dice-toss 1s var(--soft-spring); }
+        @keyframes dice-toss {
+            0% { transform: translateY(0) rotate(0); }
+            30% { transform: translateY(-150px) rotate(180deg) scale(1.2); }
+            60% { transform: translateY(10px) rotate(300deg) scale(0.9, 1.1); }
+            100% { transform: translateY(0) rotate(360deg) scale(1); }
+        }
+
+        /* ФИШКИ - ВЫЛЕТ ИЗ ЦЕНТРА */
+        .chip-container { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+        .chip-main {
+            width: 80px; height: 80px; background: #111; border-radius: 50%;
+            border: 5px solid #fff; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; z-index: 100; position: relative;
+        }
+        .chip-main::after { content: ''; position: absolute; inset: 0; border: 8px dashed #fff; border-radius: 50%; }
         
-        .sub-chip { position: absolute; width: 65px; height: 65px; background: #222; border: 4px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0); z-index: 50; pointer-events: none; }
-        .active .sub-chip { opacity: 1; transform: scale(1); pointer-events: auto; }
+        .sub-chips-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .sub-chip {
+            position: absolute; width: 60px; height: 60px; background: #222;
+            border: 4px solid #fff; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 0.8rem;
+            opacity: 0; transition: all 0.6s var(--spring);
+            transform: translate(0, 0) scale(0); /* Старт ровно в центре */
+            z-index: 50; pointer-events: none;
+        }
+        .sub-chip::after { content: ''; position: absolute; inset: 0; border: 5px dashed #fff; border-radius: 50%; }
+        .active .sub-chip { opacity: 1; pointer-events: auto; }
+
+        .bets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; }
+        .bet-btn { 
+            background: #000; border: 3px solid #fff; color: #fff; 
+            padding: 10px 0; border-radius: 15px; font-family: var(--font-main); 
+            cursor: pointer; font-size: 0.9rem;
+        }
+        .bet-btn.selected { background: #fff; color: #000; }
 
         /* РЕЗУЛЬТАТ */
-        #res-pop { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; border: 10px solid #000; border-radius: 40px; padding: 30px; z-index: 3000; text-align: center; color: #000; transition: 0.6s var(--spring); width: 260px; }
-        #res-pop img { width: 160px; height: 160px; border: 6px solid #000; border-radius: 20px; object-fit: cover; margin-bottom: 20px; }
+        #res-pop {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: #fff; border: 8px solid #000; border-radius: 35px;
+            padding: 25px; z-index: 2000; text-align: center; color: #000;
+            transition: transform 0.6s var(--spring); width: 250px; pointer-events: none;
+        }
+        #res-pop.show { transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+        #res-pop img { width: 150px; height: 150px; border: 5px solid #000; border-radius: 20px; object-fit: cover; margin-bottom: 15px; }
+
     </style>
 </head>
 <body onclick="initAudio()">
@@ -85,45 +161,48 @@
     <div class="vignette"></div>
     <div id="film-chaos"></div>
 
+    <audio id="music1" loop preload="auto"><source src="music.mp3" type="audio/mpeg"></audio>
     <audio id="music2" loop preload="auto"><source src="music2.mp3" type="audio/mpeg"></audio>
 
+    <!-- LOADING -->
     <div id="loading-screen">
         <div class="loading-title">CARTOON<br>GAME</div>
-        <div style="width:220px; height:15px; border:4px solid #fff; border-radius:15px; margin-top:35px; overflow:hidden; background:#222;">
-            <div id="bar" style="height:100%; width:0%; background:#fff;"></div>
-        </div>
+        <div class="loader-bar-container"><div id="bar"></div></div>
+        <div style="margin-top: 15px; letter-spacing: 3px; font-size: 0.8rem;">LOADING NOSTALGIA...</div>
     </div>
 
-    <div id="main-menu">
+    <!-- MAIN MENU -->
+    <div id="main-menu" style="display: none;">
         <div class="header">
-            <div style="font-size: 2.5rem; text-shadow: 4px 4px 0 #333;">$<span id="bal-val">1000</span></div>
-            <div class="avatar-box" onclick="changeAva()"><img id="m-ava" src="" style="width:100%; height:100%; object-fit:cover;"></div>
+            <div class="balance-box">$<span id="bal-val">1000</span></div>
+            <div class="avatar-box" id="avaBtn"><img id="m-ava" src="" alt="ava"></div>
         </div>
 
-        <div id="fast-game-sub" style="position:fixed; bottom:85px; left:50%; transform:translateX(-50%) scale(0); background:#000; border:5px solid #fff; border-radius:25px; padding:15px; display:flex; gap:15px; transition:0.4s var(--spring); transform-origin:bottom; z-index:1000;">
-            <button class="btn-cartoon" onclick="alert('Roulette coming soon!')">ROULETTE</button>
-            <button class="btn-cartoon" onclick="showModal('diceModal')">DICE</button>
+        <div id="fast-game-sub">
+            <button class="btn-cartoon" style="width: auto; font-size: 0.8rem;">ROULETTE</button>
+            <button class="btn-cartoon" style="width: auto; font-size: 0.8rem;" id="openDice">DICE</button>
         </div>
 
         <div class="menu-buttons-container">
             <button class="btn-cartoon" id="fastGameBtn">FAST GAME</button>
             <button class="btn-cartoon">SLOTS</button>
             <button class="btn-cartoon">BONUS</button>
-            <button class="btn-cartoon" onclick="showModal('statModal')">STAT</button>
+            <button class="btn-cartoon" id="statBtn">STAT</button>
             <button class="btn-cartoon">FIGHT</button>
         </div>
     </div>
 
     <!-- DICE MODAL -->
     <div id="diceModal" class="modal">
-        <div class="dice-content">
-            <h2 style="font-size: 2.4rem; margin:0 0 25px;">LUCKY DICE</h2>
-            <div id="the-dice">?</div>
+        <div class="modal-content">
+            <h2 style="margin:0; font-size: 2rem;">LUCKY DICE</h2>
             
-            <div style="display:flex; justify-content:center; align-items:center; gap:30px; margin-bottom:30px;">
-                <div class="chip-container" id="diceChipBox">
-                    <div class="chip-main" id="diceMainChip"><span>$0.1</span></div>
-                    <div id="diceRadial" style="position:absolute; width:100%; height:100%;">
+            <div class="dice-row">
+                <div id="the-dice">?</div>
+                
+                <div class="chip-container">
+                    <div class="chip-main" id="mainChip"><span>$0.1</span></div>
+                    <div class="sub-chips-wrapper" id="radialChips">
                         <div class="sub-chip" data-val="0.1">$0.1</div>
                         <div class="sub-chip" data-val="0.5">$0.5</div>
                         <div class="sub-chip" data-val="1">$1</div>
@@ -133,36 +212,69 @@
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:25px;">
-                <button class="btn-cartoon bet-d" data-bet="even">EVEN</button>
-                <button class="btn-cartoon bet-d" data-bet="odd">ODD</button>
-                <button class="btn-cartoon bet-d" data-bet="1">1</button>
-                <button class="btn-cartoon bet-d" data-bet="2">2</button>
-                <button class="btn-cartoon bet-d" data-bet="3">3</button>
-                <button class="btn-cartoon bet-d" data-bet="4">4</button>
-                <button class="btn-cartoon bet-d" data-bet="5">5</button>
-                <button class="btn-cartoon bet-d" data-bet="6">6</button>
+            <div class="bets-grid">
+                <button class="bet-btn" data-bet="even">EVEN</button>
+                <button class="bet-btn" data-bet="odd">ODD</button>
+                <button class="bet-btn" data-bet="1">1</button>
+                <button class="bet-btn" data-bet="2">2</button>
+                <button class="bet-btn" data-bet="3">3</button>
+                <button class="bet-btn" data-bet="4">4</button>
+                <button class="bet-btn" data-bet="5">5</button>
+                <button class="bet-btn" data-bet="6">6</button>
             </div>
-            <button class="btn-cartoon" style="width:100%;" onclick="hideModal('diceModal')">LEAVE</button>
+            
+            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('diceModal')">BACK</button>
         </div>
     </div>
 
     <!-- STAT MODAL -->
     <div id="statModal" class="modal">
-        <div class="dice-content">
-            <h2 style="font-size:2.5rem;">STATISTICS</h2>
-            <p style="font-size:1.5rem;">GAMES: <span id="s-games">0</span></p>
-            <button class="btn-cartoon" onclick="hideModal('statModal')">BACK</button>
+        <div class="modal-content">
+            <h2 style="font-size: 2rem;">STATISTICS</h2>
+            <div style="text-align: left; padding: 20px; font-size: 1.3rem;">
+                <p>GAMES: <span id="s-games" style="float:right">0</span></p>
+                <p>DEPOSITS: <span style="float:right">$0</span></p>
+                <p>WITHDRAWS: <span style="float:right">$0</span></p>
+            </div>
+            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('statModal')">OK</button>
         </div>
     </div>
 
-    <div id="res-pop"><img id="res-img" src="" alt=""><div id="res-txt" style="font-size:1.8rem;">WIN!</div></div>
+    <!-- RESULT POPUP -->
+    <div id="res-pop">
+        <img id="res-img" src="" alt="">
+        <div id="res-txt" style="font-size: 1.8rem;">YOU WIN!</div>
+    </div>
 
     <script>
-        let balance = 1000, betVal = 0.1, isRolling = false, audioStarted = false, gamesCount = 0;
+        let balance = 1000;
+        let gamesCount = 0;
+        let betValue = 0.1;
+        let selectedBet = null;
+        let isRolling = false;
+        let audioStarted = false;
+
+        const m1 = document.getElementById('music1');
         const m2 = document.getElementById('music2');
 
-        function initAudio() { if(!audioStarted) { m2.volume=0.4; m2.play(); audioStarted=true; } }
+        function initAudio() {
+            if (!audioStarted) {
+                m1.volume = 0.4; m2.volume = 0.4;
+                m1.play().catch(() => {});
+                audioStarted = true;
+            }
+        }
+
+        function switchMusic() { m1.pause(); m2.play().catch(() => {}); }
+
+        // ПРУЖИНА ДЛЯ КНОПОК
+        document.querySelectorAll('.btn-cartoon, .bet-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.remove('btn-active');
+                void this.offsetWidth;
+                this.classList.add('btn-active');
+            });
+        });
 
         // ПЛЕНКА
         setInterval(() => {
@@ -177,79 +289,10 @@
             setTimeout(() => d.remove(), 800);
         }, 200);
 
-        // DICE LOGIC
-        document.querySelectorAll('.bet-d').forEach(btn => {
-            btn.onclick = () => {
-                if(isRolling || balance < betVal) return;
-                const type = btn.dataset.bet;
-                isRolling = true;
-                const dice = document.getElementById('the-dice');
-                dice.classList.add('dice-anim');
-
-                const win = Math.random() < (isNaN(type) ? 0.4 : 0.2);
-                let res;
-                if(win) {
-                    if(type === 'even') res = [2,4,6][Math.floor(Math.random()*3)];
-                    else if(type === 'odd') res = [1,3,5][Math.floor(Math.random()*3)];
-                    else res = parseInt(type);
-                } else {
-                    do { res = Math.floor(Math.random()*6)+1; } 
-                    while((type === 'even' && res % 2 === 0) || (type === 'odd' && res % 2 !== 0) || (type == res));
-                }
-
-                let ticks = 0;
-                const t = setInterval(() => { dice.innerText = Math.floor(Math.random()*6)+1; ticks++; if(ticks > 10) clearInterval(t); }, 80);
-
-                setTimeout(() => {
-                    dice.classList.remove('dice-anim');
-                    dice.innerText = res;
-                    balance -= betVal;
-                    gamesCount++;
-                    if(win) {
-                        const winAmt = betVal * (isNaN(type) ? 2 : 10);
-                        balance += winAmt;
-                        showResult(true, winAmt.toFixed(1) + "$");
-                    } else showResult(false);
-                    updateUI(); isRolling = false;
-                }, 1000);
-            };
-        });
-
-        // ФИШКИ (РАДИАЛЬНЫЕ)
-        const mainChip = document.getElementById('diceMainChip');
-        const radial = document.getElementById('diceRadial');
-        mainChip.onclick = (e) => {
-            e.stopPropagation();
-            const act = radial.classList.toggle('active');
-            radial.querySelectorAll('.sub-chip').forEach((c, i) => {
-                if(act) {
-                    const a = (i * 40) - 120;
-                    c.style.transform = `translate(${Math.cos(a*Math.PI/180)*110}px, ${Math.sin(a*Math.PI/180)*110}px) scale(1)`;
-                } else c.style.transform = 'translate(0,0) scale(0)';
-            });
-        };
-        radial.querySelectorAll('.sub-chip').forEach(sc => {
-            sc.onclick = (e) => {
-                e.stopPropagation();
-                betVal = parseFloat(sc.dataset.val);
-                mainChip.querySelector('span').innerText = '$' + betVal;
-                radial.classList.remove('active');
-            };
-        });
-
-        function changeAva() {
-            let cur = parseInt(localStorage.getItem('userAva')) || 1;
-            cur = cur >= 5 ? 1 : cur + 1;
-            localStorage.setItem('userAva', cur);
-            document.getElementById('m-ava').src = cur + '.png';
-        }
-
-        function showResult(win, txt="") {
-            const pop = document.getElementById('res-pop');
-            pop.querySelector('img').src = win ? "Dicewin.gif" : "Dicelose.jpg";
-            pop.querySelector('#res-txt').innerText = win ? "YOU WIN " + txt : "NO LUCK!";
-            pop.style.transform = "translate(-50%,-50%) scale(1)";
-            setTimeout(() => pop.style.transform = "translate(-50%,-50%) scale(0)", 2500);
+        function init() {
+            const ava = localStorage.getItem('userAva') || '1.png';
+            document.getElementById('m-ava').src = ava;
+            updateUI();
         }
 
         function updateUI() {
@@ -257,23 +300,135 @@
             document.getElementById('s-games').innerText = gamesCount;
         }
 
+        // ВЫДВИЖЕНИЕ ФИШЕК ИЗ ЦЕНТРА
+        const mainChip = document.getElementById('mainChip');
+        const radial = document.getElementById('radialChips');
+        
+        mainChip.onclick = (e) => {
+            if(isRolling) return;
+            e.stopPropagation();
+            const isActive = radial.classList.toggle('active');
+            const chips = radial.querySelectorAll('.sub-chip');
+            
+            if(isActive) {
+                chips.forEach((c, i) => {
+                    const angle = (i * 40) - 120;
+                    const dist = 120; // Расстояние вылета
+                    const x = Math.cos(angle * Math.PI / 180) * dist;
+                    const y = Math.sin(angle * Math.PI / 180) * dist;
+                    c.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+                });
+            } else {
+                chips.forEach(c => c.style.transform = 'translate(0,0) scale(0)');
+            }
+        };
+
+        radial.querySelectorAll('.sub-chip').forEach(sc => {
+            sc.onclick = (e) => {
+                e.stopPropagation();
+                betValue = parseFloat(sc.dataset.val);
+                mainChip.querySelector('span').innerText = '$' + betValue;
+                radial.classList.remove('active');
+                radial.querySelectorAll('.sub-chip').forEach(c => c.style.transform = 'translate(0,0) scale(0)');
+            };
+        });
+
+        // DICE GAME
+        const bBtns = document.querySelectorAll('.bet-btn');
+        bBtns.forEach(b => {
+            b.onclick = () => {
+                if(isRolling) return;
+                bBtns.forEach(x => x.classList.remove('selected'));
+                b.classList.add('selected');
+                selectedBet = b.dataset.bet;
+                startDice();
+            };
+        });
+
+        function startDice() {
+            if(balance < betValue) return alert("NOT ENOUGH $");
+            isRolling = true;
+            const dice = document.getElementById('the-dice');
+            dice.classList.add('dice-anim');
+
+            const isNum = !isNaN(selectedBet);
+            const winProb = isNum ? 0.20 : 0.40;
+            const win = Math.random() < winProb;
+
+            let finalRes;
+            if(win) {
+                if(selectedBet === 'even') finalRes = [2,4,6][Math.floor(Math.random()*3)];
+                else if(selectedBet === 'odd') finalRes = [1,3,5][Math.floor(Math.random()*3)];
+                else finalRes = parseInt(selectedBet);
+            } else {
+                do { finalRes = Math.floor(Math.random()*6)+1; } 
+                while( (selectedBet === 'even' && finalRes % 2 === 0) || (selectedBet === 'odd' && finalRes % 2 !== 0) || (selectedBet == finalRes) );
+            }
+
+            let tCount = 0;
+            const t = setInterval(() => { dice.innerText = Math.floor(Math.random()*6)+1; tCount++; if(tCount > 10) clearInterval(t); }, 80);
+
+            setTimeout(() => {
+                dice.classList.remove('dice-anim');
+                dice.innerText = finalRes;
+                setTimeout(() => {
+                    balance -= betValue;
+                    gamesCount++;
+                    if(win) {
+                        const winAmt = betValue * (isNum ? 3.5 : 2.0);
+                        balance += winAmt;
+                        showResult(true, winAmt.toFixed(1) + "$");
+                    } else { showResult(false); }
+                    updateUI();
+                }, 600);
+            }, 1000);
+        }
+
+        function showResult(win, val = "") {
+            const pop = document.getElementById('res-pop');
+            const img = document.getElementById('res-img');
+            const txt = document.getElementById('res-txt');
+            if(win) { img.src = "Dicewin.gif"; txt.innerText = "YOU WIN " + val; } 
+            else { 
+                img.src = "Dicelose.jpg"; 
+                const msgs = ["Nice try", "No luck", "Luck next time", "Not your day"];
+                txt.innerText = msgs[Math.floor(Math.random()*msgs.length)];
+            }
+            pop.classList.add('show');
+            setTimeout(() => {
+                pop.classList.remove('show');
+                isRolling = false;
+                selectedBet = null;
+                bBtns.forEach(x => x.classList.remove('selected'));
+            }, 2500);
+        }
+
         function showModal(id) { document.getElementById(id).classList.add('show'); }
         function hideModal(id) { if(isRolling) return; document.getElementById(id).classList.remove('show'); }
 
-        document.getElementById('fastGameBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('fast-game-sub').style.transform = "translateX(-50%) scale(1)"; };
-        window.onclick = () => { document.getElementById('fast-game-sub').style.transform = "translateX(-50%) scale(0)"; radial.classList.remove('active'); };
+        document.getElementById('fastGameBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('fast-game-sub').classList.toggle('active'); };
+        document.getElementById('openDice').onclick = () => showModal('diceModal');
+        document.getElementById('statBtn').onclick = () => showModal('statModal');
+        document.getElementById('avaBtn').onclick = () => {
+            let cur = parseInt(localStorage.getItem('userAva')) || 1;
+            cur = cur >= 5 ? 1 : cur + 1;
+            localStorage.setItem('userAva', cur + '.png');
+            init();
+        };
 
-        // LOAD
-        let p = 0;
+        window.onclick = () => { document.getElementById('fast-game-sub').classList.remove('active'); radial.classList.remove('active'); };
+
+        let progress = 0;
         const loader = setInterval(() => {
-            p += 4; document.getElementById('bar').style.width = p + '%';
-            if(p >= 100) {
-                clearInterval(loader); initAudio();
+            progress += 2;
+            document.getElementById('bar').style.width = progress + '%';
+            if(progress >= 100) {
+                clearInterval(loader);
+                switchMusic();
                 document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('main-menu').style.display = 'block';
+                document.getElementById('main-menu').style.display = 'flex';
                 setTimeout(() => document.getElementById('main-menu').style.opacity = '1', 50);
-                document.getElementById('m-ava').src = (localStorage.getItem('userAva') || 1) + '.png';
-                updateUI();
+                init();
             }
         }, 50);
 
