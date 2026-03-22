@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dice Game - Cartoon Noir</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+        :root { --bg: #000; --text: #fff; --font-main: 'Luckiest Guy', cursive; --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); --soft-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        body { margin: 0; background: #000; color: #fff; font-family: var(--font-main); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        
+        .noise { position: fixed; inset: 0; opacity: 0.15; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 510; pointer-events: none; }
+
+        .modal-content { background: #000; border: 6px solid #fff; border-radius: 40px; width: 90%; max-width: 380px; padding: 30px 15px; text-align: center; position: relative; }
+        .dice-row { display: flex; align-items: center; justify-content: space-around; margin: 30px 0; }
+        #the-dice { width: 90px; height: 90px; background: #fff; border-radius: 18px; border: 6px solid #000; color: #000; font-size: 3.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 0 #ccc; }
+        .dice-anim { animation: dice-toss 1s var(--soft-spring); }
+        @keyframes dice-toss { 0% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-150px) rotate(180deg) scale(1.2); } 60% { transform: translateY(10px) rotate(300deg) scale(0.9, 1.1); } 100% { transform: translateY(0) rotate(360deg) scale(1); } }
+
+        .chip-main { width: 80px; height: 80px; background: #111; border: 5px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; position: relative; }
+        .chip-main::after { content: ''; position: absolute; inset: 0; border: 8px dashed #fff; border-radius: 50%; }
+        .sub-chips-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .sub-chip { position: absolute; width: 60px; height: 60px; background: #222; border: 4px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: all 0.6s var(--spring); transform: scale(0); z-index: 50; }
+        .active .sub-chip { opacity: 1; pointer-events: auto; }
+
+        .bets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; }
+        .bet-btn { background: #000; border: 3px solid #fff; color: #fff; padding: 10px 0; border-radius: 15px; font-family: var(--font-main); cursor: pointer; font-size: 0.9rem; }
+        .bet-btn.selected { background: #fff; color: #000; }
+        .btn-cartoon { background: #000; color: #fff; border: 5px solid #fff; padding: 12px 24px; font-family: var(--font-main); font-size: 1.1rem; border-radius: 20px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 5px 0 #333; }
+
+        #res-pop { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; border: 8px solid #000; border-radius: 35px; padding: 25px; z-index: 2000; text-align: center; color: #000; transition: 0.6s var(--spring); width: 250px; pointer-events: none; }
+        #res-pop.show { transform: translate(-50%, -50%) scale(1); }
+        #res-pop img { width: 150px; height: 150px; border: 5px solid #000; border-radius: 20px; object-fit: cover; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="noise"></div>
+    <div class="vignette"></div>
+
+    <div class="modal-content">
+        <h2 style="margin:0; font-size: 2rem;">LUCKY DICE</h2>
+        <div class="dice-row">
+            <div id="the-dice">?</div>
+            <div style="position:relative;">
+                <div class="chip-main" id="mainChip"><span>$0.1</span></div>
+                <div class="sub-chips-wrapper" id="radialChips">
+                    <div class="sub-chip" data-val="0.1">$0.1</div>
+                    <div class="sub-chip" data-val="0.5">$0.5</div>
+                    <div class="sub-chip" data-val="1">$1</div>
+                    <div class="sub-chip" data-val="5">$5</div>
+                    <div class="sub-chip" data-val="10">$10</div>
+                </div>
+            </div>
+        </div>
+        <div class="bets-grid">
+            <button class="bet-btn" data-bet="even">EVEN</button>
+            <button class="bet-btn" data-bet="odd">ODD</button>
+            <button class="bet-btn" data-bet="1">1</button>
+            <button class="bet-btn" data-bet="2">2</button>
+            <button class="bet-btn" data-bet="3">3</button>
+            <button class="bet-btn" data-bet="4">4</button>
+            <button class="bet-btn" data-bet="5">5</button>
+            <button class="bet-btn" data-bet="6">6</button>
+        </div>
+        <button class="btn-cartoon" onclick="window.location.href='index.html'">BACK TO MENU</button>
+    </div>
+
+    <div id="res-pop">
+        <img id="res-img" src="" alt="">
+        <div id="res-txt" style="font-size: 1.8rem;">YOU WIN!</div>
+    </div>
+
+    <script>
+        let balance = parseFloat(localStorage.getItem('balance')) || 1000;
+        let gamesCount = parseInt(localStorage.getItem('gamesCount')) || 0;
+        let betValue = 0.1, isRolling = false;
+
+        const mainChip = document.getElementById('mainChip');
+        const radial = document.getElementById('radialChips');
+        mainChip.onclick = () => {
+            if(isRolling) return;
+            const isActive = radial.classList.toggle('active');
+            radial.querySelectorAll('.sub-chip').forEach((c, i) => {
+                const angle = (i * 40) - 120;
+                const x = isActive ? Math.cos(angle * Math.PI / 180) * 120 : 0;
+                const y = isActive ? Math.sin(angle * Math.PI / 180) * 120 : 0;
+                c.style.transform = `translate(${x}px, ${y}px) scale(${isActive?1:0})`;
+            });
+        };
+
+        radial.querySelectorAll('.sub-chip').forEach(sc => {
+            sc.onclick = () => {
+                betValue = parseFloat(sc.dataset.val);
+                mainChip.querySelector('span').innerText = '$' + betValue;
+                mainChip.click();
+            };
+        });
+
+        document.querySelectorAll('.bet-btn').forEach(btn => {
+            btn.onclick = () => {
+                if(isRolling || balance < betValue) return;
+                isRolling = true;
+                const dice = document.getElementById('the-dice');
+                dice.classList.add('dice-anim');
+                const type = btn.dataset.bet;
+                const win = Math.random() < (isNaN(type) ? 0.4 : 0.2);
+                let finalRes;
+                if(win) finalRes = (type === 'even') ? 2 : (type === 'odd' ? 1 : parseInt(type));
+                else finalRes = (type === 'even' || type === '2') ? 1 : 2;
+
+                setTimeout(() => {
+                    dice.classList.remove('dice-anim');
+                    dice.innerText = finalRes;
+                    balance -= betValue;
+                    if(win) balance += betValue * (isNaN(type) ? 2 : 3.5);
+                    gamesCount++;
+                    localStorage.setItem('balance', balance);
+                    localStorage.setItem('gamesCount', gamesCount);
+                    showResult(win);
+                }, 1000);
+            };
+        });
+
+        function showResult(win) {
+            const pop = document.getElementById('res-pop');
+            document.getElementById('res-img').src = win ? "Dicewin.gif" : "Dicelose.jpg";
+            document.getElementById('res-txt').innerText = win ? "YOU WIN!" : "NO LUCK!";
+            pop.classList.add('show');
+            setTimeout(() => { pop.classList.remove('show'); isRolling = false; }, 2000);
+        }
+    </script>
+</body>
+</html>
