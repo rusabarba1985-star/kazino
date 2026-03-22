@@ -1,286 +1,265 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cartoon Game</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body, html { width: 100%; height: 100%; background: #050505; overflow: hidden; font-family: 'Georgia', serif; }
-        .noise { position: fixed; inset: 0; opacity: 0.05; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
-        .dust, .scratch { position: absolute; background: #fff; opacity: 0; animation: fadeOut 0.9s ease-out forwards; }
-        .dust { border-radius: 50%; background: rgba(200,200,200,0.7); }
-        .scratch { background: rgba(255,255,255,0.3); width: 2px; height: 100%; top: 0; }
-        @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; transform: scale(1.2); } }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, black 150%); z-index: 510; pointer-events: none; }
-        #loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; background: #050505; transition: opacity 0.5s ease; }
-        .title { font-size: 3.5rem; text-align: center; text-transform: uppercase; font-weight: 900; animation: rubber-jump 1s infinite ease-in-out; color: white; text-shadow: 4px 4px 0px #3a3a3a; font-family: 'Georgia', serif; }
-        .bar-wrap { width: 200px; height: 3px; background: #1a1a1a; margin-top: 40px; }
-        #bar { width: 0%; height: 100%; background: #fff; transition: width 0.2s linear; }
-        #main-menu { display: none; width: 100%; height: 100%; position: relative; z-index: 50; opacity: 0; transition: opacity 0.5s ease; }
-        .avatar { position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; border: 2px solid #fff; border-radius: 50%; overflow: hidden; background: #111; cursor: pointer; transition: transform 0.3s ease; z-index: 10; }
-        .avatar:hover { transform: scale(1.05); }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .menu-buttons { position: absolute; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; padding: 0 20px; z-index: 10; }
-        .menu-btn { background: transparent; border: none; color: white; font-family: 'Georgia', serif; font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; text-align: center; padding: 8px 0; text-shadow: 2px 2px 0px #3a3a3a; white-space: nowrap; }
-        .menu-btn:hover { transform: scale(1.05); letter-spacing: 2px; text-shadow: 3px 3px 0px #3a3a3a; }
-        .fastgame-panel { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) scale(0); background: rgba(10,10,10,0.95); border: 2px solid #fff; border-radius: 20px; padding: 20px; display: flex; gap: 20px; z-index: 200; transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); backdrop-filter: blur(10px); }
-        .fastgame-panel.open { transform: translateX(-50%) scale(1); }
-        .fastgame-btn { background: transparent; border: 2px solid #fff; color: white; font-family: 'Georgia', serif; font-size: 1.2rem; font-weight: bold; padding: 10px 25px; cursor: pointer; border-radius: 40px; transition: all 0.2s; text-shadow: 2px 2px 0px #3a3a3a; }
-        .fastgame-btn:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
-        .dice-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .dice-content { background: #111; border: 3px solid #fff; border-radius: 30px; padding: 25px; max-width: 550px; width: 90%; text-align: center; box-shadow: 10px 10px 0px #3a3a3a; position: relative; }
-        .dice-cube { width: 120px; height: 120px; margin: 0 auto 20px; background: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: bold; color: #000; transition: transform 0.2s; box-shadow: 5px 5px 0px #666; position: relative; }
-        .dice-cube.animate { animation: diceToss 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes diceToss { 0% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-80px) rotate(180deg); } 70% { transform: translateY(-40px) rotate(360deg); } 100% { transform: translateY(0) rotate(540deg); } }
-        .bet-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0; }
-        .bet-btn { background: transparent; border: 2px solid #fff; color: white; font-family: 'Georgia', serif; font-size: 1rem; font-weight: bold; padding: 8px 15px; cursor: pointer; border-radius: 30px; transition: all 0.2s; text-shadow: 1px 1px 0px #3a3a3a; }
-        .bet-btn:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
-        .chip-right { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); background: #222; border: 3px solid #fff; border-radius: 50%; width: 80px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; z-index: 1100; box-shadow: 5px 5px 0px #3a3a3a; transition: all 0.2s; }
-        .chip-right:hover { transform: translateY(-50%) scale(1.05); }
-        .chip-value { font-size: 1.2rem; font-weight: bold; color: #ffd966; }
-        .chip-label { font-size: 0.7rem; color: white; }
-        .chip-drum { position: fixed; right: 120px; top: 50%; transform: translateY(-50%) scale(0); background: #111; border: 2px solid #fff; border-radius: 20px; padding: 15px; z-index: 1101; transition: transform 0.2s; text-align: center; }
-        .chip-drum.open { transform: translateY(-50%) scale(1); }
-        .drum-arrow-up, .drum-arrow-down { font-size: 2rem; cursor: pointer; padding: 5px 15px; color: white; }
-        .drum-value { font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #ffd966; }
-        .countdown-display { position: fixed; bottom: 150px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 50px; padding: 10px 25px; font-size: 2rem; font-weight: bold; color: white; z-index: 1200; display: none; }
-        .result-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0,0,0,0.9); border: 3px solid #fff; border-radius: 20px; padding: 25px; text-align: center; z-index: 1100; transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55); backdrop-filter: blur(10px); min-width: 250px; }
-        .result-popup.open { transform: translate(-50%, -50%) scale(1); animation: popupBounce 0.3s ease; }
-        @keyframes popupBounce { 0% { transform: translate(-50%, -50%) scale(0); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
-        .result-popup img { width: 80px; height: 80px; margin-top: 10px; }
-        .result-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; font-family: 'Georgia', serif; text-shadow: 2px 2px 0px #3a3a3a; }
-        .profile-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .profile-content { background: rgba(10,10,10,0.95); border-radius: 20px; padding: 30px; max-width: 400px; width: 85%; text-align: center; border: 2px solid #fff; box-shadow: 10px 10px 0px #3a3a3a; }
-        .profile-name { font-size: 1.5rem; font-weight: 900; margin-bottom: 10px; text-shadow: 2px 2px 0px #3a3a3a; font-family: 'Georgia', serif; }
-        .profile-id { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; font-family: monospace; }
-        .profile-stats { text-align: left; margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .stat-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .stat-label { font-weight: bold; color: #ccc; }
-        .stat-value { font-weight: 900; color: #ffd966; }
-        .close-profile { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; margin-top: 20px; cursor: pointer; font-family: 'Georgia', serif; font-weight: bold; border-radius: 30px; transition: all 0.3s; }
-        .close-profile:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
-        .version { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: rgba(255,255,255,0.3); z-index: 600; font-family: monospace; }
-        @keyframes rubber-jump { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scaleY(1.1) scaleX(0.97) translateY(-15px); } }
-        @media (max-width: 768px) { .title { font-size: 2.5rem; } .menu-btn { font-size: 0.75rem; } .chip-right { width: 60px; height: 60px; } .chip-value { font-size: 0.9rem; } .dice-cube { width: 80px; height: 80px; font-size: 2.5rem; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartoon Game</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+
+<style>
+:root { --bg:#050505; --text:#fff; }
+
+body,html{
+margin:0;height:100%;background:var(--bg);color:#fff;
+font-family:'Luckiest Guy',cursive;overflow:hidden;
+}
+
+/* ПЛЕНКА */
+.noise{
+position:fixed;inset:0;opacity:0.12;
+filter:contrast(180%);
+background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+pointer-events:none;
+}
+
+/* LOADING */
+#loading{
+position:fixed;inset:0;display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+}
+.title{
+font-size:3rem;
+animation:rubber 1s infinite;
+text-shadow:4px 4px #333;
+}
+@keyframes rubber{
+0%,100%{transform:scale(1)}
+50%{transform:scale(1.1,.9)}
+}
+
+/* MENU */
+#menu{display:none;height:100%;}
+.menu-buttons{
+position:absolute;bottom:30px;width:100%;
+display:flex;justify-content:center;gap:15px;
+}
+.menu-btn{
+background:none;border:none;color:white;
+font-size:1rem;cursor:pointer;
+text-shadow:2px 2px #333;
+transition:.2s;
+}
+.menu-btn:hover{transform:scale(1.1);}
+
+.avatar{
+position:absolute;top:20px;right:20px;
+width:60px;height:60px;border-radius:50%;
+border:2px solid white;cursor:pointer;
+}
+
+/* FAST PANEL */
+#fastPanel{
+position:absolute;bottom:80px;left:50%;
+transform:translateX(-50%) scaleY(0);
+transform-origin:bottom;
+background:#111;padding:10px 20px;
+border:2px solid white;border-radius:10px;
+display:flex;gap:10px;transition:.3s;
+}
+
+/* MODAL */
+.modal{
+position:fixed;inset:0;background:rgba(0,0,0,.8);
+display:none;justify-content:center;align-items:center;
+}
+.modal-content{
+background:#111;padding:20px;border-radius:15px;
+text-align:center;
+}
+
+/* DICE */
+#cube{
+width:80px;height:80px;background:white;color:black;
+display:flex;align-items:center;justify-content:center;
+font-size:30px;margin:auto;border-radius:10px;
+}
+
+.grid{
+display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+margin-top:10px;
+}
+
+/* RESULT */
+.result{
+position:fixed;inset:0;background:rgba(0,0,0,.7);
+display:flex;justify-content:center;align-items:center;
+}
+.result-box{
+background:#111;padding:20px;border-radius:15px;
+animation:rubber .5s infinite alternate;
+}
+</style>
+
 </head>
+
 <body>
 
 <div class="noise"></div>
-<div class="vignette"></div>
-<div id="film-chaos"></div>
 
-<div id="loading-screen">
-    <h1 class="title">CARTOON<br>GAME</h1>
-    <div class="bar-wrap"><div id="bar"></div></div>
-    <div class="version">v3.1</div>
+<div id="loading">
+<div class="title">CARTOON GAME</div>
 </div>
 
-<div id="main-menu">
-    <div class="avatar" id="avatarBtn"><img id="ava" src="" alt="ava"></div>
-    <div class="menu-buttons">
-        <button class="menu-btn" data-action="fastgame">Fast Game</button>
-        <button class="menu-btn" data-action="slots">Slots</button>
-        <button class="menu-btn" data-action="bonus">Bonus</button>
-        <button class="menu-btn" data-action="stat">Stat</button>
-        <button class="menu-btn" data-action="fight">Fight</button>
-    </div>
-    <div class="version">v3.1</div>
+<div id="menu">
+
+<img id="avatar" class="avatar">
+
+<div id="fastPanel">
+<button class="menu-btn" onclick="openDice()">Dice</button>
 </div>
 
-<div id="fastgamePanel" class="fastgame-panel">
-    <button class="fastgame-btn" data-game="roulet">Roulet</button>
-    <button class="fastgame-btn" data-game="dice">Dice</button>
+<div class="menu-buttons">
+<button class="menu-btn" onclick="toggleFast()">Fast Game</button>
+<button class="menu-btn">Slots</button>
+<button class="menu-btn">Bonus</button>
+<button class="menu-btn" onclick="openStat()">Stat</button>
+<button class="menu-btn">Fight</button>
 </div>
 
-<div id="diceModal" class="dice-modal">
-    <div class="dice-content">
-        <div class="dice-cube" id="diceCube">⚀</div>
-        <div class="bet-buttons" id="betButtons">
-            <button class="bet-btn" data-bet="even">EVEN</button>
-            <button class="bet-btn" data-bet="odd">ODD</button>
-            <button class="bet-btn" data-bet="1">1</button>
-            <button class="bet-btn" data-bet="2">2</button>
-            <button class="bet-btn" data-bet="3">3</button>
-            <button class="bet-btn" data-bet="4">4</button>
-            <button class="bet-btn" data-bet="5">5</button>
-            <button class="bet-btn" data-bet="6">6</button>
-        </div>
-        <button class="close-profile" id="closeDice" style="margin-top: 20px;">CLOSE</button>
-    </div>
 </div>
 
-<div class="chip-right" id="chipBtn">
-    <div class="chip-value" id="chipValue">0.1</div>
-    <div class="chip-label">$</div>
+<!-- STAT -->
+
+<div id="stat" class="modal">
+<div class="modal-content">
+<h2>STAT</h2>
+<button class="menu-btn">Deposit</button>
+<button class="menu-btn">Withdraw</button>
+</div>
 </div>
 
-<div class="chip-drum" id="chipDrum">
-    <div class="drum-arrow-up" id="arrowUp">▲</div>
-    <div class="drum-value" id="drumValue">0.1</div>
-    <div class="drum-arrow-down" id="arrowDown">▼</div>
+<!-- DICE -->
+
+<div id="dice" class="modal">
+<div class="modal-content">
+
+<div id="cube">?</div>
+
+<div class="grid">
+<button onclick="bet('even')" class="menu-btn">even</button>
+<button onclick="bet('odd')" class="menu-btn">odd</button>
+<button onclick="bet(1)" class="menu-btn">1</button>
+<button onclick="bet(2)" class="menu-btn">2</button>
+<button onclick="bet(3)" class="menu-btn">3</button>
+<button onclick="bet(4)" class="menu-btn">4</button>
+<button onclick="bet(5)" class="menu-btn">5</button>
+<button onclick="bet(6)" class="menu-btn">6</button>
 </div>
 
-<div class="countdown-display" id="countdownDisplay"></div>
-
-<div id="resultPopup" class="result-popup">
-    <div class="result-text" id="resultText"></div>
-    <img id="resultImg" src="" alt="">
+<div style="margin-top:10px;display:flex;justify-content:space-between;">
+<button onclick="undo()" class="menu-btn">←</button>
+<div onclick="chip()" id="chip" class="menu-btn">0.1$</div>
 </div>
 
-<div id="profileModal" class="profile-modal">
-    <div class="profile-content">
-        <div class="profile-name" id="profileName">Player</div>
-        <div class="profile-id" id="profileId">ID: 71831</div>
-        <div class="profile-stats">
-            <div class="stat-item"><span class="stat-label">Games Played:</span><span class="stat-value" id="statGames">0</span></div>
-            <div class="stat-item"><span class="stat-label">Balance:</span><span class="stat-value" id="statBalance">$1000</span></div>
-        </div>
-        <button class="close-profile" id="closeProfile">Close</button>
-    </div>
 </div>
-
-<audio id="music1" loop src="music.mp3"></audio>
-<audio id="music2" loop src="music2.mp3"></audio>
+</div>
 
 <script>
-let tg = null, userData = null;
-try { if (window.Telegram?.WebApp) { tg = window.Telegram.WebApp; tg.expand(); userData = tg.initDataUnsafe?.user; } } catch(e) {}
 
-let currentUser = { id: null, name: 'Player', avatar: null, gamesPlayed: 0, balance: 1000 };
+/* LOAD */
+setTimeout(()=>{
+document.getElementById('loading').style.display='none';
+document.getElementById('menu').style.display='block';
+initUser();
+},1500);
 
-function generateUserId() { let lastId = localStorage.getItem('lastUserId'); let newId = lastId ? parseInt(lastId) + 1 : 71831; localStorage.setItem('lastUserId', newId); return newId; }
+/* USER */
+let user={games:0,money:1000,avatar:null};
+let chips=[0.1,0.5,1,5,10];
+let chipIndex=0;
+let history=[];
 
-function getOrCreateUser() {
-    let userId = null, userName = 'Player';
-    if (userData) { if (userData.id) userId = userData.id; if (userData.first_name) userName = userData.first_name + (userData.last_name ? ' ' + userData.last_name : ''); }
-    if (!userId) { let saved = localStorage.getItem('localUserId'); userId = saved ? parseInt(saved) : generateUserId(); localStorage.setItem('localUserId', userId); }
-    let userKey = `user_${userId}`, savedUser = localStorage.getItem(userKey);
-    if (savedUser) { let u = JSON.parse(savedUser); currentUser = { id: userId, name: userName, avatar: u.avatar, gamesPlayed: u.gamesPlayed || 0, balance: u.balance !== undefined ? u.balance : 1000 }; }
-    else { currentUser = { id: userId, name: userName, avatar: null, gamesPlayed: 0, balance: 1000 }; saveUser(); }
-    return currentUser;
+/* AVATAR */
+function randAvatar(){
+return "https://api.dicebear.com/7.x/fun-emoji/svg?seed="+Math.random();
 }
-function saveUser() { localStorage.setItem(`user_${currentUser.id}`, JSON.stringify({ avatar: currentUser.avatar, gamesPlayed: currentUser.gamesPlayed, balance: currentUser.balance })); }
-function getRandomAvatar() { return Math.floor(Math.random() * 5) + 1 + '.png'; }
-function loadAvatar(img, name) { if (!name) { name = getRandomAvatar(); currentUser.avatar = name; saveUser(); } img.src = name; img.onerror = () => { img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%23FFD966"/%3E%3Ccircle cx="35" cy="40" r="8" fill="white"/%3E%3Ccircle cx="65" cy="40" r="8" fill="white"/%3E%3Ccircle cx="32" cy="37" r="3" fill="black"/%3E%3Ccircle cx="62" cy="37" r="3" fill="black"/%3E%3Cpath d="M35 65 Q50 75 65 65" fill="%23663300"/%3E%3C/svg%3E'; }; }
-function changeAvatar() { let newAvatar = getRandomAvatar(); currentUser.avatar = newAvatar; saveUser(); loadAvatar(document.getElementById('ava'), currentUser.avatar); }
-function showStat() { document.getElementById('profileName').textContent = currentUser.name; document.getElementById('profileId').textContent = `ID: ${currentUser.id}`; document.getElementById('statGames').textContent = currentUser.gamesPlayed; document.getElementById('statBalance').textContent = `$${currentUser.balance.toFixed(2)}`; document.getElementById('profileModal').style.display = 'flex'; }
-function hideProfile() { document.getElementById('profileModal').style.display = 'none'; }
-
-let selectedBetAmount = 0.1;
-let chipValues = [0.1, 0.5, 1, 5, 10];
-let chipIndex = 0;
-
-function updateChipDisplay() { document.getElementById('chipValue').textContent = selectedBetAmount; document.getElementById('drumValue').textContent = selectedBetAmount; }
-document.getElementById('chipBtn').addEventListener('click', () => { document.getElementById('chipDrum').classList.toggle('open'); });
-document.getElementById('arrowUp').addEventListener('click', () => { chipIndex = (chipIndex + 1) % chipValues.length; selectedBetAmount = chipValues[chipIndex]; updateChipDisplay(); });
-document.getElementById('arrowDown').addEventListener('click', () => { chipIndex = (chipIndex - 1 + chipValues.length) % chipValues.length; selectedBetAmount = chipValues[chipIndex]; updateChipDisplay(); });
-
-let diceModal = document.getElementById('diceModal');
-let fastPanel = document.getElementById('fastgamePanel');
-let currentBetType = null;
-
-function showCountdown(callback) {
-    let count = 3;
-    let display = document.getElementById('countdownDisplay');
-    display.style.display = 'block';
-    function update() {
-        display.textContent = count;
-        if (count === 0) {
-            display.style.display = 'none';
-            callback();
-            return;
-        }
-        count--;
-        setTimeout(update, 1000);
-    }
-    update();
+function initUser(){
+user.avatar=randAvatar();
+document.getElementById('avatar').src=user.avatar;
 }
 
-async function playDice(betType) {
-    if (currentUser.balance < selectedBetAmount) { alert('Not enough balance!'); return; }
-    currentBetType = betType;
-    
-    showCountdown(async () => {
-        let result = Math.floor(Math.random() * 6) + 1;
-        let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        let cube = document.getElementById('diceCube');
-        cube.classList.add('animate');
-        setTimeout(() => { cube.textContent = diceSymbols[result-1]; }, 300);
-        setTimeout(() => { cube.classList.remove('animate'); }, 600);
-        
-        let isWin = false, winAmount = 0;
-        if (betType === 'even' && result % 2 === 0) { isWin = true; winAmount = selectedBetAmount * 2; }
-        else if (betType === 'odd' && result % 2 === 1) { isWin = true; winAmount = selectedBetAmount * 2; }
-        else if (parseInt(betType) === result) { isWin = true; winAmount = selectedBetAmount * 3.5; }
-        
-        await new Promise(r => setTimeout(r, 600));
-        
-        if (isWin) {
-            currentUser.balance += winAmount;
-            currentUser.gamesPlayed++;
-            saveUser();
-            showResult('win', winAmount);
-        } else {
-            currentUser.balance -= selectedBetAmount;
-            if (currentUser.balance < 0) currentUser.balance = 0;
-            currentUser.gamesPlayed++;
-            saveUser();
-            showResult('lose');
-        }
-    });
+/* FAST */
+let open=false;
+function toggleFast(){
+open=!open;
+document.getElementById('fastPanel').style.transform=
+open?'translateX(-50%) scaleY(1)':'translateX(-50%) scaleY(0)';
 }
 
-function showResult(type, amount = 0) {
-    let popup = document.getElementById('resultPopup');
-    let text = document.getElementById('resultText');
-    let img = document.getElementById('resultImg');
-    let msgs = ['Nice try', 'No luck', 'Luck next time', 'Not your day'];
-    if (type === 'win') {
-        text.textContent = amount + '$';
-        img.src = 'Dicewin.png';
-    } else {
-        text.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-        img.src = 'Dicelose.png';
-    }
-    popup.classList.add('open');
-    setTimeout(() => { popup.classList.remove('open'); }, 2000);
+/* MODALS */
+function openDice(){document.getElementById('dice').style.display='flex';}
+function openStat(){document.getElementById('stat').style.display='flex';}
+
+/* CHIP */
+function chip(){
+chipIndex=(chipIndex+1)%chips.length;
+document.getElementById('chip').innerText=chips[chipIndex]+'$';
 }
 
-document.querySelectorAll('.bet-btn').forEach(btn => {
-    btn.addEventListener('click', () => { playDice(btn.dataset.bet); });
-});
+/* BET */
+function bet(type){
+let amount=chips[chipIndex];
+history.push({type,amount});
 
-function handleAction(action) {
-    if (action === 'fastgame') { fastPanel.classList.toggle('open'); }
-    else if (action === 'stat') { showStat(); }
-    else if (action === 'slots') { alert('Slots - Coming soon!'); }
-    else if (action === 'bonus') { alert('Bonus - Coming soon!'); }
-    else if (action === 'fight') { alert('Fight - Coming soon!'); }
+setTimeout(()=>roll(type,amount),3000);
 }
 
-document.querySelectorAll('[data-action]').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); handleAction(btn.dataset.action); }); });
-document.querySelectorAll('.fastgame-btn').forEach(btn => { btn.addEventListener('click', () => { if (btn.dataset.game === 'dice') { fastPanel.classList.remove('open'); diceModal.style.display = 'flex'; } else { alert(btn.dataset.game + ' - Coming soon!'); } }); });
-document.getElementById('closeDice').addEventListener('click', () => { diceModal.style.display = 'none'; document.getElementById('chipDrum').classList.remove('open'); });
-document.getElementById('avatarBtn').addEventListener('click', () => { changeAvatar(); });
-document.getElementById('closeProfile').addEventListener('click', hideProfile);
+function undo(){history.pop();}
 
-let m1 = document.getElementById('music1'), m2 = document.getElementById('music2');
-m1.volume = 0.75; m2.volume = 0.1;
-let audioStarted = false;
-function initAudio() { if (!audioStarted) { m1.play().then(() => { audioStarted = true; }).catch(e => {}); } }
-function switchToMusic2() { if (audioStarted) { m1.pause(); m2.play().catch(e => {}); } }
-setTimeout(initAudio, 100);
-document.body.addEventListener('click', initAudio);
+/* ROLL */
+function roll(type,amount){
+let d=Math.floor(Math.random()*6)+1;
+document.getElementById('cube').innerText=d;
 
-function triggerFilm() { let film = document.getElementById('film-chaos'); film.innerHTML = ''; for(let i=0;i<4;i++) { let d = document.createElement('div'); d.className = 'dust'; let s = Math.random()*6+2; d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${Math.random()*0.8+0.6}s`; film.appendChild(d); } if (Math.random()>0.7) { let sc = document.createElement('div'); sc.className = 'scratch'; sc.style.left = Math.random()*100+'%'; sc.style.height = Math.random()*60+20+'%'; sc.style.top = Math.random()*40+20+'%'; film.appendChild(sc); } setTimeout(() => { if (film.children.length>20) film.innerHTML=''; }, 1000); }
-setInterval(triggerFilm, Math.random()*400+800);
+let win=false;
 
-let p = 0;
-let loadInt = setInterval(() => { p += 1.43; document.getElementById('bar').style.width = Math.min(p,100)+'%'; if(p>=100){ clearInterval(loadInt); finishLoading(); } }, 100);
-function finishLoading() { switchToMusic2(); getOrCreateUser(); loadAvatar(document.getElementById('ava'), currentUser.avatar); document.getElementById('loading-screen').style.opacity='0'; setTimeout(() => { document.getElementById('loading-screen').style.display='none'; document.getElementById('main-menu').style.display='block'; setTimeout(() => { document.getElementById('main-menu').style.opacity='1'; }, 50); }, 500); }
+if(type==='even') win=d%2===0;
+else if(type==='odd') win=d%2!==0;
+else win=d===type;
+
+if(win){
+let mult=(type==='even'||type==='odd')?2:3.5;
+let winAmount=amount*mult;
+user.money+=winAmount;
+show(true,winAmount);
+}else{
+show(false,0);
+}
+
+user.games++;
+}
+
+/* RESULT */
+function show(win,amount){
+let div=document.createElement('div');
+div.className='result';
+
+let texts=["Nice try","No luck","Not your day"];
+
+div.innerHTML=`
+<div class="result-box">
+<img src="${win?'Dicewin.gif':'Dicelose.gif'}" width="120"><br>
+${win?amount+'$':texts[Math.floor(Math.random()*texts.length)]}
+</div>`;
+
+document.body.appendChild(div);
+
+setTimeout(()=>div.remove(),2000);
+}
+
 </script>
+
 </body>
 </html>
