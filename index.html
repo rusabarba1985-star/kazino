@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cartoon Game - Mobile Noir</title>
+    <title>Cartoon Game - Multiplatform</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
 
@@ -22,7 +22,7 @@
             touch-action: manipulation;
         }
 
-        /* ПЛЕНКА И ВИЗУАЛ */
+        /* ЭФФЕКТЫ ПЛЕНКИ */
         .noise { position: fixed; inset: 0; opacity: 0.15; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
@@ -30,129 +30,152 @@
         @keyframes fadeOut { 0% { opacity: 0.5; } 100% { opacity: 0; } }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 510; pointer-events: none; }
 
-        /* ЭКРАН ЗАГРУЗКИ */
+        /* ЗАГРУЗКА */
         #loading-screen { 
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
         }
         .loading-title {
-            font-size: 3.5rem; text-align: center; line-height: 0.9;
+            font-size: 4rem; text-align: center; line-height: 0.8;
             animation: title-jump 0.8s infinite var(--spring);
-            text-shadow: 5px 5px 0 #333;
+            text-shadow: 6px 6px 0 #333;
         }
         @keyframes title-jump {
             0%, 100% { transform: scale(1) rotate(-3deg); }
             50% { transform: scale(1.1, 0.9) rotate(3deg); }
         }
         .loader-bar-container {
-            width: 70%; max-width: 250px; height: 15px; border: 4px solid #fff;
-            border-radius: 20px; margin-top: 30px; overflow: hidden; background: #222;
+            width: 250px; height: 18px; border: 5px solid #fff;
+            border-radius: 20px; margin-top: 40px; overflow: hidden; background: #222;
         }
         #bar { height: 100%; width: 0%; background: #fff; }
 
-        /* ГЛАВНЫЙ ИНТЕРФЕЙС */
-        #main-menu { display: none; height: 100vh; display: flex; flex-direction: column; opacity: 0; transition: opacity 0.8s; z-index: 50; }
+        /* ОСНОВНОЕ МЕНЮ */
+        #main-menu { display: none; height: 100vh; position: relative; opacity: 0; transition: opacity 0.8s; z-index: 50; }
         
-        .header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
-        .balance-box { font-size: 2rem; text-shadow: 3px 3px 0 #333; }
-        .avatar-box { width: 70px; height: 70px; border: 5px solid #fff; border-radius: 50%; overflow: hidden; cursor: pointer; box-shadow: 4px 4px 0 #333; }
+        .header { display: flex; justify-content: space-between; padding: 25px; align-items: center; }
+        .balance-box { font-size: 2.5rem; text-shadow: 4px 4px 0 #333; }
+        .avatar-box { 
+            width: 80px; height: 80px; border: 6px solid #fff; 
+            border-radius: 50%; overflow: hidden; cursor: pointer; 
+            box-shadow: 5px 5px 0 #333; flex-shrink: 0;
+        }
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .menu-buttons-container {
-            margin-top: auto; padding-bottom: 40px;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-        }
-
+        /* КНОПКИ */
         .btn-cartoon {
             background: #000; color: #fff; border: 5px solid #fff;
-            padding: 12px 24px; font-family: var(--font-main); font-size: 1.1rem;
+            padding: 12px 20px; font-family: var(--font-main); font-size: 1.2rem;
             border-radius: 20px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 5px 0 #333; transition: transform 0.2s var(--spring);
-            width: 80%; max-width: 280px; text-align: center;
+            box-shadow: 0 6px 0 #333; transition: transform 0.2s var(--spring);
+            text-align: center;
         }
         .btn-active { animation: btn-bounce 0.4s var(--spring); }
         @keyframes btn-bounce {
             0% { transform: scale(1); }
-            40% { transform: scale(0.8) translateY(4px); }
+            40% { transform: scale(0.8) translateY(5px); }
             100% { transform: scale(1) translateY(0); }
         }
 
-        /* ПОДМЕНЮ FAST GAME */
+        /* ДИЗАЙН ДЛЯ ПК */
+        @media (min-width: 1024px) {
+            .menu-buttons-container {
+                position: absolute; bottom: 50px; width: 100%;
+                display: flex; justify-content: center; gap: 15px;
+            }
+            #fast-game-sub {
+                position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%) scale(0);
+            }
+        }
+
+        /* ДИЗАЙН ДЛЯ ТЕЛЕФОНА */
+        @media (max-width: 1023px) {
+            .balance-box { font-size: 2rem; }
+            .avatar-box { width: 70px; height: 70px; }
+            .menu-buttons-container {
+                position: absolute; bottom: 30px; width: 100%;
+                display: flex; flex-direction: column; align-items: center; gap: 12px;
+            }
+            .btn-cartoon { width: 85%; max-width: 300px; }
+            /* Выдвигается выше кнопок на телефоне */
+            #fast-game-sub {
+                position: absolute; bottom: 320px; left: 50%; transform: translateX(-50%) scale(0);
+            }
+        }
+
         #fast-game-sub {
-            position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%) scale(0);
-            background: #000; border: 5px solid #fff; border-radius: 25px; padding: 15px;
+            background: #000; border: 6px solid #fff; border-radius: 25px; padding: 15px;
             display: flex; gap: 15px; transition: transform 0.5s var(--spring); transform-origin: bottom;
             z-index: 60;
         }
         #fast-game-sub.active { transform: translateX(-50%) scale(1); }
 
+        /* КРУГЛЫЕ ФИШКИ (ИСПРАВЛЕН ОВАЛ) */
+        .chip-container { position: relative; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .chip-main {
+            width: 85px; height: 85px; background: #111; border-radius: 50%;
+            border: 5px solid #fff; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; z-index: 100; position: relative; aspect-ratio: 1/1;
+        }
+        .chip-main::after { content: ''; position: absolute; inset: 0; border: 10px dashed #fff; border-radius: 50%; }
+        
+        .sub-chips-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .sub-chip {
+            position: absolute; width: 65px; height: 65px; background: #222;
+            border: 4px solid #fff; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 0.9rem;
+            opacity: 0; transition: all 0.6s var(--spring);
+            transform: translate(0, 0) scale(0); 
+            z-index: 50; pointer-events: none; aspect-ratio: 1/1;
+        }
+        .sub-chip::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
+        .active .sub-chip { opacity: 1; pointer-events: auto; }
+
         /* DICE MODAL */
         .modal { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.96); 
             display: none; justify-content: center; align-items: center; z-index: 800; 
         }
         .modal.show { display: flex; }
         .modal-content { 
-            background: #000; border: 6px solid #fff; border-radius: 40px; 
-            width: 90%; max-width: 380px; padding: 30px 15px; text-align: center;
-            transform: scale(0.8); transition: transform 0.5s var(--spring);
+            background: #000; border: 8px solid #fff; border-radius: 50px; 
+            width: 90%; max-width: 400px; padding: 40px 15px; text-align: center;
+            transform: scale(0.7); transition: transform 0.6s var(--spring);
         }
         .modal.show .modal-content { transform: scale(1); }
 
-        .dice-row { display: flex; align-items: center; justify-content: space-around; margin: 30px 0; position: relative; }
+        .dice-area { display: flex; align-items: center; justify-content: space-around; margin: 35px 0; }
         #the-dice { 
-            width: 90px; height: 90px; background: #fff; border-radius: 18px; 
-            border: 6px solid #000; color: #000; font-size: 3.5rem; 
+            width: 100px; height: 100px; background: #fff; border-radius: 20px; 
+            border: 6px solid #000; color: #000; font-size: 4rem; 
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 0 #ccc;
+            box-shadow: 0 10px 0 #ccc; flex-shrink: 0;
         }
         .dice-anim { animation: dice-toss 1s var(--soft-spring); }
         @keyframes dice-toss {
             0% { transform: translateY(0) rotate(0); }
-            30% { transform: translateY(-150px) rotate(180deg) scale(1.2); }
-            60% { transform: translateY(10px) rotate(300deg) scale(0.9, 1.1); }
+            30% { transform: translateY(-160px) rotate(180deg) scale(1.2); }
+            60% { transform: translateY(15px) rotate(300deg) scale(0.9, 1.1); }
             100% { transform: translateY(0) rotate(360deg) scale(1); }
         }
 
-        /* ФИШКИ - ВЫЛЕТ ИЗ ЦЕНТРА */
-        .chip-container { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
-        .chip-main {
-            width: 80px; height: 80px; background: #111; border-radius: 50%;
-            border: 5px solid #fff; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; z-index: 100; position: relative;
-        }
-        .chip-main::after { content: ''; position: absolute; inset: 0; border: 8px dashed #fff; border-radius: 50%; }
-        
-        .sub-chips-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .sub-chip {
-            position: absolute; width: 60px; height: 60px; background: #222;
-            border: 4px solid #fff; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 0.8rem;
-            opacity: 0; transition: all 0.6s var(--spring);
-            transform: translate(0, 0) scale(0); /* Старт ровно в центре */
-            z-index: 50; pointer-events: none;
-        }
-        .sub-chip::after { content: ''; position: absolute; inset: 0; border: 5px dashed #fff; border-radius: 50%; }
-        .active .sub-chip { opacity: 1; pointer-events: auto; }
-
-        .bets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; }
+        .bets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 25px 0; }
         .bet-btn { 
             background: #000; border: 3px solid #fff; color: #fff; 
-            padding: 10px 0; border-radius: 15px; font-family: var(--font-main); 
-            cursor: pointer; font-size: 0.9rem;
+            padding: 12px 0; border-radius: 18px; font-family: var(--font-main); 
+            cursor: pointer; font-size: 1rem;
         }
         .bet-btn.selected { background: #fff; color: #000; }
 
         /* РЕЗУЛЬТАТ */
         #res-pop {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: #fff; border: 8px solid #000; border-radius: 35px;
-            padding: 25px; z-index: 2000; text-align: center; color: #000;
-            transition: transform 0.6s var(--spring); width: 250px; pointer-events: none;
+            background: #fff; border: 10px solid #000; border-radius: 40px;
+            padding: 30px; z-index: 2000; text-align: center; color: #000;
+            transition: transform 0.6s var(--spring); width: 280px; pointer-events: none;
         }
         #res-pop.show { transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        #res-pop img { width: 150px; height: 150px; border: 5px solid #000; border-radius: 20px; object-fit: cover; margin-bottom: 15px; }
-
+        #res-pop img { width: 160px; height: 160px; border: 6px solid #000; border-radius: 20px; object-fit: cover; margin-bottom: 20px; }
     </style>
 </head>
 <body onclick="initAudio()">
@@ -168,19 +191,19 @@
     <div id="loading-screen">
         <div class="loading-title">CARTOON<br>GAME</div>
         <div class="loader-bar-container"><div id="bar"></div></div>
-        <div style="margin-top: 15px; letter-spacing: 3px; font-size: 0.8rem;">LOADING NOSTALGIA...</div>
+        <div style="margin-top: 15px; letter-spacing: 4px; font-size: 1rem;">LOADING...</div>
     </div>
 
     <!-- MAIN MENU -->
-    <div id="main-menu" style="display: none;">
+    <div id="main-menu">
         <div class="header">
             <div class="balance-box">$<span id="bal-val">1000</span></div>
             <div class="avatar-box" id="avaBtn"><img id="m-ava" src="" alt="ava"></div>
         </div>
 
         <div id="fast-game-sub">
-            <button class="btn-cartoon" style="width: auto; font-size: 0.8rem;">ROULETTE</button>
-            <button class="btn-cartoon" style="width: auto; font-size: 0.8rem;" id="openDice">DICE</button>
+            <button class="btn-cartoon" style="width: auto; font-size: 0.9rem;">ROULETTE</button>
+            <button class="btn-cartoon" style="width: auto; font-size: 0.9rem;" id="openDice">DICE</button>
         </div>
 
         <div class="menu-buttons-container">
@@ -195,9 +218,9 @@
     <!-- DICE MODAL -->
     <div id="diceModal" class="modal">
         <div class="modal-content">
-            <h2 style="margin:0; font-size: 2rem;">LUCKY DICE</h2>
+            <h2 style="margin:0; font-size: 2.2rem;">LUCKY DICE</h2>
             
-            <div class="dice-row">
+            <div class="dice-area">
                 <div id="the-dice">?</div>
                 
                 <div class="chip-container">
@@ -223,27 +246,27 @@
                 <button class="bet-btn" data-bet="6">6</button>
             </div>
             
-            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('diceModal')">BACK</button>
+            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('diceModal')">LEAVE</button>
         </div>
     </div>
 
     <!-- STAT MODAL -->
     <div id="statModal" class="modal">
         <div class="modal-content">
-            <h2 style="font-size: 2rem;">STATISTICS</h2>
-            <div style="text-align: left; padding: 20px; font-size: 1.3rem;">
+            <h2 style="font-size: 2.2rem;">STATISTICS</h2>
+            <div style="text-align: left; padding: 25px; font-size: 1.5rem;">
                 <p>GAMES: <span id="s-games" style="float:right">0</span></p>
                 <p>DEPOSITS: <span style="float:right">$0</span></p>
                 <p>WITHDRAWS: <span style="float:right">$0</span></p>
             </div>
-            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('statModal')">OK</button>
+            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('statModal')">CLOSE</button>
         </div>
     </div>
 
     <!-- RESULT POPUP -->
     <div id="res-pop">
         <img id="res-img" src="" alt="">
-        <div id="res-txt" style="font-size: 1.8rem;">YOU WIN!</div>
+        <div id="res-txt" style="font-size: 2rem;">YOU WIN!</div>
     </div>
 
     <script>
@@ -267,7 +290,6 @@
 
         function switchMusic() { m1.pause(); m2.play().catch(() => {}); }
 
-        // ПРУЖИНА ДЛЯ КНОПОК
         document.querySelectorAll('.btn-cartoon, .bet-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 this.classList.remove('btn-active');
@@ -276,7 +298,6 @@
             });
         });
 
-        // ПЛЕНКА
         setInterval(() => {
             const container = document.getElementById('film-chaos');
             const d = document.createElement('div');
@@ -300,22 +321,20 @@
             document.getElementById('s-games').innerText = gamesCount;
         }
 
-        // ВЫДВИЖЕНИЕ ФИШЕК ИЗ ЦЕНТРА
+        // КРУГЛЫЕ ФИШКИ - ВЫЛЕТ ИЗ ЦЕНТРА
         const mainChip = document.getElementById('mainChip');
         const radial = document.getElementById('radialChips');
         
         mainChip.onclick = (e) => {
             if(isRolling) return;
             e.stopPropagation();
-            const isActive = radial.classList.toggle('active');
+            const active = radial.classList.toggle('active');
             const chips = radial.querySelectorAll('.sub-chip');
-            
-            if(isActive) {
+            if(active) {
                 chips.forEach((c, i) => {
                     const angle = (i * 40) - 120;
-                    const dist = 120; // Расстояние вылета
-                    const x = Math.cos(angle * Math.PI / 180) * dist;
-                    const y = Math.sin(angle * Math.PI / 180) * dist;
+                    const x = Math.cos(angle * Math.PI / 180) * 125;
+                    const y = Math.sin(angle * Math.PI / 180) * 125;
                     c.style.transform = `translate(${x}px, ${y}px) scale(1)`;
                 });
             } else {
@@ -333,7 +352,7 @@
             };
         });
 
-        // DICE GAME
+        // DICE LOGIC
         const bBtns = document.querySelectorAll('.bet-btn');
         bBtns.forEach(b => {
             b.onclick = () => {
@@ -365,8 +384,8 @@
                 while( (selectedBet === 'even' && finalRes % 2 === 0) || (selectedBet === 'odd' && finalRes % 2 !== 0) || (selectedBet == finalRes) );
             }
 
-            let tCount = 0;
-            const t = setInterval(() => { dice.innerText = Math.floor(Math.random()*6)+1; tCount++; if(tCount > 10) clearInterval(t); }, 80);
+            let tc = 0;
+            const t = setInterval(() => { dice.innerText = Math.floor(Math.random()*6)+1; tc++; if(tc > 10) clearInterval(t); }, 80);
 
             setTimeout(() => {
                 dice.classList.remove('dice-anim');
@@ -426,7 +445,7 @@
                 clearInterval(loader);
                 switchMusic();
                 document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('main-menu').style.display = 'flex';
+                document.getElementById('main-menu').style.display = 'block';
                 setTimeout(() => document.getElementById('main-menu').style.opacity = '1', 50);
                 init();
             }
