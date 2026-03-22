@@ -2,138 +2,421 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartoon Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cartoon Game - Retro Rubber Hose</title>
     <style>
-        :root { --bg-color: #050505; --text-color: #fff; }
-        
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+
+        :root { 
+            --bg: #000; 
+            --text: #fff; 
+            --font-main: 'Luckiest Guy', cursive;
+            --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            --soft-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: var(--bg-color); color: var(--text-color); 
-            font-family: 'Georgia', serif; /* Возвращен стандартный винтажный шрифт */
-            overflow: hidden; 
+            background: var(--bg); color: var(--text); 
+            font-family: var(--font-main); overflow: hidden; user-select: none;
         }
 
         /* ЭФФЕКТЫ ГРЯЗНОЙ ПЛЕНКИ */
-        .noise { position: fixed; inset: 0; opacity: 0.08; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://w3.org id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .noise { position: fixed; inset: 0; opacity: 0.12; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
-        .dust { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
-        .scratch { position: absolute; background: rgba(255,255,255,0.2); width: 1.5px; height: 100%; }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, black 140%); z-index: 510; pointer-events: none; }
+        .dust { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; pointer-events: none; animation: fadeOut 0.8s forwards; }
+        .scratch { position: absolute; background: rgba(255,255,255,0.15); width: 1px; height: 100%; pointer-events: none; animation: fadeOut 0.8s forwards; }
+        @keyframes fadeOut { 0% { opacity: 0.5; } 100% { opacity: 0; } }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 140%); z-index: 510; pointer-events: none; }
 
-        /* ЭКРАН ЗАГРУЗКИ */
-        #loading-screen { 
-            position: fixed; inset: 0; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; 
+        /* МУЛЬТЯШНЫЕ КНОПКИ С ОТДАЧЕЙ */
+        .btn-cartoon {
+            background: #000; color: #fff; border: 6px solid #fff;
+            padding: 12px 24px; font-family: var(--font-main); font-size: 1.2rem;
+            border-radius: 20px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 6px 0 #333; transition: all 0.3s var(--spring);
+            display: inline-block; position: relative;
         }
-        .title { 
-            font-size: 3.5rem; text-align: center; text-transform: uppercase; 
-            font-weight: 900; margin: 0; line-height: 0.9;
-            animation: rubber-jump 1s infinite ease-in-out;
+        /* Анимация пружинки при нажатии */
+        .btn-active { animation: btn-bounce 0.4s var(--spring); }
+        @keyframes btn-bounce {
+            0% { transform: scale(1); }
+            40% { transform: scale(0.85) translateY(5px); }
+            100% { transform: scale(1) translateY(0); }
         }
-        .bar-wrap { width: 200px; height: 4px; background: #222; margin-top: 40px; }
-        #bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* ГЛАВНОЕ МЕНЮ */
-        #main-menu { display: none; width: 100%; height: 100%; position: relative; z-index: 50; }
-        .avatar { 
-            position: absolute; top: 20px; right: 20px; 
-            width: 60px; height: 60px; border: 3px solid #fff; 
-            border-radius: 50%; overflow: hidden; background: #111;
+        /* КАЗИНО ФИШКИ */
+        .chip-main {
+            width: 90px; height: 90px; background: #111; border-radius: 50%;
+            border: 6px solid #fff; position: relative; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; z-index: 110;
+            transition: transform 0.4s var(--spring);
         }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .chip-main::after { content: ''; position: absolute; inset: 0; border: 10px dashed #fff; border-radius: 50%; }
+        
+        .sub-chip {
+            position: absolute; width: 65px; height: 65px; background: #222;
+            border: 4px solid #fff; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 0.9rem;
+            opacity: 0; pointer-events: none; transition: all 0.6s var(--spring);
+            z-index: 50;
+        }
+        .sub-chip::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
+        .sub-chips.active .sub-chip { opacity: 1; pointer-events: auto; }
 
-        @keyframes rubber-jump {
-            0%, 100% { transform: scale(1) translateY(0); }
-            50% { transform: scaleY(1.1) scaleX(0.95) translateY(-20px); }
+        /* ПЛАВНЫЙ КУБИК */
+        #the-dice { 
+            width: 110px; height: 110px; background: #fff; border-radius: 22px; 
+            border: 8px solid #000; color: #000; font-size: 4.5rem; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 0 #ccc; transition: transform 0.4s var(--soft-spring);
         }
+        @keyframes dice-toss {
+            0% { transform: translateY(0) rotate(0) scale(1); }
+            30% { transform: translateY(-180px) rotate(180deg) scale(1.25); }
+            60% { transform: translateY(15px) rotate(300deg) scale(0.85, 1.15); }
+            85% { transform: translateY(-20px) rotate(340deg) scale(1.1, 0.9); }
+            100% { transform: translateY(0) rotate(360deg) scale(1); }
+        }
+        .dice-anim { animation: dice-toss 1s var(--soft-spring); }
+
+        /* ИНТЕРФЕЙС */
+        #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        .bar-wrap { width: 220px; height: 16px; background: #222; border: 4px solid #fff; border-radius: 20px; margin-top: 30px; overflow: hidden; }
+        #bar { width: 0%; height: 100%; background: #fff; }
+
+        #main-menu { display: none; height: 100vh; position: relative; opacity: 0; transition: opacity 0.8s; z-index: 50; }
+        .header { display: flex; justify-content: space-between; padding: 30px; align-items: center; }
+        
+        .avatar-box { width: 85px; height: 85px; border: 6px solid #fff; border-radius: 50%; overflow: hidden; cursor: pointer; transition: transform 0.3s var(--spring); }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.96); 
+            display: none; justify-content: center; align-items: center; z-index: 800; 
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content { 
+            background: #0a0a0a; border: 8px solid #fff; border-radius: 50px; 
+            width: 90%; max-width: 420px; padding: 45px 20px; text-align: center;
+            transform: scale(0.5) translateY(100px); transition: transform 0.6s var(--spring);
+        }
+        .modal.show .modal-content { transform: scale(1) translateY(0); }
+
+        .bets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 30px 0; }
+        .bet-btn { 
+            background: #000; border: 4px solid #fff; color: #fff; 
+            padding: 12px 0; border-radius: 18px; font-family: var(--font-main); 
+            cursor: pointer; font-size: 1.1rem; transition: transform 0.3s var(--spring);
+        }
+        .bet-btn.selected { background: #fff; color: #000; }
+
+        /* ОКНО РЕЗУЛЬТАТА */
+        #res-pop {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: #fff; border: 10px solid #000; border-radius: 40px;
+            padding: 35px; z-index: 2000; text-align: center; color: #000;
+            transition: transform 0.6s var(--spring); pointer-events: none;
+        }
+        #res-pop.show { transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+        #res-pop img { width: 160px; height: 160px; margin-bottom: 20px; border: 6px solid #000; border-radius: 25px; }
+
+        #fast-game-sub {
+            position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%) scale(0);
+            background: #000; border: 6px solid #fff; border-radius: 25px; padding: 15px;
+            display: flex; gap: 15px; transition: transform 0.5s var(--spring); transform-origin: bottom;
+        }
+        #fast-game-sub.active { transform: translateX(-50%) scale(1); }
     </style>
 </head>
-<body onclick="tryPlayMusic()">
+<body>
 
     <div class="noise"></div>
     <div class="vignette"></div>
     <div id="film-chaos"></div>
 
-    <!-- Загрузка -->
     <div id="loading-screen">
-        <h1 class="title">CARTOON<br>GAME</h1>
+        <h1 style="font-size: 4rem; text-shadow: 4px 4px 0 #333; margin: 0;">CARTOON<br>GAME</h1>
         <div class="bar-wrap"><div id="bar"></div></div>
     </div>
 
-    <!-- Меню -->
     <div id="main-menu">
-        <div class="avatar"><img id="ava" src="" alt=""></div>
+        <div class="header">
+            <div style="font-size: 2.8rem; text-shadow: 4px 4px 0 #333;">$<span id="bal-val">1000</span></div>
+            <div class="avatar-box" id="avaBtn"><img id="m-ava" src="" alt="ava"></div>
+        </div>
+
+        <div id="fast-game-sub">
+            <button class="btn-cartoon" id="fakeRoulette">ROULETTE</button>
+            <button class="btn-cartoon" id="openDice">DICE</button>
+        </div>
+
+        <div style="position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-cartoon" id="fastGameBtn">FAST GAME</button>
+            <button class="btn-cartoon">SLOTS</button>
+            <button class="btn-cartoon">BONUS</button>
+            <button class="btn-cartoon" id="statBtn">STAT</button>
+            <button class="btn-cartoon">FIGHT</button>
+        </div>
     </div>
 
-    <audio id="bgMusic" loop src="music.mp3"></audio>
-
-    <script src="https://telegram.org"></script>
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        const audio = document.getElementById('bgMusic');
-        const film = document.getElementById('film-chaos');
-        const bar = document.getElementById('bar');
-        let musicStarted = false;
-
-        // Попытка запустить музыку при клике
-        function tryPlayMusic() {
-            if (!musicStarted) {
-                audio.play().then(() => { musicStarted = true; }).catch(e => console.log(e));
-            }
-        }
-
-        // 1. ГРЯЗНАЯ ПЛЕНКА (РИТМ 1 СЕК)
-        function triggerChaos() {
-            film.innerHTML = '';
-            for(let i=0; i<5; i++) {
-                const d = document.createElement('div');
-                d.className = 'dust';
-                const s = Math.random()*6+2;
-                d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%`;
-                film.appendChild(d);
-            }
-            const sc = document.createElement('div');
-            sc.className = 'scratch';
-            sc.style.left = Math.random()*100+'%';
-            film.appendChild(sc);
-            setTimeout(() => { film.innerHTML = ''; }, 100);
-        }
-        setInterval(triggerChaos, 1000);
-
-        // 2. ЗАГРУЗКА (7 СЕКУНД)
-        let prog = 0;
-        const loadInterval = setInterval(() => {
-            prog += 1.43; 
-            bar.style.width = prog + '%';
-            if (prog >= 100) {
-                clearInterval(loadInterval);
-                finishLoading();
-            }
-        }, 100);
-
-        function finishLoading() {
-            audio.pause(); 
-            audio.currentTime = 0;
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('main-menu').style.display = 'block';
-
-            const img = document.getElementById('ava');
-            const user = tg.initDataUnsafe?.user;
+    <!-- DICE MODAL -->
+    <div id="diceModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin:0; font-size: 2.6rem; letter-spacing: 2px;">LUCKY DICE</h2>
             
-            if (user && user.photo_url) {
-                img.src = user.photo_url;
+            <div style="display: flex; align-items: center; justify-content: center; gap: 40px; margin: 50px 0;">
+                <div id="the-dice">?</div>
+                
+                <div style="position: relative; width: 90px; height: 90px;">
+                    <div class="chip-main" id="mainChip"><span style="font-size: 1.4rem;">$0.1</span></div>
+                    <div class="sub-chips" id="radialChips">
+                        <div class="sub-chip" data-val="0.1">$0.1</div>
+                        <div class="sub-chip" data-val="0.5">$0.5</div>
+                        <div class="sub-chip" data-val="1">$1</div>
+                        <div class="sub-chip" data-val="5">$5</div>
+                        <div class="sub-chip" data-val="10">$10</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bets-grid">
+                <button class="bet-btn" data-bet="even">EVEN</button>
+                <button class="bet-btn" data-bet="odd">ODD</button>
+                <button class="bet-btn" data-bet="1">1</button>
+                <button class="bet-btn" data-bet="2">2</button>
+                <button class="bet-btn" data-bet="3">3</button>
+                <button class="bet-btn" data-bet="4">4</button>
+                <button class="bet-btn" data-bet="5">5</button>
+                <button class="bet-btn" data-bet="6">6</button>
+            </div>
+            
+            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('diceModal')">LEAVE GAME</button>
+        </div>
+    </div>
+
+    <!-- STAT MODAL -->
+    <div id="statModal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-size: 2.5rem;">STATISTICS</h2>
+            <div style="text-align: left; padding: 25px; font-size: 1.6rem;">
+                <p>GAMES: <span id="s-games" style="float:right">0</span></p>
+                <p>DEPOSITS: <span style="float:right">$0</span></p>
+                <p>WITHDRAWS: <span style="float:right">$0</span></p>
+            </div>
+            <button class="btn-cartoon" id="closeStat">BACK</button>
+        </div>
+    </div>
+
+    <!-- РЕЗУЛЬТАТ -->
+    <div id="res-pop">
+        <img id="res-img" src="" alt="">
+        <div id="res-txt" style="font-size: 2.2rem;">YOU WIN!</div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        let gamesCount = 0;
+        let betValue = 0.1;
+        let selectedBet = null;
+        let isRolling = false;
+
+        // ПРУЖИНИСТЫЙ КЛИК ДЛЯ ВСЕХ КНОПОК
+        document.querySelectorAll('.btn-cartoon, .bet-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.remove('btn-active');
+                void this.offsetWidth; // Триггер рефлоу
+                this.classList.add('btn-active');
+            });
+        });
+
+        // ПЛЕНКА
+        setInterval(() => {
+            const container = document.getElementById('film-chaos');
+            const d = document.createElement('div');
+            d.className = Math.random() > 0.8 ? 'scratch' : 'dust';
+            if (d.className === 'dust') {
+                const s = Math.random() * 5 + 2;
+                d.style.width = s + 'px'; d.style.height = s + 'px';
+                d.style.left = Math.random() * 100 + '%'; d.style.top = Math.random() * 100 + '%';
             } else {
-                let saved = localStorage.getItem('userAva');
-                if(!saved) {
-                    saved = Math.floor(Math.random() * 3) + 1 + '.png';
-                    localStorage.setItem('userAva', saved);
-                }
-                img.src = saved;
+                d.style.left = Math.random() * 100 + '%';
             }
+            container.appendChild(d);
+            setTimeout(() => d.remove(), 800);
+        }, 200);
+
+        function init() {
+            const ava = localStorage.getItem('userAva') || '1.png';
+            document.getElementById('m-ava').src = ava;
+            updateUI();
         }
+
+        function updateUI() {
+            document.getElementById('bal-val').innerText = balance.toFixed(2);
+            document.getElementById('s-games').innerText = gamesCount;
+        }
+
+        // РАДИАЛЬНОЕ МЕНЮ
+        const mainChip = document.getElementById('mainChip');
+        const radial = document.getElementById('radialChips');
+        
+        mainChip.onclick = (e) => {
+            if(isRolling) return;
+            e.stopPropagation();
+            radial.classList.toggle('active');
+            if(radial.classList.contains('active')) {
+                radial.querySelectorAll('.sub-chip').forEach((c, i) => {
+                    const angle = (i * 40) - 120;
+                    const dist = 145; 
+                    const x = Math.cos(angle * Math.PI / 180) * dist;
+                    const y = Math.sin(angle * Math.PI / 180) * dist - 35; 
+                    c.style.transform = `translate(${x}px, ${y}px)`;
+                });
+            } else {
+                radial.querySelectorAll('.sub-chip').forEach(c => c.style.transform = 'translate(0,0)');
+            }
+        };
+
+        radial.querySelectorAll('.sub-chip').forEach(sc => {
+            sc.onclick = (e) => {
+                e.stopPropagation();
+                betValue = parseFloat(sc.dataset.val);
+                mainChip.querySelector('span').innerText = '$' + betValue;
+                radial.classList.remove('active');
+                radial.querySelectorAll('.sub-chip').forEach(c => c.style.transform = 'translate(0,0)');
+            };
+        });
+
+        // DICE LOGIC
+        const bBtns = document.querySelectorAll('.bet-btn');
+        bBtns.forEach(b => {
+            b.onclick = () => {
+                if(isRolling) return;
+                bBtns.forEach(x => x.classList.remove('selected'));
+                b.classList.add('selected');
+                selectedBet = b.dataset.bet;
+                playDice();
+            };
+        });
+
+        function playDice() {
+            if(balance < betValue) return alert("NOT ENOUGH FUNDS!");
+            
+            isRolling = true;
+            const dice = document.getElementById('the-dice');
+            dice.classList.add('dice-anim');
+
+            // Расчет шанса
+            const isNum = !isNaN(selectedBet);
+            const winProb = isNum ? 0.20 : 0.40;
+            const win = Math.random() < winProb;
+
+            let finalFace;
+            if(win) {
+                if(selectedBet === 'even') finalFace = [2,4,6][Math.floor(Math.random()*3)];
+                else if(selectedBet === 'odd') finalFace = [1,3,5][Math.floor(Math.random()*3)];
+                else finalFace = parseInt(selectedBet);
+            } else {
+                do { finalFace = Math.floor(Math.random()*6)+1; } 
+                while( (selectedBet === 'even' && finalFace % 2 === 0) || 
+                       (selectedBet === 'odd' && finalFace % 2 !== 0) || 
+                       (selectedBet == finalFace) );
+            }
+
+            // Имитация быстрой смены граней во время прыжка
+            let tickCount = 0;
+            const timer = setInterval(() => {
+                dice.innerText = Math.floor(Math.random()*6)+1;
+                tickCount++;
+                if(tickCount > 10) clearInterval(timer);
+            }, 80);
+
+            // Остановка кубика ПЕРЕД показом меню
+            setTimeout(() => {
+                dice.classList.remove('dice-anim');
+                dice.innerText = finalFace;
+                
+                // Пауза перед появлением меню, чтобы кубик "приземлился"
+                setTimeout(() => {
+                    endGame(win, isNum);
+                }, 600); 
+
+            }, 1000); // 1000ms - время анимации кубика
+        }
+
+        function endGame(win, isNum) {
+            balance -= betValue;
+            gamesCount++;
+
+            if(win) {
+                const mult = isNum ? 3.5 : 2.0;
+                const winSum = betValue * mult;
+                balance += winSum;
+                showRes(true, winSum.toFixed(1) + "$");
+            } else {
+                showRes(false);
+            }
+            updateUI();
+        }
+
+        function showRes(win, val = "") {
+            const pop = document.getElementById('res-pop');
+            const img = document.getElementById('res-img');
+            const txt = document.getElementById('res-txt');
+
+            if(win) {
+                img.src = "Dicewin.gif";
+                txt.innerText = "YOU WIN " + val;
+            } else {
+                const msgs = ["Nice try", "No luck", "Luck next time", "Not your day"];
+                img.src = "Dicelose.gif";
+                txt.innerText = msgs[Math.floor(Math.random()*msgs.length)];
+            }
+
+            pop.classList.add('show');
+            setTimeout(() => {
+                pop.classList.remove('show');
+                isRolling = false;
+                selectedBet = null;
+                bBtns.forEach(x => x.classList.remove('selected'));
+            }, 2500);
+        }
+
+        // НАВИГАЦИЯ
+        function showModal(id) { document.getElementById(id).classList.add('show'); }
+        function hideModal(id) { if(isRolling) return; document.getElementById(id).classList.remove('show'); }
+
+        document.getElementById('fastGameBtn').onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('fast-game-sub').classList.toggle('active');
+        };
+        document.getElementById('openDice').onclick = () => showModal('diceModal');
+        document.getElementById('statBtn').onclick = () => showModal('statModal');
+        document.getElementById('closeStat').onclick = () => hideModal('statModal');
+        document.getElementById('avaBtn').onclick = () => showModal('statModal');
+
+        window.onclick = () => {
+            document.getElementById('fast-game-sub').classList.remove('active');
+            radial.classList.remove('active');
+        };
+
+        // ЗАГРУЗКА
+        let p = 0;
+        const loader = setInterval(() => {
+            p += 5;
+            document.getElementById('bar').style.width = p + '%';
+            if(p >= 100) {
+                clearInterval(loader);
+                document.getElementById('loading-screen').style.display = 'none';
+                const m = document.getElementById('main-menu');
+                m.style.display = 'block';
+                setTimeout(() => m.style.opacity = '1', 50);
+                init();
+            }
+        }, 40);
+
     </script>
 </body>
 </html>
