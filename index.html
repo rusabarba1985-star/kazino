@@ -3,137 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cartoon Game - Home</title>
+    <title>Cartoon Game - Hub</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
-        :root { --bg: #000; --text: #fff; --font-main: 'Luckiest Guy', cursive; --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-main); overflow: hidden; user-select: none; touch-action: manipulation; }
+        :root { --bg: #000; --font-main: 'Luckiest Guy', cursive; --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: var(--font-main); overflow: hidden; }
         
-        /* ПЛЕНКА */
-        .noise { position: fixed; inset: 0; opacity: 0.15; pointer-events: none; z-index: 500; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 450; }
-        .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
-        .scratch { width: 1px; height: 100%; opacity: 0.2; }
+        /* ПЛЕНКА ПОВЕРХ ВСЕГО */
+        .noise { position: fixed; inset: 0; opacity: 0.15; pointer-events: none; z-index: 5000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 5001; }
+        .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); animation: fadeOut 0.8s forwards; }
         @keyframes fadeOut { 0% { opacity: 0.5; } 100% { opacity: 0; } }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 510; pointer-events: none; }
 
-        /* ЗАГРУЗКА */
-        #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
-        .loading-title { font-size: 3.5rem; text-align: center; line-height: 0.9; animation: title-jump 0.8s infinite var(--spring); text-shadow: 5px 5px 0 #333; }
-        @keyframes title-jump { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.1, 0.9) rotate(3deg); } }
-        .loader-bar-container { width: 70%; max-width: 250px; height: 15px; border: 4px solid #fff; border-radius: 20px; margin-top: 30px; overflow: hidden; background: #222; }
-        #bar { height: 100%; width: 0%; background: #fff; }
-
-        /* МЕНЮ */
-        #main-menu { display: none; height: 100vh; flex-direction: column; opacity: 0; transition: opacity 0.8s; z-index: 50; }
+        /* ИНТЕРФЕЙС */
         .header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
-        .balance-box { font-size: 2rem; text-shadow: 3px 3px 0 #333; }
-        .avatar-box { width: 70px; height: 70px; border: 5px solid #fff; border-radius: 50%; overflow: hidden; cursor: pointer; box-shadow: 4px 4px 0 #333; }
-        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-        .menu-buttons-container { margin-top: auto; padding-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .btn-cartoon { background: #000; color: #fff; border: 5px solid #fff; padding: 12px 24px; font-family: var(--font-main); font-size: 1.1rem; border-radius: 20px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 0 #333; width: 80%; max-width: 280px; text-align: center; }
+        .balance { font-size: 2.2rem; text-shadow: 3px 3px 0 #333; }
+        .avatar { width: 70px; height: 70px; border: 5px solid #fff; border-radius: 50%; overflow: hidden; cursor: pointer; }
+
+        /* КНОПКИ ВНИЗУ */
+        .bottom-nav { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: center; z-index: 100; }
+        .btn-group { display: flex; gap: 8px; transition: transform 0.6s var(--spring); }
         
-        #fast-game-sub { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%) scale(0); background: #000; border: 5px solid #fff; border-radius: 25px; padding: 15px; display: flex; gap: 15px; transition: transform 0.5s var(--spring); transform-origin: bottom; z-index: 60; }
-        #fast-game-sub.active { transform: translateX(-50%) scale(1); }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 800; }
-        .modal.show { display: flex; }
-        .modal-content { background: #000; border: 6px solid #fff; border-radius: 40px; width: 90%; max-width: 380px; padding: 30px 15px; text-align: center; }
+        /* Кнопки меню */
+        #main-btns { transform: translateY(0); }
+        #main-btns.hide { transform: translateY(200%); }
+
+        /* Кнопки игр */
+        #sub-btns { position: absolute; transform: translateY(200%); }
+        #sub-btns.show { transform: translateY(0); }
+
+        .btn-cartoon {
+            background: #000; color: #fff; border: 4px solid #fff; padding: 10px 15px;
+            font-family: var(--font-main); font-size: 0.8rem; border-radius: 15px;
+            cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 0 #333;
+        }
+
+        #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; }
+        #bar { width: 0%; height: 100%; background: #fff; transition: width 0.3s; }
     </style>
 </head>
-<body onclick="initAudio()">
+<body onclick="resetMenu()">
     <div class="noise"></div>
-    <div class="vignette"></div>
     <div id="film-chaos"></div>
-    <audio id="music2" loop preload="auto"><source src="music2.mp3" type="audio/mpeg"></audio>
 
     <div id="loading-screen">
-        <div class="loading-title">CARTOON<br>GAME</div>
-        <div class="loader-bar-container"><div id="bar"></div></div>
+        <h1 style="font-size:3.5rem; text-align:center;">CARTOON<br>GAME</h1>
+        <div style="width:200px; height:12px; border:3px solid #fff; border-radius:10px; margin-top:20px; overflow:hidden;">
+            <div id="bar"></div>
+        </div>
     </div>
 
-    <div id="main-menu">
+    <div id="ui" style="display:none; opacity:0; transition: 0.8s;">
         <div class="header">
-            <div class="balance-box">$<span id="bal-val">1000</span></div>
-            <div class="avatar-box" id="avaBtn"><img id="m-ava" src="" alt="ava"></div>
+            <div class="balance">$<span id="bal">1000</span></div>
+            <div class="avatar" onclick="event.stopPropagation(); changeAva();"><img id="ava" src="1.png" style="width:100%; height:100%;"></div>
         </div>
-        <div id="fast-game-sub">
-            <button class="btn-cartoon" style="width: auto; font-size: 0.8rem;" onclick="window.location.href='roulette.html'">ROULETTE</button>
-            <button class="btn-cartoon" style="width: auto; font-size: 0.8rem;" onclick="window.location.href='dice.html'">DICE</button>
-        </div>
-        <div class="menu-buttons-container">
-            <button class="btn-cartoon" id="fastGameBtn">FAST GAME</button>
-            <button class="btn-cartoon">SLOTS</button>
-            <button class="btn-cartoon">BONUS</button>
-            <button class="btn-cartoon" id="statBtn">STAT</button>
-            <button class="btn-cartoon">FIGHT</button>
-        </div>
-    </div>
 
-    <!-- STAT MODAL -->
-    <div id="statModal" class="modal">
-        <div class="modal-content">
-            <h2 style="font-size: 2rem;">STATISTICS</h2>
-            <div style="text-align: left; padding: 20px; font-size: 1.3rem;">
-                <p>GAMES: <span id="s-games" style="float:right">0</span></p>
-                <p>DEPOSITS: <span style="float:right">$0</span></p>
-                <p>WITHDRAWS: <span style="float:right">$0</span></p>
+        <div class="bottom-nav">
+            <!-- Главные кнопки -->
+            <div class="btn-group" id="main-btns">
+                <button class="btn-cartoon" onclick="event.stopPropagation(); toggleSub();">FAST GAME</button>
+                <button class="btn-cartoon">SLOTS</button>
+                <button class="btn-cartoon">BONUS</button>
+                <button class="btn-cartoon">STAT</button>
             </div>
-            <button class="btn-cartoon" style="width: 100%" onclick="hideModal('statModal')">OK</button>
+            <!-- Подменю игр -->
+            <div class="btn-group" id="sub-btns">
+                <button class="btn-cartoon" onclick="window.location.href='roulette.html'">ROULETTE</button>
+                <button class="btn-cartoon" onclick="window.location.href='dice.html'">DICE</button>
+            </div>
         </div>
     </div>
 
     <script>
         let balance = parseFloat(localStorage.getItem('balance')) || 1000;
-        let gamesCount = parseInt(localStorage.getItem('gamesCount')) || 0;
-        let audioStarted = false;
 
-        function initAudio() { if (!audioStarted) { document.getElementById('music2').play(); audioStarted = true; } }
-
-        function updateUI() {
-            document.getElementById('bal-val').innerText = balance.toFixed(2);
-            document.getElementById('s-games').innerText = gamesCount;
-            localStorage.setItem('balance', balance);
-            localStorage.setItem('gamesCount', gamesCount);
+        function toggleSub() {
+            document.getElementById('main-btns').classList.add('hide');
+            document.getElementById('sub-btns').classList.add('show');
         }
 
-        setInterval(() => {
-            const container = document.getElementById('film-chaos');
-            const d = document.createElement('div');
-            d.className = Math.random() > 0.8 ? 'scratch' : 'dust';
-            d.style.left = Math.random()*100+'%';
-            if (d.className === 'dust') {
-                d.style.top = Math.random()*100+'%';
-                d.style.width = d.style.height = (Math.random()*5+2)+'px';
-            }
-            container.appendChild(d);
-            setTimeout(() => d.remove(), 800);
-        }, 200);
-
-        function init() {
-            const ava = localStorage.getItem('userAva') || '1.png';
-            document.getElementById('m-ava').src = ava;
-            updateUI();
+        function resetMenu() {
+            document.getElementById('main-btns').classList.remove('hide');
+            document.getElementById('sub-btns').classList.remove('show');
         }
 
-        function showModal(id) { document.getElementById(id).classList.add('show'); }
-        function hideModal(id) { document.getElementById(id).classList.remove('show'); }
-
-        document.getElementById('fastGameBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('fast-game-sub').classList.toggle('active'); };
-        document.getElementById('statBtn').onclick = () => showModal('statModal');
-        document.getElementById('avaBtn').onclick = () => {
+        function changeAva() {
             let cur = parseInt(localStorage.getItem('userAva')) || 1;
             cur = cur >= 5 ? 1 : cur + 1;
-            localStorage.setItem('userAva', cur + '.png');
-            document.getElementById('m-ava').src = cur + '.png';
-        };
+            localStorage.setItem('userAva', cur);
+            document.getElementById('ava').src = cur + '.png';
+        }
 
-        window.onclick = () => document.getElementById('fast-game-sub').classList.remove('active');
+        // ПЛЕНКА
+        setInterval(() => {
+            const c = document.getElementById('film-chaos');
+            const d = document.createElement('div');
+            d.className = Math.random() > 0.8 ? 'scratch' : 'dust';
+            d.style.left = Math.random() * 100 + '%';
+            if(d.className === 'dust') {
+                d.style.top = Math.random() * 100 + '%';
+                d.style.width = d.style.height = (Math.random()*5+2)+'px';
+            }
+            c.appendChild(d); setTimeout(()=>d.remove(), 800);
+        }, 200);
 
         let p = 0;
         const loader = setInterval(() => {
-            p += 5; document.getElementById('bar').style.width = p + '%';
-            if(p >= 100) { clearInterval(loader); document.getElementById('loading-screen').style.display = 'none'; document.getElementById('main-menu').style.display = 'flex'; setTimeout(() => document.getElementById('main-menu').style.opacity = '1', 50); init(); }
-        }, 40);
+            p += 10; document.getElementById('bar').style.width = p + '%';
+            if(p >= 100) {
+                clearInterval(loader);
+                document.getElementById('loading-screen').style.display='none';
+                document.getElementById('ui').style.display='block';
+                setTimeout(()=>document.getElementById('ui').style.opacity='1', 50);
+                document.getElementById('bal').innerText = balance;
+                document.getElementById('ava').src = (localStorage.getItem('userAva') || 1) + '.png';
+            }
+        }, 100);
     </script>
 </body>
 </html>
