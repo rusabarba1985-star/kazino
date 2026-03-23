@@ -13,7 +13,7 @@
         }
         body { margin: 0; background: #000; color: #fff; font-family: var(--font-main); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        /* ГРЯЗНАЯ ПЛЕНКА (Z-INDEX 10000) */
+        /* ГРЯЗНАЯ ПЛЕНКА */
         .noise { position: fixed; inset: 0; opacity: 0.18; pointer-events: none; z-index: 10000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 10001; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
@@ -21,7 +21,7 @@
         @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; } }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 10002; pointer-events: none; }
 
-        /* ЭКРАН ЗАГРУЗКИ (КАК В МЕНЮ) */
+        /* ЗАГРУЗКА */
         #loading-screen { 
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
@@ -38,29 +38,27 @@
             0%, 100% { transform: scale(1) rotate(-3deg); }
             50% { transform: scale(1.15, 0.85) rotate(3deg); }
         }
-        .loader-bar-container {
-            width: 240px; height: 16px; border: 5px solid #fff;
-            border-radius: 20px; margin-top: 40px; overflow: hidden; background: #222;
-        }
+        #bar-container { width: 220px; height: 14px; border: 4px solid #fff; border-radius: 15px; margin-top: 40px; overflow: hidden; background: #222; }
         #bar { height: 100%; width: 0%; background: #fff; transition: width 0.4s ease; }
 
-        /* ОСНОВНОЙ КОНТЕНТ */
-        .game-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; z-index: 10; width: 100%; max-width: 800px; padding: 0 10px; }
+        /* ИГРОВОЕ ОКНО */
+        .game-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; z-index: 10; width: 100%; max-width: 750px; padding: 0 10px; }
         
         .char-gif { 
             width: 180px; height: auto; object-fit: contain; flex-shrink: 0; 
             filter: grayscale(1); border: none; background: none; display: block; 
-            pointer-events: none; animation: char-sway 2s infinite ease-in-out;
-        }
-        @keyframes char-sway {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-10px) rotate(2deg); }
+            pointer-events: none; /* АНИМАЦИЯ УДАЛЕНА - ТЕПЕРЬ НЕ ДВИГАЕТСЯ */
         }
 
-        .modal-content { background: #000; border: 6px solid #fff; border-radius: 40px; flex: 1; padding: 25px 15px; text-align: center; position: relative; box-shadow: 0 10px 0 #333; }
+        .modal-content { 
+            background: #000; border: 6px solid #fff; border-radius: 40px; 
+            flex: 1; padding: 20px 15px; /* УМЕНЬШЕН ОТСТУП */
+            text-align: center; position: relative; box-shadow: 0 10px 0 #333; 
+            max-width: 350px; /* СДЕЛАНО ЧУТЬ МЕНЬШЕ */
+        }
         
-        .dice-row { display: flex; align-items: center; justify-content: space-around; margin: 20px 0; }
-        #the-dice { width: 90px; height: 90px; background: #fff; border-radius: 18px; border: 6px solid #000; color: #000; font-size: 3.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 0 #ccc; }
+        .dice-row { display: flex; align-items: center; justify-content: space-around; margin: 15px 0; }
+        #the-dice { width: 85px; height: 85px; background: #fff; border-radius: 18px; border: 6px solid #000; color: #000; font-size: 3.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 0 #ccc; }
         
         .dice-anim { animation: dice-toss 1s var(--soft-spring) forwards; }
         @keyframes dice-toss { 
@@ -70,14 +68,13 @@
             100% { transform: translateY(0) rotate(360deg) scale(1); } 
         }
 
-        /* ФИШКИ */
-        .chip-main { width: 80px; height: 80px; border: 5px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; z-index: 100; transition: transform 0.3s var(--spring); }
+        .chip-main { width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; z-index: 100; transition: transform 0.3s var(--spring); }
         .chip-main:active { transform: scale(0.85); }
         .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; pointer-events: none; }
         
         .sub-chips-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
         .sub-chip { 
-            position: absolute; width: 60px; height: 60px; background: #222; border: 4px solid #fff; border-radius: 50%; 
+            position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; font-size: 0.8rem; 
             opacity: 0; transition: all 0.6s var(--spring); transform: scale(0); z-index: 50; 
         }
@@ -88,7 +85,7 @@
         .bet-btn:active { transform: scale(0.9); }
         .bet-btn.selected { background: #fff; color: #000; }
         
-        .btn-cartoon { background: #000; color: #fff; border: 5px solid #fff; padding: 12px 20px; font-family: var(--font-main); font-size: 1.1rem; border-radius: 20px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 6px 0 #333; transition: 0.2s; }
+        .btn-cartoon { background: #000; color: #fff; border: 5px solid #fff; padding: 10px 20px; font-family: var(--font-main); font-size: 1.1rem; border-radius: 20px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 6px 0 #333; transition: 0.2s; }
         .btn-cartoon:active { transform: translateY(4px); box-shadow: 0 2px 0 #333; }
 
         #res-pop { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; border: 8px solid #000; border-radius: 40px; padding: 30px; z-index: 20000; text-align: center; color: #000; transition: 0.6s var(--spring); width: 250px; pointer-events: none; }
@@ -98,9 +95,9 @@
         .bal-display { position: absolute; top: 25px; left: 25px; font-size: 1.8rem; text-shadow: 3px 3px 0 #333; z-index: 100; }
 
         @media (max-width: 650px) {
-            .game-wrapper { flex-direction: column; padding-top: 60px; }
+            .game-wrapper { flex-direction: column; padding-top: 40px; }
             .char-gif { width: 140px; order: 2; }
-            .modal-content { order: 1; width: 100%; }
+            .modal-content { order: 1; width: 100%; max-width: 320px; }
         }
     </style>
 </head>
@@ -109,10 +106,9 @@
     <div id="film-chaos"></div>
     <div class="vignette"></div>
 
-    <!-- ЗАГРУЗКА -->
     <div id="loading-screen">
         <div class="drawn-title">CARTOON<br>GAME</div>
-        <div class="loader-bar-container"><div id="bar"></div></div>
+        <div id="bar-container"><div id="bar"></div></div>
     </div>
 
     <audio id="bgMusic" loop preload="auto"><source src="music2.mp3" type="audio/mpeg"></audio>
@@ -161,7 +157,6 @@
         let balance = parseFloat(localStorage.getItem('balance')) || 1000;
         let betValue = 0.1, isRolling = false, musicStarted = false;
 
-        // ЛОГИКА ЗАГРУЗКИ
         window.onload = () => {
             let p = 0;
             const bar = document.getElementById('bar');
@@ -211,14 +206,11 @@
             btn.onclick = () => {
                 if(isRolling || balance < betValue) return;
                 isRolling = true;
-                
                 const snd = document.getElementById('diceSound');
                 snd.currentTime = 0; snd.play();
-
                 const type = btn.dataset.bet;
                 const dice = document.getElementById('the-dice');
                 dice.classList.add('dice-anim');
-
                 let shuffle = setInterval(() => { dice.innerText = Math.floor(Math.random() * 6) + 1; }, 80);
 
                 const win = Math.random() < (isNaN(type) ? 0.4 : 0.2);
@@ -253,7 +245,6 @@
             setTimeout(() => { pop.classList.remove('show'); isRolling = false; }, 2400);
         }
 
-        // ЭФФЕКТ ПЛЕНКИ
         setInterval(() => {
             const c = document.getElementById('film-chaos');
             const d = document.createElement('div');
