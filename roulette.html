@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Roulette - Cartoon Pro Sync</title>
+    <title>Roulette Pro - Global Sync</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
         :root { 
@@ -21,66 +21,52 @@
 
         .game-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; }
 
-        .roulette-top { display: flex; align-items: center; justify-content: center; height: 40%; width: 100%; transition: transform 0.8s var(--spring); z-index: 5; }
+        .roulette-top { display: flex; align-items: center; justify-content: center; height: 42%; width: 100%; transition: transform 0.8s var(--spring); z-index: 5; }
         .roulette-top.away { transform: translateY(-150%); } 
 
-        .wheel-wrap { position: relative; width: 320px; height: 320px; border-radius: 50%; }
+        .wheel-wrap { position: relative; width: 380px; height: 380px; border-radius: 50%; }
         #wheel { width: 100%; height: 100%; background: url('wheel.png') no-repeat center; background-size: contain; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.2, 1); }
         .arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 35px; height: 45px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 200; border: 2px solid #000; }
 
-        /* ПОЛЕ СТАВОК (УДЛИНЕННОЕ) */
         .bet-board {
-            position: absolute; bottom: 0; width: 100%; height: 65%; 
+            position: absolute; bottom: 0; width: 100%; height: 60%; 
             background: rgba(0,0,0,0.98); border-top: 5px solid #fff; 
             border-radius: 40px 40px 0 0; transition: all 0.7s var(--soft); 
-            z-index: 1000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box;
+            z-index: 1000; display: flex; flex-direction: column; padding: 5px; box-sizing: border-box;
         }
-        .bet-board.active { height: 92%; transform: translateY(0); }
+        .bet-board.active { height: 88%; transform: translateY(0); }
         .bet-board.spring-out { transform: translateY(115%); }
 
-        .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 5px; }
-        @media (min-width: 1024px) {
-            .bet-board.active { max-width: 450px; left: 50%; transform: translateX(-50%); border-left: 5px solid #fff; border-right: 5px solid #fff; }
-            .grid-layout { transform: scale(1.1); }
-        }
-        @media (max-width: 1023px) { .grid-layout { transform: scale(0.85); } }
+        /* СЕТКА СТАВОК */
+        .grid-layout { display: flex; gap: 4px; justify-content: center; transform-origin: top; margin-top: 5px; height: 85%; }
+        @media (min-width: 1024px) { .grid-layout { transform: scale(1.1); } }
+        @media (max-width: 1023px) { .grid-layout { transform: scale(0.9); } }
 
-        .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
-        /* КНОПКИ СДЕЛАЛИ ДЛИННЕЕ */
-        .cell { height: 50px; border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
+        .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 70px; }
+        .num-area { display: flex; flex-direction: column; flex: 1; max-width: 200px; }
+        .numbers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; flex: 1; }
+
+        .cell { height: 100%; border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
         .cell.grey { background: var(--grey); color: #000; }
         .cell.black { background: #111; color: #fff; }
-        .cell.has-bet::after { content: attr(data-sum); position: absolute; inset: 0; margin: auto; width: 24px; height: 24px; background: #fff; color: #000; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; font-weight: bold; }
+        .cell.zero { background:#fff; color:#000; height: 45px; border-radius: 40% 40% 0 0; font-size: 1.3rem; margin-bottom: 4px; }
+        .cell.outside { background: #222; font-size: 0.65rem; text-transform: uppercase; }
+        .cell.has-bet::after { content: attr(data-sum); position: absolute; inset: 0; margin: auto; width: 22px; height: 22px; background: #fff; color: #000; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; font-weight: bold; }
 
-        /* РИСОВАННАЯ СТРЕЛКА ОТМЕНЫ */
-        .undo-draw {
-            width: 50px; height: 50px; background: #fff; border-radius: 50%; 
-            border: 4px solid #000; position: relative; cursor: pointer;
-            box-shadow: 0 4px 0 #333;
-        }
-        .undo-draw::before {
-            content: ''; position: absolute; top: 18px; left: 12px;
-            width: 15px; height: 10px; border-left: 5px solid #000; border-top: 5px solid #000;
-            transform: rotate(-45deg);
-        }
-        .undo-draw::after {
-            content: ''; position: absolute; top: 22px; left: 16px;
-            width: 18px; height: 12px; border-top: 5px solid #000; border-right: 5px solid #000;
-            border-radius: 0 10px 0 0;
-        }
+        .undo-draw { width: 45px; height: 45px; background: #fff; border-radius: 50%; border: 3px solid #000; position: relative; cursor: pointer; }
+        .undo-draw::before { content: ''; position: absolute; top: 15px; left: 10px; width: 12px; height: 8px; border-left: 4px solid #000; border-top: 4px solid #000; transform: rotate(-45deg); }
+        .undo-draw::after { content: ''; position: absolute; top: 18px; left: 14px; width: 15px; height: 10px; border-top: 4px solid #000; border-right: 4px solid #000; border-radius: 0 8px 0 0; }
 
-        /* ФИШКИ (ВЕЕР ВЛЕВО) */
-        .chip-main { width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; font-size: 1rem; z-index: 1100; }
-        .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
-        .sub-chip { position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: all 0.5s var(--spring); transform: scale(0); pointer-events: none; }
+        .chip-main { width: 70px; height: 70px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .chip-main::after { content: ''; position: absolute; inset: 0; border: 5px dashed #fff; border-radius: 50%; }
+        .sub-chip { position: absolute; width: 50px; height: 50px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0); pointer-events: none; }
         .active .sub-chip { opacity: 1; transform: scale(1); pointer-events: auto; }
 
-        /* ЭКРАН ОЖИДАНИЯ */
         #wait-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 8000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .wait-box { background: #fff; color: #000; padding: 30px; border-radius: 30px; border: 8px solid #000; font-size: 2rem; animation: wait-spring 0.6s var(--spring) forwards; }
+        .wait-box { background: #fff; color: #000; padding: 25px; border-radius: 25px; border: 6px solid #000; font-size: 1.8rem; animation: wait-spring 0.6s var(--spring) forwards; }
         @keyframes wait-spring { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
 
-        #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 25px; text-align: center; z-index: 9000; transition: 0.4s var(--spring); min-width: 220px; }
+        #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 20px; text-align: center; z-index: 9000; transition: 0.4s var(--spring); min-width: 200px; }
         #roul-res.show { transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
@@ -91,18 +77,17 @@
     <audio id="spinSound"><source src="soundroulet.mp3" type="audio/mpeg"></audio>
 
     <div id="wait-screen"><div class="wait-box">WAIT NEXT GAME</div></div>
-
     <div id="roul-res">
-        <div id="res-num" style="font-size:4rem;">?</div>
-        <div id="res-col" style="font-size:1.1rem;">-</div>
-        <div id="res-win" style="font-size:1.8rem; color:#0a0;"></div>
+        <div id="res-num" style="font-size:3rem;">?</div>
+        <div id="res-col" style="font-size:1rem;">-</div>
+        <div id="res-win" style="font-size:1.5rem; color:#0a0;"></div>
     </div>
 
     <div class="game-screen">
-        <div style="width:100%; display:flex; justify-content:space-between; padding:15px; box-sizing:border-box; z-index: 2000;">
-            <div style="font-size:1.6rem;">$<span id="bal">1000.00</span></div>
-            <div id="timer" style="color:#ff0; font-size:2rem;">15</div>
-            <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer; padding:5px 15px;" onclick="window.location.href='index.html'">EXIT</button>
+        <div style="width:100%; display:flex; justify-content:space-between; padding:12px; box-sizing:border-box; z-index: 2000;">
+            <div style="font-size:1.4rem;">$<span id="bal">1000.00</span></div>
+            <div id="timer" style="color:#ff0; font-size:1.8rem; display: none;">15</div>
+            <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer;" onclick="window.location.href='index.html'">EXIT</button>
         </div>
 
         <div class="roulette-top" id="wheelArea"><div class="wheel-wrap"><div class="arrow"></div><div id="wheel"></div></div></div>
@@ -117,13 +102,13 @@
                     <div class="cell outside" data-target="odd">ODD</div>
                     <div class="cell outside" data-target="19-36">19to36</div>
                 </div>
-                <div style="display:flex; flex-direction:column; flex:1;">
-                    <div class="cell" data-target="0" style="background:#fff; color:#000; height:45px; border-radius:40% 40% 0 0; font-size: 1.5rem; margin-bottom:4px;">0</div>
-                    <div id="numGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; flex:1;"></div>
+                <div class="num-area">
+                    <div class="cell zero" data-target="0">0</div>
+                    <div id="numGrid" class="numbers-grid"></div>
                 </div>
             </div>
             
-            <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:30px;">
+            <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-top:auto; padding-bottom:15px;">
                 <div class="undo-draw" onclick="undo()"></div>
                 <div class="chip-main" id="mainChip" onclick="toggleChips()">
                     $0.1
@@ -146,12 +131,11 @@
         const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
         function toggleChips() {
-            if(isRolling) return;
             const rad = document.getElementById('mainChip');
             const isActive = rad.classList.toggle('active');
             rad.querySelectorAll('.sub-chip').forEach((c, i) => {
                 const angle = 110 + (i * 35); 
-                const dist = isActive ? 130 : 0;
+                const dist = isActive ? 120 : 0;
                 const x = Math.cos(angle * Math.PI / 180) * dist;
                 const y = Math.sin(angle * Math.PI / 180) * dist;
                 c.style.transform = `translate(${x}px, ${y}px) scale(${isActive?1:0})`;
@@ -166,8 +150,7 @@
             let seed = roundId * 1234567;
             let x = Math.sin(seed) * 10000;
             let rand = x - Math.floor(x);
-            if (rand < 0.01) return 0;
-            return Math.floor(((rand - 0.01) / 0.99) * 36) + 1;
+            return rand < 0.01 ? 0 : Math.floor(((rand - 0.01) / 0.99) * 36) + 1;
         }
 
         function sync() {
@@ -180,6 +163,7 @@
             const waitScreen = document.getElementById('wait-screen');
 
             if (elapsed < 15000) { 
+                timerEl.style.display = 'block';
                 timerEl.innerText = Math.ceil((15000 - elapsed) / 1000);
                 board.className = 'bet-board active';
                 wheelArea.className = 'roulette-top away';
@@ -187,22 +171,24 @@
                 if (lastProcessedRound !== roundId) { resetRound(); lastProcessedRound = roundId; }
                 isRolling = false;
             } 
-            else if (elapsed < 21000) {
-                timerEl.innerText = "0";
-                if (!isRolling) {
-                    if (activeBets.length === 0) waitScreen.style.display = 'flex';
-                    board.className = 'bet-board spring-out';
-                    wheelArea.className = 'roulette-top';
-                    startSpin(roundId);
-                }
-            } 
-            else { waitScreen.style.display = 'none'; }
+            else {
+                timerEl.style.display = 'none';
+                if (elapsed < 21000) {
+                    if (!isRolling) {
+                        if (activeBets.length === 0) waitScreen.style.display = 'flex';
+                        board.className = 'bet-board spring-out';
+                        wheelArea.className = 'roulette-top';
+                        startSpin(roundId);
+                    }
+                } else { waitScreen.style.display = 'none'; }
+            }
             requestAnimationFrame(sync);
         }
 
         function startSpin(roundId) {
             isRolling = true;
-            const resIdx = getSyncedResult(roundId);
+            const nRes = getSyncedResult(roundId);
+            const resIdx = nums.indexOf(nRes);
             const wheel = document.getElementById('wheel');
             const snd = document.getElementById('spinSound');
             snd.play();
@@ -223,7 +209,9 @@
                     else if(b.target==='black' && col==='BLACK') m=2;
                     else if(b.target==='even' && n%2===0 && n!==0) m=2;
                     else if(b.target==='odd' && n%2!==0) m=2;
-                    won += b.amount * m;
+                    else if(b.target==='1-18' && n>=1 && n<=18) m=2;
+                    else if(b.target==='19-36' && n>=19 && n<=36) m=2;
+                    if(win) won += b.amount * m;
                 });
                 balance += won; updateUI();
                 document.getElementById('res-num').innerText = n;
@@ -239,10 +227,7 @@
             }, 5000);
         }
 
-        function resetRound() {
-            document.querySelectorAll('.has-bet').forEach(el => el.classList.remove('has-bet'));
-            activeBets = []; betHistory = [];
-        }
+        function resetRound() { document.querySelectorAll('.has-bet').forEach(el => el.classList.remove('has-bet')); activeBets = []; betHistory = []; }
 
         function placeBet(el) {
             if (isRolling || balance < curBet || activeBets.length >= 5 && !activeBets.find(b => b.target === el.dataset.target)) return;
@@ -253,9 +238,7 @@
             let bet = activeBets.find(b => b.target === t);
             if(bet) bet.amount = parseFloat((bet.amount + curBet).toFixed(1));
             else { bet = { target: t, amount: curBet, el }; activeBets.push(bet); el.classList.add('has-bet'); }
-            el.setAttribute('data-sum', bet.amount);
-            betHistory.push({t, v: curBet});
-            updateUI();
+            el.setAttribute('data-sum', bet.amount); betHistory.push({t, v: curBet}); updateUI();
         }
 
         function undo() {
@@ -264,8 +247,7 @@
             const bet = activeBets.find(b => b.target === last.t);
             balance += last.v; bet.amount = parseFloat((bet.amount - last.v).toFixed(1));
             if(bet.amount <= 0) { bet.el.classList.remove('has-bet'); activeBets = activeBets.filter(b => b.target !== last.t); }
-            else bet.el.setAttribute('data-sum', bet.amount);
-            updateUI();
+            else bet.el.setAttribute('data-sum', bet.amount); updateUI();
         }
 
         function init() {
@@ -276,7 +258,7 @@
                 c.innerText = i; c.dataset.target = i;
                 c.onclick = () => placeBet(c); grid.appendChild(c);
             }
-            document.querySelectorAll('.cell.outside, [data-target="0"]').forEach(el => el.onclick = () => placeBet(el));
+            document.querySelectorAll('.cell.outside, .cell.zero').forEach(el => el.onclick = () => placeBet(el));
             updateUI(); sync();
         }
 
