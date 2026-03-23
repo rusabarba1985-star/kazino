@@ -14,12 +14,13 @@
         }
         body, html { margin:0; padding:0; width:100%; height:100%; background:#000; color:#fff; font-family:var(--font); overflow:hidden; }
         
-        /* ГРЯЗНАЯ ПЛЕНКА ПОВЕРХ ВСЕГО */
-        .noise { position:fixed; inset:0; opacity:0.15; pointer-events:none; z-index:9000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        /* ГРЯЗНАЯ ПЛЕНКА */
+        .noise { position:fixed; inset:0; opacity:0.12; pointer-events:none; z-index:9000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 9001; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
         .scratch { width: 1px; height: 100%; opacity: 0.3; }
         @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; } }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 9002; pointer-events: none; }
 
         .game-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; }
 
@@ -48,7 +49,7 @@
             transition: all 0.7s var(--soft); 
             z-index: 1000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box;
         }
-        .bet-board.active { height: 90%; transform: translateY(0); }
+        .bet-board.active { height: 92%; transform: translateY(0); }
         .bet-board.spring-out { transform: translateY(115%); }
 
         /* СЕТКА (Узкая и длинная на ПК) */
@@ -60,6 +61,7 @@
         @media (max-width: 1023px) { .grid-layout { transform: scale(0.8); } }
 
         .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
+        .num-grid-box { display: flex; flex-direction: column; flex: 1; }
         .cell { border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; position: relative; }
         .cell.grey { background: var(--grey); color: #000; }
         .cell.black { background: #111; color: #fff; }
@@ -73,7 +75,7 @@
 
         .undo-btn { width: 45px; height: 45px; background: #fff; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #000; font-size: 1.5rem; cursor: pointer; }
 
-        .stats-info { text-align: center; font-size: 0.75rem; color: #ffd966; padding-bottom: 10px; line-height: 1.4; }
+        .stats-area { text-align: center; font-size: 0.75rem; color: #ffd966; padding-bottom: 10px; line-height: 1.4; margin-top: auto; }
 
         #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 25px; text-align: center; z-index: 8000; transition: 0.4s var(--spring); min-width: 220px; }
         #roul-res.show { transform: translate(-50%, -50%) scale(1); }
@@ -81,13 +83,14 @@
 </head>
 <body onclick="document.getElementById('bgMusic').play()">
     <div class="noise"></div>
+    <div class="vignette"></div>
     <div id="film-chaos"></div>
     
     <audio id="bgMusic" loop><source src="music2.mp3" type="audio/mpeg"></audio>
     <audio id="spinSound"><source src="soundroulet.mp3" type="audio/mpeg"></audio>
 
     <div id="roul-res">
-        <div id="res-num" style="font-size:4rem;">?</div>
+        <div id="res-num" style="font-size:3.5rem;">?</div>
         <div id="res-col" style="font-size:1.1rem;">-</div>
         <div id="res-win" style="font-size:1.5rem; color:#0a0;"></div>
     </div>
@@ -96,7 +99,7 @@
         <div style="width:100%; display:flex; justify-content:space-between; padding:15px; box-sizing:border-box; z-index: 2000;">
             <div style="font-size:1.5rem;">$<span id="bal">1000.00</span></div>
             <div id="timer" style="color:#ff0; font-size:1.8rem;">15</div>
-            <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer;" onclick="window.location.href='index.html'">BACK</button>
+            <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer; padding:5px 15px;" onclick="window.location.href='index.html'">EXIT</button>
         </div>
 
         <div class="roulette-top" id="wheelArea">
@@ -116,13 +119,13 @@
                     <div class="cell outside" data-target="odd">ODD</div>
                     <div class="cell outside" data-target="19-36">19to36</div>
                 </div>
-                <div style="display:flex; flex-direction:column; flex:1;">
+                <div class="num-grid-box">
                     <div class="cell" data-target="0" style="background:#fff; color:#000; height:45px; border-radius:40% 40% 0 0; font-size: 1.5rem;">0</div>
                     <div id="numGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; flex:1;"></div>
                 </div>
             </div>
             
-            <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:30px;">
+            <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:20px; padding-bottom:20px;">
                 <div class="undo-btn" onclick="undo()">↩</div>
                 <div class="chip-main" id="mainChip" onclick="toggleChips()">
                     $0.1
@@ -135,7 +138,7 @@
                     </div>
                 </div>
             </div>
-            <div class="stats-info" id="statsArea">Waiting for bets...</div>
+            <div class="stats-area" id="statsInfo">Waiting for bets...</div>
         </div>
     </div>
 
@@ -182,18 +185,18 @@
             if(balance < curBet) return;
             balance -= curBet;
             let bet = activeBets.find(b => b.target === t);
-            if(bet) bet.amount += curBet;
+            if(bet) bet.amount = parseFloat((bet.amount + curBet).toFixed(1));
             else { bet = { target: t, amount: curBet, el }; activeBets.push(bet); el.classList.add('has-bet'); }
-            el.setAttribute('data-sum', bet.amount.toFixed(1)); betHistory.push({t, v: curBet}); updateUI();
+            el.setAttribute('data-sum', bet.amount); betHistory.push({t, v: curBet}); updateUI();
         }
 
         function undo() {
             if(isRolling || betHistory.length === 0) return;
             const last = betHistory.pop();
             const bet = activeBets.find(b => b.target === last.t);
-            balance += last.v; bet.amount -= last.v;
+            balance += last.v; bet.amount = parseFloat((bet.amount - last.v).toFixed(1));
             if(bet.amount <= 0) { bet.el.classList.remove('has-bet'); activeBets = activeBets.filter(b => b.target !== last.t); }
-            else bet.el.setAttribute('data-sum', bet.amount.toFixed(1)); updateUI();
+            else bet.el.setAttribute('data-sum', bet.amount); updateUI();
         }
 
         function startCycle() {
@@ -212,7 +215,7 @@
             const wheel = document.getElementById('wheel');
             let resIdx = Math.random() < 0.01 ? 0 : Math.floor(Math.random() * 36) + 1;
             
-            // Анти-вин
+            // Подкрутка
             let grey$ = activeBets.filter(b=>b.target==='grey').reduce((s,b)=>s+b.amount,0);
             let black$ = activeBets.filter(b=>b.target==='black').reduce((s,b)=>s+b.amount,0);
             if(grey$ > black$ * 2 && Math.random() < 0.6) resIdx = 2; // Black
@@ -242,18 +245,27 @@
                 document.getElementById('res-win').innerText = won > 0 ? `+$${won.toFixed(1)}` : "";
                 document.getElementById('roul-res').classList.add('show');
                 
-                const stats = document.getElementById('statsArea');
-                const botWin = Math.floor(Math.random()*500 + 133);
-                const botCount = Math.floor(Math.random()*30 + 23);
-                stats.innerHTML = `${botCount} players won $${botWin} last round<br>` + (won > 0 ? `YOU WON: $${won.toFixed(1)}` : "YOU LOST");
+                const stats = document.getElementById('statsInfo');
+                const bWin = Math.floor(Math.random()*500 + 133);
+                const bCount = Math.floor(Math.random()*30 + 23);
+                stats.innerHTML = `${bCount} players won $${bWin} last round<br>` + (won > 0 ? `YOU WON: $${won.toFixed(1)}` : "YOU LOST");
                 
                 updateUI();
                 setTimeout(() => {
                     document.getElementById('roul-res').classList.remove('show');
                     isRolling = false;
+                    
+                    // СБРОС К НУЛЮ
+                    wheel.style.transition = 'none';
+                    totalRot = 0;
+                    wheel.style.transform = `rotate(0deg)`;
+                    
                     activeBets.forEach(b => b.el.classList.remove('has-bet'));
                     activeBets = []; betHistory = [];
-                    startCycle();
+                    setTimeout(() => {
+                        wheel.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.2, 1)';
+                        startCycle();
+                    }, 50);
                 }, 2000);
             }, 5000);
         }
