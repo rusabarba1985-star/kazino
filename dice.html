@@ -13,28 +13,42 @@
         }
         body { margin: 0; background: #000; color: #fff; font-family: var(--font-main); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        /* ГРЯЗНАЯ ПЛЕНКА ПОВЕРХ ВСЕГО */
-        .noise { position: fixed; inset: 0; opacity: 0.18; pointer-events: none; z-index: 9000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 9001; }
+        /* ГРЯЗНАЯ ПЛЕНКА ПОВЕРХ ВСЕГО (z-index: 10000) */
+        .noise { position: fixed; inset: 0; opacity: 0.18; pointer-events: none; z-index: 10000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 10001; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
         .scratch { width: 1px; height: 100%; opacity: 0.3; }
         @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; } }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 9002; pointer-events: none; }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 10002; pointer-events: none; }
+
+        /* ЭКРАН ЗАГРУЗКИ */
+        #loading-screen { 
+            position: fixed; inset: 0; background: #000; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 9000; transition: opacity 0.5s ease;
+        }
+        .drawn-title {
+            font-size: 4rem; text-align: center; line-height: 0.85;
+            color: #fff; animation: title-jump 0.8s infinite var(--spring);
+            /* Эффект "нарисованности" */
+            -webkit-text-stroke: 2px #000;
+            text-shadow: 
+                4px 4px 0px #fff, 
+                8px 8px 0px #333;
+            letter-spacing: -2px;
+        }
+        .loader-bar-container {
+            width: 220px; height: 14px; border: 4px solid #fff;
+            border-radius: 15px; margin-top: 40px; overflow: hidden; background: #222;
+        }
+        #bar { height: 100%; width: 0%; background: #fff; transition: width 0.3s ease; }
 
         /* ОБЕРТКА ИГРЫ */
         .game-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 10; width: 100%; max-width: 800px; padding: 0 10px; }
         
-        /* ПЕРСОНАЖ (ГИФКА БЕЗ КВАДРАТА) */
         .char-gif { 
-            width: 200px; /* Увеличено */
-            height: auto; 
-            object-fit: contain; 
-            flex-shrink: 0; 
-            filter: grayscale(1); 
-            border: none; 
-            background: none;
-            display: block;
-            pointer-events: none;
+            width: 200px; height: auto; object-fit: contain; flex-shrink: 0; 
+            filter: grayscale(1); border: none; background: none; display: block; pointer-events: none;
         }
 
         .modal-content { background: #000; border: 6px solid #fff; border-radius: 40px; flex: 1; padding: 25px 15px; text-align: center; position: relative; box-shadow: 0 10px 0 #333; }
@@ -50,13 +64,12 @@
             100% { transform: translateY(0) rotate(360deg) scale(1); } 
         }
 
-        /* ФИШКИ */
         .chip-main { width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; position: relative; }
         .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
         
         .sub-chips-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
         .sub-chip { 
-            position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; 
+            position: absolute; width: 55px; height: 55px; background: #222; border: 4px solid #fff; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; font-size: 0.8rem; 
             opacity: 0; transition: all 0.6s var(--spring); transform: scale(0); z-index: 50; 
         }
@@ -67,7 +80,7 @@
         .bet-btn.selected { background: #fff; color: #000; }
         .btn-cartoon { background: #000; color: #fff; border: 5px solid #fff; padding: 10px 20px; font-family: var(--font-main); font-size: 1rem; border-radius: 20px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 5px 0 #333; }
 
-        #res-pop { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; border: 8px solid #000; border-radius: 35px; padding: 25px; z-index: 9500; text-align: center; color: #000; transition: 0.6s var(--spring); width: 240px; pointer-events: none; }
+        #res-pop { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 25px; z-index: 9500; text-align: center; color: #000; transition: 0.6s var(--spring); width: 240px; pointer-events: none; }
         #res-pop.show { transform: translate(-50%, -50%) scale(1); }
         #res-pop img { width: 150px; height: 150px; border: 5px solid #000; border-radius: 20px; object-fit: cover; margin-bottom: 15px; }
         
@@ -80,10 +93,16 @@
     </style>
 </head>
 <body onclick="startMusic()">
-    <!-- Слой пленки -->
+    <!-- ПЛЕНКА -->
     <div class="noise"></div>
     <div id="film-chaos"></div>
     <div class="vignette"></div>
+
+    <!-- ЗАГРУЗКА -->
+    <div id="loading-screen">
+        <div class="drawn-title">CARTOON<br>GAME</div>
+        <div class="loader-bar-container"><div id="bar"></div></div>
+    </div>
 
     <audio id="bgMusic" loop preload="auto"><source src="music2.mp3" type="audio/mpeg"></audio>
     <audio id="diceSound" preload="auto"><source src="sounddice.mp3" type="audio/mpeg"></audio>
@@ -91,7 +110,6 @@
     <div class="bal-display">$ <span id="bal">1000.00</span></div>
 
     <div class="game-wrapper">
-        <!-- Персонаж без фона и рамок -->
         <img src="dicechar.gif" class="char-gif" alt="">
 
         <div class="modal-content">
@@ -132,10 +150,32 @@
         let balance = parseFloat(localStorage.getItem('balance')) || 1000;
         let betValue = 0.1, isRolling = false, musicStarted = false;
 
+        // ЛОГИКА ЗАГРУЗКИ
+        window.onload = () => {
+            let p = 0;
+            const bar = document.getElementById('bar');
+            const loader = setInterval(() => {
+                p += Math.random() * 15;
+                if (p > 100) p = 100;
+                bar.style.width = p + '%';
+                
+                if (p >= 100) {
+                    clearInterval(loader);
+                    setTimeout(() => {
+                        document.getElementById('loading-screen').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('loading-screen').style.display = 'none';
+                        }, 500);
+                    }, 500);
+                }
+            }, 100);
+        };
+
         function startMusic() {
             if(!musicStarted) {
-                const m = document.getElementById('bgMusic');
-                m.volume = 0.4; m.play(); musicStarted = true;
+                document.getElementById('bgMusic').volume = 0.4;
+                document.getElementById('bgMusic').play();
+                musicStarted = true;
             }
         }
 
@@ -189,7 +229,6 @@
                     while((type === 'even' && finalRes % 2 === 0) || (type === 'odd' && finalRes % 2 !== 0) || (type == finalRes));
                 }
 
-                // БРОСОК 1 СЕКУНДА
                 setTimeout(() => {
                     clearInterval(shuffle);
                     snd.pause(); 
@@ -216,7 +255,6 @@
             setTimeout(() => { pop.classList.remove('show'); isRolling = false; }, 2200);
         }
 
-        // ЭФФЕКТ ПЛЕНКИ
         setInterval(() => {
             const c = document.getElementById('film-chaos');
             const d = document.createElement('div');
