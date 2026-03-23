@@ -7,28 +7,28 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
         :root { 
-            --bg: #000; --text: #fff; --font: 'Luckiest Guy', cursive; 
+            --bg: #000; --font: 'Luckiest Guy', cursive; 
             --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); 
             --soft: cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --grey: #888; --black: #111; 
         }
         body, html { margin:0; padding:0; width:100%; height:100%; background:#000; color:#fff; font-family:var(--font); overflow:hidden; }
         
-        .noise { position:fixed; inset:0; opacity:0.1; pointer-events:none; z-index:5000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .noise { position:fixed; inset:0; opacity:0.12; pointer-events:none; z-index:5000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
         .game-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; }
 
         /* КОЛЕСО */
         .roulette-top { 
             display: flex; align-items: center; justify-content: center; 
-            height: 40%; width: 100%; transition: transform 0.8s var(--spring);
+            height: 45%; width: 100%; transition: transform 0.8s var(--spring);
             z-index: 5;
         }
         .roulette-top.away { transform: translateY(-150%); } 
 
         .wheel-wrap { 
             position: relative; 
-            width: 320px; height: 320px; 
+            width: 380px; height: 380px; /* Увеличено */
             border-radius: 50%;
         }
         #wheel { 
@@ -48,24 +48,24 @@
 
         /* ПОЛЕ СТАВОК */
         .bet-board {
-            position: absolute; bottom: 0; width: 100%; height: 60%; 
+            position: absolute; bottom: 0; width: 100%; height: 65%; 
             background: rgba(0,0,0,0.98); border-top: 5px solid #fff; 
             border-radius: 40px 40px 0 0;
             transition: all 0.8s var(--spring); 
             z-index: 1000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box;
         }
         .bet-board.active { height: 92%; transform: translateY(0); }
-        .bet-board.spring-out { transform: translateY(110%); }
+        .bet-board.spring-out { transform: translateY(115%); }
 
-        /* СЕТКА (ПК АДАПТАЦИЯ) */
+        /* СЕТКА СТАВОК */
         .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 15px; }
         @media (min-width: 1024px) {
-            .grid-layout { transform: scale(1.15); }
-            .bet-board.active { max-width: 600px; left: 50%; transform: translateX(-50%); border-right: 5px solid #fff; border-left: 5px solid #fff; }
+            .grid-layout { transform: scale(1.1); }
+            .bet-board.active { max-width: 500px; left: 50%; transform: translateX(-50%); border-left: 5px solid #fff; border-right: 5px solid #fff; }
         }
-        @media (max-width: 1023px) { .grid-layout { transform: scale(0.85); } }
+        @media (max-width: 1023px) { .grid-layout { transform: scale(0.82); } }
 
-        .side-bets { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
+        .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
         .cell { border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; position: relative; }
         .cell.grey { background: var(--grey); color: #000; }
         .cell.black { background: #111; color: #fff; }
@@ -78,13 +78,13 @@
             position: relative; cursor: pointer; font-size: 1rem; z-index: 100;
         }
         .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
-        
+        .sub-chips-wrapper { position: absolute; inset: 0; pointer-events: none; }
         .sub-chip { 
             position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-size: 0.8rem; opacity: 0; transition: all 0.6s var(--spring); transform: scale(0);
+            font-size: 0.8rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0);
         }
-        .active .sub-chip { opacity: 1; transform: scale(1); }
+        .active .sub-chip { opacity: 1; transform: scale(1); pointer-events: auto; }
 
         .undo-btn { width: 45px; height: 45px; background: #fff; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #000; font-size: 1.5rem; cursor: pointer; }
 
@@ -119,13 +119,13 @@
 
         <div class="bet-board active" id="betBoard">
             <div class="grid-layout">
-                <div class="side-bets">
-                    <div class="cell outside" data-target="1-18">1to18</div>
+                <div class="side-panel">
+                    <div class="cell outside" data-target="1-18">1-18</div>
                     <div class="cell outside" data-target="even">EVEN</div>
                     <div class="cell outside grey" data-target="grey">GREY</div>
                     <div class="cell outside black" data-target="black">BLACK</div>
                     <div class="cell outside" data-target="odd">ODD</div>
-                    <div class="cell outside" data-target="19-36">19to36</div>
+                    <div class="cell outside" data-target="19-36">19-36</div>
                 </div>
                 <div style="display:flex; flex-direction:column; flex:1;">
                     <div class="cell" data-target="0" style="background:#fff; color:#000; height:40px; border-radius:40% 40% 0 0; font-size: 1.5rem;">0</div>
@@ -135,10 +135,9 @@
             
             <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:30px;">
                 <div class="undo-btn" onclick="undo()">↩</div>
-                
                 <div class="chip-main" id="mainChip" onclick="toggleChips()">
                     $0.1
-                    <div class="sub-chip-wrapper" id="radial">
+                    <div class="sub-chips-wrapper" id="radial">
                         <div class="sub-chip" data-val="0.1">0.1</div>
                         <div class="sub-chip" data-val="0.5">0.5</div>
                         <div class="sub-chip" data-val="1">1</div>
@@ -147,7 +146,7 @@
                     </div>
                 </div>
             </div>
-            <div style="text-align:center; font-size:0.7rem; color:#ffd966; padding-bottom:10px;">23 players won $133 last round</div>
+            <div style="text-align:center; font-size:0.75rem; color:#ffd966; padding-bottom:10px;" id="winInfo">...</div>
         </div>
     </div>
 
@@ -155,28 +154,23 @@
         let balance = parseFloat(localStorage.getItem('balance')) || 1000;
         let activeBets = [], betHistory = [], timer = 15, isRolling = false, curBet = 0.1, totalRot = 0;
         
-        // Массив чисел по порядку на вашей картинке (начиная с 0 и далее по часовой)
-        // На вашем фото 0 на 3 часах, далее вниз: 32, 15, 19, 4, 21, 2, 25, 17, 34...
         const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
         function toggleChips() {
             if(isRolling) return;
             const radial = document.getElementById('radial');
             const isActive = radial.classList.toggle('active');
-            const chips = radial.querySelectorAll('.sub-chip');
-            chips.forEach((c, i) => {
-                const angle = 110 + (i * 35); // Веер влево
-                const dist = isActive ? 120 : 0;
+            radial.querySelectorAll('.sub-chip').forEach((c, i) => {
+                const angle = 110 + (i * 35); 
+                const dist = isActive ? 130 : 0;
                 const x = Math.cos(angle * Math.PI / 180) * dist;
                 const y = Math.sin(angle * Math.PI / 180) * dist;
                 c.style.transform = `translate(${x}px, ${y}px) scale(${isActive?1:0})`;
             });
         }
 
-        function setBet(v) { curBet = v; document.getElementById('mainChip').childNodes[0].textContent = '$' + v; }
-
         document.querySelectorAll('.sub-chip').forEach(sc => {
-            sc.onclick = (e) => { e.stopPropagation(); setBet(parseFloat(sc.dataset.val)); toggleChips(); };
+            sc.onclick = (e) => { e.stopPropagation(); curBet = parseFloat(sc.dataset.val); document.getElementById('mainChip').childNodes[0].textContent = '$' + curBet; toggleChips(); };
         });
 
         function init() {
@@ -190,7 +184,13 @@
                 grid.appendChild(c);
             }
             document.querySelectorAll('.cell.outside, [data-target="0"]').forEach(el => el.onclick = () => placeBet(el));
-            updateUI(); startCycle();
+            updateUI(); genStats(); startCycle();
+        }
+
+        function genStats() {
+            const p = Math.floor(Math.random() * 50) + 23;
+            const s = Math.floor(Math.random() * 500) + 133;
+            document.getElementById('winInfo').innerText = `${p} players won $${s} last round`;
         }
 
         function placeBet(el) {
@@ -235,14 +235,11 @@
             const wheel = document.getElementById('wheel');
             let resIdx = Math.random() < 0.01 ? 0 : Math.floor(Math.random() * 36) + 1;
             
-            // СИНХРОНИЗАЦИЯ:
-            // 0 на картинке находится на 90 градусах (справа). 
-            // Чтобы 0 был сверху (0 градусов), нужно повернуть на -90.
-            // Каждое число занимает 360/37 градусов.
+            // СИНХРОНИЗАЦИЯ: 0 на фото на 90 градусов (справа). 
             const sector = 360 / 37;
-            const syncOffset = 90; // Смещение, так как 0 справа
+            const syncOffset = 90; 
             
-            totalRot += (360 * 8) + (syncOffset - (resIdx * sector)); 
+            totalRot += (360 * 10) + (syncOffset - (resIdx * sector)); 
             wheel.style.transform = `rotate(${totalRot}deg)`;
             
             setTimeout(() => {
@@ -260,8 +257,11 @@
                     else if(b.target==='black' && col==='BLACK') m=2;
                     else if(b.target==='even' && n%2===0 && n!==0) m=2;
                     else if(b.target==='odd' && n%2!==0) m=2;
+                    else if(b.target==='1-18' && n>=1 && n<=18) m=2;
+                    else if(b.target==='19-36' && n>=19 && n<=36) m=2;
                     won += b.amount * m;
                 });
+
                 balance += won;
                 document.getElementById('res-num').innerText = n;
                 document.getElementById('res-col').innerText = col;
@@ -273,7 +273,7 @@
                     isRolling = false;
                     activeBets.forEach(b => b.el.classList.remove('has-bet'));
                     activeBets = []; betHistory = [];
-                    startCycle();
+                    genStats(); startCycle();
                 }, 2000);
             }, 5000);
         }
