@@ -3,334 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Roulette - Cartoon Game</title>
+    <title>Roulette - Cartoon</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
-
-        :root { 
-            --bg: #000; --text: #fff; --font-main: 'Luckiest Guy', cursive;
-            --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6);
-            --soft-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --grey: #888; --black: #111; --white: #fff;
-        }
-
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: var(--bg); color: var(--text); 
-            font-family: var(--font-main); overflow: hidden; user-select: none;
-        }
-
-        /* ГРЯЗНАЯ ПЛЕНКА ПОВЕРХ ВСЕГО */
-        .noise { position: fixed; inset: 0; opacity: 0.15; pointer-events: none; z-index: 5000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 5001; }
-        .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
-        .scratch { width: 1px; height: 100%; opacity: 0.2; }
-        @keyframes fadeOut { 0% { opacity: 0.5; } 100% { opacity: 0; } }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 5002; pointer-events: none; }
-
-        /* ИНТЕРФЕЙС */
-        .roulette-container { position: relative; height: 100vh; display: flex; flex-direction: column; }
-        .top-bar { display: flex; justify-content: space-between; padding: 15px; align-items: center; z-index: 100; }
-        .balance { font-size: 1.8rem; text-shadow: 3px 3px 0 #333; }
-        .timer { font-size: 2.5rem; color: #ff0; text-shadow: 2px 2px 0 #000; }
-
-        /* КОЛЕСО И ПЕРСОНАЖ */
-        .game-area { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; position: relative; padding-bottom: 100px; }
-        .mickey-gif { width: 120px; height: 120px; border: 4px solid #fff; border-radius: 15px; box-shadow: 5px 5px 0 #333; }
-        
-        .wheel-wrap { position: relative; width: 240px; height: 240px; border: 8px solid #fff; border-radius: 50%; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
-        #wheel { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); background: #222; }
-        .arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 25px; height: 35px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 100; border: 1px solid #000; }
-
-        /* ПОЛЕ СТАВОК */
-        .bet-board {
-            position: absolute; bottom: 0; width: 100%; height: 70%; background: rgba(0,0,0,0.95);
-            border-top: 6px solid #fff; border-radius: 30px 30px 0 0;
-            transition: transform 0.6s var(--spring); transform: translateY(105%); z-index: 1000;
-            display: flex; flex-direction: column; padding: 10px; box-sizing: border-box;
-        }
+        :root { --bg: #000; --font: 'Luckiest Guy', cursive; --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); --grey: #aaa; }
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#000; color:#fff; font-family:var(--font); overflow:hidden; }
+        .noise { position:fixed; inset:0; opacity:0.1; pointer-events:none; z-index:5000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .roulette-top { display: flex; align-items: center; justify-content: center; height: 35%; padding: 10px; }
+        .wheel-wrap { position: relative; width: 240px; height: 240px; border: 8px solid #fff; border-radius: 50%; background: #222; }
+        #wheel { width: 100%; height: 100%; border-radius: 50%; background: url('wheel.png') no-repeat center; background-size: cover; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); }
+        .arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 30px; height: 40px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 200; border: 2px solid #000; }
+        .bet-board { position: absolute; bottom: 0; width: 100%; height: 75%; background: rgba(0,0,0,0.98); border-top: 6px solid #fff; border-radius: 30px 30px 0 0; transition: transform 0.6s var(--spring); transform: translateY(105%); z-index: 1000; display: flex; flex-direction: column; padding: 10px; }
         .bet-board.active { transform: translateY(10%); }
-        
-        /* Пружинка вниз: чуть вверх, потом резко вниз */
-        .bet-board.spring-out { animation: spring-down 0.8s forwards; }
-        @keyframes spring-down { 
-            0% { transform: translateY(10%); } 
-            20% { transform: translateY(0%); } 
-            100% { transform: translateY(105%); } 
-        }
-
-        /* СЕТКА СТАВОК (ПО ФОТО) */
-        .grid-layout { display: flex; gap: 5px; justify-content: center; transform: scale(0.9); transform-origin: top; margin-top: 10px; }
-        .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
-        .num-area { display: flex; flex-direction: column; flex: 1; max-width: 240px; }
-        .zero-cell { height: 35px; background: var(--white); border: 2px solid #000; color: #000; border-radius: 40% 40% 0 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
-        .numbers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; flex: 1; }
-        .dozen-bets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 4px; height: 35px; }
-
-        .cell { border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; position: relative; }
+        .grid-layout { display: flex; gap: 4px; justify-content: center; transform: scale(0.9); transform-origin: top; }
+        .side-bets { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
+        .cell { border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
         .cell.grey { background: var(--grey); color: #000; }
-        .cell.black { background: var(--black); color: #fff; }
-        .cell.outside { background: #222; font-size: 0.6rem; text-align: center; }
-
-        /* ФИШКА НА ПОЛЕ */
-        .cell.has-bet::after {
-            content: attr(data-sum); position: absolute; inset: 0; margin: auto;
-            width: 26px; height: 26px; background: #fff; color: #000;
-            border-radius: 50%; border: 2px solid #000; font-size: 9px;
-            display: flex; align-items: center; justify-content: center; z-index: 10;
-        }
-
-        /* УПРАВЛЕНИЕ */
-        .bet-footer { position: fixed; bottom: 85px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 1100; }
-        .undo-btn { width: 50px; height: 50px; background: #fff; color: #000; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 3px solid #000; cursor: pointer; }
-        .chip-main { width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
-        .stats-bar { text-align: center; font-size: 0.8rem; color: #ffd966; margin-top: auto; padding-bottom: 5px; }
-
-        /* ВСПЛЫВАЮЩИЙ РЕЗУЛЬТАТ */
-        #roul-pop {
-            position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: #fff; border: 8px solid #000; border-radius: 30px;
-            padding: 25px; text-align: center; color: #000; z-index: 6000; transition: 0.5s var(--spring);
-        }
-        #roul-pop.show { transform: translate(-50%, -50%) scale(1); }
-
+        .cell.black { background: #000; color: #fff; }
+        .cell.has-bet::after { content: attr(data-sum); position: absolute; inset: 0; margin: auto; width: 22px; height: 22px; background: #fff; color: #000; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
+        #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 30px; padding: 20px; text-align: center; z-index: 5000; transition: 0.4s var(--spring); }
+        #roul-res.show { transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
-<body onclick="startMusic()">
-
+<body onclick="document.getElementById('bgMusic').play()">
     <div class="noise"></div>
-    <div id="film-chaos"></div>
-    <div class="vignette"></div>
+    <audio id="bgMusic" loop><source src="music2.mp3" type="audio/mpeg"></audio>
+    <audio id="spinSound"><source src="soundroulet.mp3" type="audio/mpeg"></audio>
 
-    <audio id="bgMusic" loop preload="auto"><source src="music2.mp3" type="audio/mpeg"></audio>
+    <div id="roul-res"><div id="res-num" style="font-size:3rem;">?</div><div id="res-col" style="font-size:1rem;">-</div><div id="res-win" style="font-size:1.5rem; color:#0a0;"></div></div>
 
-    <div class="roulette-container">
-        <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
-        <div class="top-bar">
-            <div class="balance">$<span id="roul-bal">1000</span></div>
-            <div class="timer" id="roul-timer">15</div>
-            <div style="width: 50px;"></div> <!-- Отступ -->
+    <div class="game-screen">
+        <div style="width:100%; display:flex; justify-content:space-between; padding:15px; box-sizing:border-box;">
+            <div style="font-size:1.5rem;">$<span id="bal">1000.00</span></div>
+            <div id="timer" style="color:#ff0; font-size:1.8rem;">15</div>
+            <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px;" onclick="window.location.href='index.html'">BACK</button>
         </div>
-
-        <!-- ИГРОВАЯ ЗОНА -->
-        <div class="game-area">
-            <img src="ruolet.gif" class="mickey-gif" alt="mickey">
-            <div class="wheel-wrap">
-                <div class="arrow"></div>
-                <div id="wheel"></div>
-            </div>
-        </div>
-
-        <!-- СТОЛ СТАВОК -->
+        <div class="roulette-top"><div class="wheel-wrap"><div class="arrow"></div><div id="wheel"></div></div></div>
         <div class="bet-board active" id="betBoard">
             <div class="grid-layout">
-                <div class="side-panel">
-                    <div class="cell outside" data-target="1-18">1to18</div>
-                    <div class="cell outside" data-target="even">EVEN</div>
-                    <div class="cell outside grey" data-target="grey">GREY</div>
-                    <div class="cell outside black" data-target="black">BLACK</div>
-                    <div class="cell outside" data-target="odd">ODD</div>
-                    <div class="cell outside" data-target="19-36">19to36</div>
+                <div class="side-bets">
+                    <div class="cell outside" data-target="1-18">1-18</div><div class="cell outside" data-target="even">EVEN</div><div class="cell outside grey" data-target="grey">GREY</div><div class="cell outside black" data-target="black">BLACK</div><div class="cell outside" data-target="odd">ODD</div><div class="cell outside" data-target="19-36">19-36</div>
                 </div>
-                <div class="num-area">
-                    <div class="zero-cell cell" data-target="0">0</div>
-                    <div class="numbers-grid" id="numGrid"></div>
-                    <div class="dozen-bets">
-                        <div class="cell outside" data-target="1st12">1st 12</div>
-                        <div class="cell outside" data-target="2nd12">2nd 12</div>
-                        <div class="cell outside" data-target="3rd12">3rd 12</div>
-                    </div>
-                </div>
-                <div style="display:grid; grid-template-rows:repeat(3, 1fr); gap:4px; width:40px;">
-                    <div class="cell outside" data-target="col1">2to1</div>
-                    <div class="cell outside" data-target="col2">2to1</div>
-                    <div class="cell outside" data-target="col3">2to1</div>
-                </div>
+                <div style="display:flex; flex-direction:column; flex:1;"><div class="cell" data-target="0" style="background:#fff; color:#000; height:40px; border-radius:40% 40% 0 0;">0</div><div id="numGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; flex:1;"></div></div>
             </div>
-            
-            <div class="bet-footer">
-                <div class="undo-btn" id="roulUndo">↩</div>
-                <div class="chip-main"><span>$0.1</span></div>
+            <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-top:auto; padding-bottom:35px;">
+                <div style="width:45px; height:45px; background:#fff; color:#000; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #000;" onclick="location.reload()">↩</div>
+                <div style="width:70px; height:70px; border:4px solid #fff; border-radius:50%; background:#111; display:flex; align-items:center; justify-content:center;">$0.1</div>
             </div>
-            <div class="stats-bar" id="roulStats">23 players won $133 last round</div>
         </div>
-    </div>
-
-    <!-- ОКНО РЕЗУЛЬТАТА -->
-    <div id="roul-pop">
-        <div id="res-num" style="font-size:3.5rem;">?</div>
-        <div id="res-col" style="font-size:1.2rem; margin-bottom:10px;">-</div>
-        <div id="res-win" style="font-size:1.8rem; color:#0a0;"></div>
     </div>
 
     <script>
-        let balance = 1000, isRolling = false, musicStarted = false;
-        let roulTimer = 15, activeBets = [], betHistory = [];
+        let balance = parseFloat(localStorage.getItem('balance')) || 1000;
+        let activeBets = [], timer = 15, isRolling = false, totalRot = 0;
+        const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
-        function startMusic() {
-            if(!musicStarted) {
-                const m = document.getElementById('bgMusic');
-                m.volume = 0.4; m.play();
-                musicStarted = true;
-            }
-        }
-
-        // ИНИЦИАЛИЗАЦИЯ
         function init() {
             const grid = document.getElementById('numGrid');
-            const wheel = document.getElementById('wheel');
-            const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
-            
-            // Колесо
-            nums.forEach((n, i) => {
-                const angle = (360 / 37) * i;
-                const color = n === 0 ? '#fff' : (i % 2 === 0 ? '#1a1a1a' : '#666');
-                const div = document.createElement('div');
-                div.style.cssText = `position:absolute; width:100%; height:100%; transform:rotate(${angle}deg); text-align:center; color:${n===0?'#000':'#fff'}; font-size:12px; padding-top:10px; background: conic-gradient(from -5deg, transparent 0, ${color} 10deg, transparent 10deg); border-radius:50%;`;
-                div.innerText = n; wheel.appendChild(div);
-            });
-
-            // Сетка
             for(let i=1; i<=36; i++) {
                 const c = document.createElement('div');
-                c.className = `cell ${i % 2 === 0 ? 'black' : 'grey'}`;
+                c.className = `cell ${[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(i) ? 'grey' : 'black'}`;
                 c.innerText = i; c.dataset.target = i;
-                c.onclick = () => placeBet(c);
-                grid.appendChild(c);
+                c.onclick = () => placeBet(c); grid.appendChild(c);
             }
-            document.querySelectorAll('.cell.outside, .zero-cell').forEach(el => el.onclick = () => placeBet(el));
-            
-            updateUI();
-            startRoulCycle();
+            document.querySelectorAll('.outside, [data-target="0"]').forEach(el => el.onclick = () => placeBet(el));
+            startCycle(); updateUI();
         }
 
         function placeBet(el) {
-            if(isRolling || roulTimer <= 0) return;
-            const target = el.dataset.target;
-            const opposites = [['even','odd'], ['grey','black'], ['1-18','19-36']];
-            for(let pair of opposites) {
-                if(pair.includes(target) && activeBets.some(b => b.target === pair.find(x => x !== target))) return;
-            }
-            if(activeBets.length >= 5 && !activeBets.find(b => b.target === target)) return;
-
-            if(balance < 0.1) return;
+            if(isRolling || timer <= 0 || balance < 0.1) return;
             balance -= 0.1;
-            let bet = activeBets.find(b => b.target === target);
-            if(bet) {
-                bet.amount = parseFloat((bet.amount + 0.1).toFixed(1));
-            } else {
-                bet = { target, amount: 0.1, el };
-                activeBets.push(bet);
-                el.classList.add('has-bet');
-            }
-            el.setAttribute('data-sum', bet.amount);
-            betHistory.push(target);
-            updateUI();
+            let bet = activeBets.find(b => b.target === el.dataset.target);
+            if(bet) bet.amount += 0.1;
+            else { bet = { target: el.dataset.target, amount: 0.1, el }; activeBets.push(bet); el.classList.add('has-bet'); }
+            el.setAttribute('data-sum', bet.amount.toFixed(1)); updateUI();
         }
 
-        document.getElementById('roulUndo').onclick = () => {
-            if(isRolling || betHistory.length === 0) return;
-            const lastT = betHistory.pop();
-            const bet = activeBets.find(b => b.target === lastT);
-            balance += 0.1; bet.amount = parseFloat((bet.amount - 0.1).toFixed(1));
-            if(bet.amount <= 0) {
-                bet.el.classList.remove('has-bet');
-                activeBets = activeBets.filter(b => b.target !== lastT);
-            } else {
-                bet.el.setAttribute('data-sum', bet.amount);
-            }
-            updateUI();
-        };
-
-        function startRoulCycle() {
-            roulTimer = 15;
-            document.getElementById('betBoard').className = 'bet-board active';
-            const tick = setInterval(() => {
-                roulTimer--;
-                document.getElementById('roul-timer').innerText = roulTimer;
-                if(roulTimer <= 0) {
-                    clearInterval(tick);
-                    document.getElementById('betBoard').classList.add('spring-out');
-                    setTimeout(spinRoulette, 800);
-                }
+        function startCycle() {
+            timer = 15; document.getElementById('betBoard').classList.add('active');
+            const t = setInterval(() => {
+                timer--; document.getElementById('timer').innerText = timer;
+                if(timer <= 0) { clearInterval(t); document.getElementById('betBoard').classList.remove('active'); setTimeout(spin, 800); }
             }, 1000);
         }
 
-        function spinRoulette() {
-            isRolling = true;
-            const wheel = document.getElementById('wheel');
-            const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
-            
-            // Логика шансов
-            let resIdx;
-            const r = Math.random();
-            if(r < 0.01) resIdx = 0; // 1/100 на Zero
-            else {
-                // Подкрутка: если на серый в 2 раза больше чем на черный
-                let grey$ = activeBets.filter(b=>b.target==='grey').reduce((s,b)=>s+b.amount,0);
-                let black$ = activeBets.filter(b=>b.target==='black').reduce((s,b)=>s+b.amount,0);
-                if(grey$ > black$ * 2 && Math.random() < 0.6) resIdx = nums.findIndex((n,i)=>i!==0 && i%2===0);
-                else resIdx = Math.floor(Math.random() * 36) + 1;
-            }
-
-            const rotation = (360 * 10) + (resIdx * (360/37));
-            wheel.style.transform = `rotate(-${rotation}deg)`;
-
+        function spin() {
+            isRolling = true; document.getElementById('spinSound').play();
+            let resIdx = Math.random() < 0.01 ? 0 : Math.floor(Math.random() * 36) + 1;
+            totalRot += (360 * 10) + (360 - (resIdx * (360/37)));
+            document.getElementById('wheel').style.transform = `rotate(${totalRot}deg)`;
             setTimeout(() => {
-                const resNum = nums[resIdx];
-                const resCol = resNum === 0 ? 'WHITE' : (resIdx % 2 === 0 ? 'BLACK' : 'GREY');
-                
-                let winAmt = 0;
+                document.getElementById('spinSound').pause(); document.getElementById('spinSound').currentTime = 0;
+                let n = nums[resIdx], col = n === 0 ? 'WHITE' : ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(n) ? 'GREY' : 'BLACK'), won = 0;
                 activeBets.forEach(b => {
                     let m = 0;
-                    if(b.target == resNum) m = resNum == 0 ? 20 : 10;
-                    else if(b.target === 'even' && resNum%2===0 && resNum!==0) m = 2;
-                    else if(b.target === 'odd' && resNum%2!==0) m = 2;
-                    else if(b.target === 'grey' && resCol === 'GREY') m = 2;
-                    else if(b.target === 'black' && resCol === 'BLACK') m = 2;
-                    winAmt += b.amount * m;
+                    if(b.target == n) m = n==0?20:10;
+                    else if(b.target==='grey' && col==='GREY') m=2;
+                    else if(b.target==='black' && col==='BLACK') m=2;
+                    won += b.amount * m;
                 });
-
-                showResult(resNum, resCol, winAmt);
-                
-                isRolling = false;
-                setTimeout(() => {
-                    activeBets.forEach(b => b.el.classList.remove('has-bet'));
-                    activeBets = []; betHistory = [];
-                    document.getElementById('roulStats').innerText = `${23 + Math.floor(Math.random()*10)} players won $${133 + Math.floor(Math.random()*50)} last round`;
-                    startRoulCycle();
-                }, 2000);
-            }, 5500);
+                balance += won; document.getElementById('res-num').innerText = n;
+                document.getElementById('res-col').innerText = col;
+                document.getElementById('res-win').innerText = won > 0 ? `+$${won.toFixed(1)}` : "";
+                document.getElementById('roul-res').classList.add('show'); updateUI();
+                setTimeout(() => { document.getElementById('roul-res').classList.remove('show'); isRolling = false; activeBets.forEach(b => b.el.classList.remove('has-bet')); activeBets = []; startCycle(); }, 2000);
+            }, 5000);
         }
 
-        function showResult(num, col, win) {
-            const pop = document.getElementById('roul-pop');
-            document.getElementById('res-num').innerText = num;
-            document.getElementById('res-col').innerText = col;
-            document.getElementById('res-win').innerText = win > 0 ? `+ $${win.toFixed(1)}` : "";
-            balance += win; updateUI();
-            pop.classList.add('show');
-            setTimeout(() => pop.classList.remove('show'), 1500);
-        }
-
-        function updateUI() {
-            document.getElementById('roul-bal').innerText = balance.toFixed(2);
-        }
-
-        // ПЛЕНКА
-        setInterval(() => {
-            const c = document.getElementById('film-chaos');
-            const d = document.createElement('div');
-            d.className = Math.random() > 0.8 ? 'scratch' : 'dust';
-            d.style.left = Math.random() * 100 + '%';
-            if(d.className === 'dust') {
-                d.style.top = Math.random() * 100 + '%';
-                d.style.width = d.style.height = (Math.random()*5+2)+'px';
-            }
-            c.appendChild(d); setTimeout(()=>d.remove(), 800);
-        }, 150);
-
+        function updateUI() { document.getElementById('bal').innerText = balance.toFixed(2); localStorage.setItem('balance', balance); }
         window.onload = init;
     </script>
 </body>
