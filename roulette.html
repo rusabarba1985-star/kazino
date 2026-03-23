@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Roulette - Cartoon Pro Sync</title>
+    <title>Roulette - Cartoon Sync Pro</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
         :root { 
-            --bg: #000; --font: 'Luckiest Guy', cursive; 
+            --bg: #000; --text: #fff; --font: 'Luckiest Guy', cursive; 
             --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); 
-            --grey: #aaa; --white: #fff; 
+            --soft: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --grey: #888; --black: #111; 
         }
         body, html { margin:0; padding:0; width:100%; height:100%; background:#000; color:#fff; font-family:var(--font); overflow:hidden; }
         
@@ -17,19 +18,18 @@
 
         .game-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; }
 
-        /* ВЕРХНЯЯ ЧАСТЬ С КОЛЕСОМ */
+        /* КОЛЕСО */
         .roulette-top { 
             display: flex; align-items: center; justify-content: center; 
             height: 40%; width: 100%; transition: transform 0.8s var(--spring);
             z-index: 5;
         }
-        .roulette-top.away { transform: translateY(-150%); } /* Колесо улетает вверх */
+        .roulette-top.away { transform: translateY(-150%); } 
 
         .wheel-wrap { 
             position: relative; 
-            width: 350px; height: 350px; /* Увеличено в 1.5x */
+            width: 320px; height: 320px; 
             border-radius: 50%;
-            overflow: visible;
         }
         #wheel { 
             width: 100%; height: 100%; 
@@ -40,56 +40,55 @@
             border-radius: 50%;
             transition: transform 5s cubic-bezier(0.15, 0, 0.2, 1);
         }
-
         .arrow { 
             position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
-            width: 40px; height: 50px; background: #fff; 
+            width: 35px; height: 45px; background: #fff; 
             clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 200; border: 2px solid #000; 
         }
 
         /* ПОЛЕ СТАВОК */
         .bet-board {
             position: absolute; bottom: 0; width: 100%; height: 60%; 
-            background: rgba(0,0,0,0.98); border-top: 6px solid #fff; 
+            background: rgba(0,0,0,0.98); border-top: 5px solid #fff; 
             border-radius: 40px 40px 0 0;
             transition: all 0.8s var(--spring); 
             z-index: 1000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box;
         }
-        /* Поле на весь экран во время ставок */
         .bet-board.active { height: 92%; transform: translateY(0); }
         .bet-board.spring-out { transform: translateY(110%); }
 
-        /* СЕТКА (Адаптация под ПК) */
-        .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 20px; }
-        @media (min-width: 1024px) { .grid-layout { transform: scale(1.3); } }
-        @media (max-width: 1023px) { .grid-layout { transform: scale(0.9); } }
+        /* СЕТКА (ПК АДАПТАЦИЯ) */
+        .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 15px; }
+        @media (min-width: 1024px) {
+            .grid-layout { transform: scale(1.15); }
+            .bet-board.active { max-width: 600px; left: 50%; transform: translateX(-50%); border-right: 5px solid #fff; border-left: 5px solid #fff; }
+        }
+        @media (max-width: 1023px) { .grid-layout { transform: scale(0.85); } }
 
-        .side-bets { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 70px; }
-        .cell { border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
+        .side-bets { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
+        .cell { border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; position: relative; }
         .cell.grey { background: var(--grey); color: #000; }
         .cell.black { background: #111; color: #fff; }
-        .cell.has-bet::after { content: attr(data-sum); position: absolute; inset: 0; margin: auto; width: 24px; height: 24px; background: #fff; color: #000; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; font-weight: bold; }
+        .cell.has-bet::after { content: attr(data-sum); position: absolute; inset: 0; margin: auto; width: 22px; height: 22px; background: #fff; color: #000; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; font-weight: bold; }
 
-        /* НОВАЯ СИСТЕМА ФИШЕК */
+        /* ФИШКИ (ВЕЕР ВЛЕВО) */
         .chip-main { 
-            width: 80px; height: 80px; border: 5px solid #fff; border-radius: 50%; 
+            width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; 
             background: #111; display: flex; align-items: center; justify-content: center; 
-            position: relative; cursor: pointer; font-size: 1.1rem; z-index: 100;
+            position: relative; cursor: pointer; font-size: 1rem; z-index: 100;
         }
         .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
         
         .sub-chip { 
             position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-size: 0.8rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0);
+            font-size: 0.8rem; opacity: 0; transition: all 0.6s var(--spring); transform: scale(0);
         }
-        .chip-main.active .sub-chip { opacity: 1; transform: scale(1); }
+        .active .sub-chip { opacity: 1; transform: scale(1); }
 
-        #roul-res { 
-            position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); 
-            background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; 
-            padding: 25px; text-align: center; z-index: 5000; transition: 0.4s var(--spring); min-width: 220px; 
-        }
+        .undo-btn { width: 45px; height: 45px; background: #fff; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #000; font-size: 1.5rem; cursor: pointer; }
+
+        #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 20px; text-align: center; z-index: 5000; transition: 0.4s var(--spring); min-width: 200px; }
         #roul-res.show { transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
@@ -99,19 +98,18 @@
     <audio id="spinSound"><source src="soundroulet.mp3" type="audio/mpeg"></audio>
 
     <div id="roul-res">
-        <div id="res-num" style="font-size:4rem;">?</div>
+        <div id="res-num" style="font-size:3.5rem;">?</div>
         <div id="res-col" style="font-size:1.1rem;">-</div>
-        <div id="res-win" style="font-size:1.8rem; color:#0a0;"></div>
+        <div id="res-win" style="font-size:1.5rem; color:#0a0;"></div>
     </div>
 
     <div class="game-screen">
         <div style="width:100%; display:flex; justify-content:space-between; padding:15px; box-sizing:border-box; z-index: 2000;">
-            <div style="font-size:1.6rem;">$<span id="bal">1000.00</span></div>
-            <div id="timer" style="color:#ff0; font-size:2rem;">15</div>
+            <div style="font-size:1.5rem;">$<span id="bal">1000.00</span></div>
+            <div id="timer" style="color:#ff0; font-size:1.8rem;">15</div>
             <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer;" onclick="window.location.href='index.html'">BACK</button>
         </div>
 
-        <!-- КОЛЕСО -->
         <div class="roulette-top" id="wheelArea">
             <div class="wheel-wrap">
                 <div class="arrow"></div>
@@ -119,7 +117,6 @@
             </div>
         </div>
 
-        <!-- ПОЛЕ СТАВОК -->
         <div class="bet-board active" id="betBoard">
             <div class="grid-layout">
                 <div class="side-bets">
@@ -131,20 +128,23 @@
                     <div class="cell outside" data-target="19-36">19to36</div>
                 </div>
                 <div style="display:flex; flex-direction:column; flex:1;">
-                    <div class="cell" data-target="0" style="background:#fff; color:#000; height:45px; border-radius:40% 40% 0 0; font-size: 1.5rem;">0</div>
+                    <div class="cell" data-target="0" style="background:#fff; color:#000; height:40px; border-radius:40% 40% 0 0; font-size: 1.5rem;">0</div>
                     <div id="numGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; flex:1;"></div>
                 </div>
             </div>
             
             <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:30px;">
-                <div style="width:50px; height:50px; background:#fff; color:#000; border-radius:50%; display:flex; align-items:center; justify-content:center; border:4px solid #000; font-size:1.8rem; cursor:pointer;" onclick="undo()">↩</div>
+                <div class="undo-btn" onclick="undo()">↩</div>
                 
-                <!-- РАДИАЛЬНЫЙ ВЫБОР ФИШЕК -->
-                <div class="chip-main" id="mainChip" onclick="this.classList.toggle('active')">
+                <div class="chip-main" id="mainChip" onclick="toggleChips()">
                     $0.1
-                    <div class="sub-chip" style="left:-65px;" onclick="setBet(0.1)">0.1</div>
-                    <div class="sub-chip" style="left:-130px;" onclick="setBet(0.5)">0.5</div>
-                    <div class="sub-chip" style="left:-195px;" onclick="setBet(1.0)">1.0</div>
+                    <div class="sub-chip-wrapper" id="radial">
+                        <div class="sub-chip" data-val="0.1">0.1</div>
+                        <div class="sub-chip" data-val="0.5">0.5</div>
+                        <div class="sub-chip" data-val="1">1</div>
+                        <div class="sub-chip" data-val="5">5</div>
+                        <div class="sub-chip" data-val="10">10</div>
+                    </div>
                 </div>
             </div>
             <div style="text-align:center; font-size:0.7rem; color:#ffd966; padding-bottom:10px;">23 players won $133 last round</div>
@@ -155,10 +155,29 @@
         let balance = parseFloat(localStorage.getItem('balance')) || 1000;
         let activeBets = [], betHistory = [], timer = 15, isRolling = false, curBet = 0.1, totalRot = 0;
         
-        // Порядок чисел на стандартном колесе (по часовой)
+        // Массив чисел по порядку на вашей картинке (начиная с 0 и далее по часовой)
+        // На вашем фото 0 на 3 часах, далее вниз: 32, 15, 19, 4, 21, 2, 25, 17, 34...
         const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
+        function toggleChips() {
+            if(isRolling) return;
+            const radial = document.getElementById('radial');
+            const isActive = radial.classList.toggle('active');
+            const chips = radial.querySelectorAll('.sub-chip');
+            chips.forEach((c, i) => {
+                const angle = 110 + (i * 35); // Веер влево
+                const dist = isActive ? 120 : 0;
+                const x = Math.cos(angle * Math.PI / 180) * dist;
+                const y = Math.sin(angle * Math.PI / 180) * dist;
+                c.style.transform = `translate(${x}px, ${y}px) scale(${isActive?1:0})`;
+            });
+        }
+
         function setBet(v) { curBet = v; document.getElementById('mainChip').childNodes[0].textContent = '$' + v; }
+
+        document.querySelectorAll('.sub-chip').forEach(sc => {
+            sc.onclick = (e) => { e.stopPropagation(); setBet(parseFloat(sc.dataset.val)); toggleChips(); };
+        });
 
         function init() {
             const grid = document.getElementById('numGrid');
@@ -171,18 +190,21 @@
                 grid.appendChild(c);
             }
             document.querySelectorAll('.cell.outside, [data-target="0"]').forEach(el => el.onclick = () => placeBet(el));
-            updateUI();
-            startCycle();
+            updateUI(); startCycle();
         }
 
         function placeBet(el) {
             if(isRolling || timer <= 0 || activeBets.length >= 5 && !activeBets.find(b => b.target === el.dataset.target) || balance < curBet) return;
+            const target = el.dataset.target;
+            const opposites = [['even','odd'], ['grey','black'], ['1-18','19-36']];
+            for(let pair of opposites) if(pair.includes(target) && activeBets.some(b => b.target === pair.find(x => x !== target))) return;
+
             balance -= curBet;
-            let bet = activeBets.find(b => b.target === el.dataset.target);
+            let bet = activeBets.find(b => b.target === target);
             if(bet) bet.amount += curBet;
-            else { bet = { target: el.dataset.target, amount: curBet, el }; activeBets.push(bet); el.classList.add('has-bet'); }
+            else { bet = { target, amount: curBet, el }; activeBets.push(bet); el.classList.add('has-bet'); }
             el.setAttribute('data-sum', bet.amount.toFixed(1));
-            betHistory.push({target: el.dataset.target, val: curBet});
+            betHistory.push({target, val: curBet});
             updateUI();
         }
 
@@ -199,21 +221,11 @@
         function startCycle() {
             timer = 15;
             document.getElementById('betBoard').className = 'bet-board active';
-            document.getElementById('wheelArea').className = 'roulette-top away'; // Колесо улетает
-            
+            document.getElementById('wheelArea').className = 'roulette-top away';
             const t = setInterval(() => {
-                timer--;
-                document.getElementById('timer').innerText = timer;
-                
-                if(timer === 1) {
-                    document.getElementById('wheelArea').className = 'roulette-top'; // Возвращаем колесо за 1 сек
-                }
-
-                if(timer <= 0) {
-                    clearInterval(t);
-                    document.getElementById('betBoard').className = 'bet-board spring-out';
-                    setTimeout(spin, 800);
-                }
+                timer--; document.getElementById('timer').innerText = timer;
+                if(timer === 1) document.getElementById('wheelArea').className = 'roulette-top';
+                if(timer <= 0) { clearInterval(t); document.getElementById('betBoard').className = 'bet-board spring-out'; setTimeout(spin, 800); }
             }, 1000);
         }
 
@@ -221,19 +233,21 @@
             isRolling = true;
             document.getElementById('spinSound').play();
             const wheel = document.getElementById('wheel');
-            
-            // Шанс 1/100 на Зеро
             let resIdx = Math.random() < 0.01 ? 0 : Math.floor(Math.random() * 36) + 1;
             
-            // Расчет угла для синхронизации с картинкой
-            // 360 / 37 ≈ 9.73 градуса на число
-            totalRot += (360 * 10) + (360 - (resIdx * (360/37))); 
+            // СИНХРОНИЗАЦИЯ:
+            // 0 на картинке находится на 90 градусах (справа). 
+            // Чтобы 0 был сверху (0 градусов), нужно повернуть на -90.
+            // Каждое число занимает 360/37 градусов.
+            const sector = 360 / 37;
+            const syncOffset = 90; // Смещение, так как 0 справа
+            
+            totalRot += (360 * 8) + (syncOffset - (resIdx * sector)); 
             wheel.style.transform = `rotate(${totalRot}deg)`;
             
             setTimeout(() => {
                 document.getElementById('spinSound').pause();
                 document.getElementById('spinSound').currentTime = 0;
-                
                 const n = nums[resIdx];
                 const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
                 const col = n === 0 ? 'WHITE' : (reds.includes(n) ? 'GREY' : 'BLACK');
@@ -242,34 +256,29 @@
                 activeBets.forEach(b => {
                     let m = 0;
                     if(b.target == n) m = (n == 0 ? 20 : 10);
-                    else if(b.target==='even' && n%2===0 && n!==0) m=2;
-                    else if(b.target==='odd' && n%2!==0) m=2;
                     else if(b.target==='grey' && col==='GREY') m=2;
                     else if(b.target==='black' && col==='BLACK') m=2;
+                    else if(b.target==='even' && n%2===0 && n!==0) m=2;
+                    else if(b.target==='odd' && n%2!==0) m=2;
                     won += b.amount * m;
                 });
-
                 balance += won;
                 document.getElementById('res-num').innerText = n;
                 document.getElementById('res-col').innerText = col;
                 document.getElementById('res-win').innerText = won > 0 ? `+$${won.toFixed(1)}` : "";
                 document.getElementById('roul-res').classList.add('show');
                 updateUI();
-
                 setTimeout(() => {
                     document.getElementById('roul-res').classList.remove('show');
                     isRolling = false;
                     activeBets.forEach(b => b.el.classList.remove('has-bet'));
                     activeBets = []; betHistory = [];
                     startCycle();
-                }, 2000); 
+                }, 2000);
             }, 5000);
         }
 
-        function updateUI() { 
-            document.getElementById('bal').innerText = balance.toFixed(2); 
-            localStorage.setItem('balance', balance); 
-        }
+        function updateUI() { document.getElementById('bal').innerText = balance.toFixed(2); localStorage.setItem('balance', balance); }
         window.onload = init;
     </script>
 </body>
