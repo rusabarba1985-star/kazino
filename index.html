@@ -8,33 +8,48 @@
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
         :root { --bg: #000; --font-main: 'Luckiest Guy', cursive; --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: var(--font-main); overflow: hidden; }
-        .noise { position: fixed; inset: 0; opacity: 0.15; pointer-events: none; z-index: 5000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        
+        /* ПЛЕНКА */
+        .noise { position: fixed; inset: 0; opacity: 0.18; pointer-events: none; z-index: 9000; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 9001; }
+        .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
+        @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; } }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 9002; pointer-events: none; }
+
+        /* ЗАГРУЗКА */
+        #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 8000; transition: opacity 0.5s; }
+        .drawn-title { font-size: 4rem; text-align: center; line-height: 0.85; color: #fff; animation: title-jump 0.8s infinite var(--spring); -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0px #fff, 8px 8px 0px #333; }
+        @keyframes title-jump { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.1, 0.9) rotate(3deg); } }
+        #bar-container { width: 220px; height: 14px; border: 4px solid #fff; border-radius: 15px; margin-top: 40px; overflow: hidden; background: #222; }
+        #bar { height: 100%; width: 0%; background: #fff; }
+
         .header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
-        .balance { font-size: 2.2rem; }
+        .balance { font-size: 2.2rem; text-shadow: 3px 3px 0 #333; }
         .avatar { width: 70px; height: 70px; border: 5px solid #fff; border-radius: 50%; overflow: hidden; cursor: pointer; }
+        
         .bottom-nav { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: center; z-index: 100; }
         .btn-group { display: flex; gap: 8px; transition: transform 0.6s var(--spring); }
         #main-btns.hide { transform: translateY(250%); }
         #sub-btns { position: absolute; transform: translateY(250%); }
         #sub-btns.show { transform: translateY(0); }
-        .btn-cartoon { background: #000; color: #fff; border: 4px solid #fff; padding: 10px 15px; font-family: var(--font-main); font-size: 0.8rem; border-radius: 15px; cursor: pointer; text-transform: uppercase; }
-        #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; }
-        #bar { height: 100%; width: 0%; background: #fff; }
+        .btn-cartoon { background: #000; color: #fff; border: 4px solid #fff; padding: 10px 15px; font-family: var(--font-main); font-size: 0.8rem; border-radius: 15px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 0 #333; }
     </style>
 </head>
 <body onclick="resetMenu(); startMusic();">
     <div class="noise"></div>
+    <div id="film-chaos"></div>
+    <div class="vignette"></div>
     <audio id="music2" loop><source src="music2.mp3" type="audio/mpeg"></audio>
 
     <div id="loading-screen">
-        <h1 style="font-size:3.5rem;">CARTOON<br>GAME</h1>
-        <div style="width:200px; height:12px; border:3px solid #fff; border-radius:10px; margin-top:20px; overflow:hidden;"><div id="bar"></div></div>
+        <div class="drawn-title">CARTOON<br>GAME</div>
+        <div id="bar-container"><div id="bar"></div></div>
     </div>
 
     <div id="ui" style="display:none;">
         <div class="header">
             <div class="balance">$<span id="bal">1000.00</span></div>
-            <div class="avatar" onclick="event.stopPropagation(); changeAva();"><img id="ava" src="1.png" style="width:100%; height:100%;"></div>
+            <div class="avatar" onclick="event.stopPropagation(); changeAva();"><img id="ava" src="1.png" style="width:100%; height:100%; object-fit: cover;"></div>
         </div>
         <div class="bottom-nav">
             <div class="btn-group" id="main-btns">
@@ -60,16 +75,31 @@
             localStorage.setItem('userAva', cur);
             document.getElementById('ava').src = cur + '.png';
         }
-        let p = 0;
-        const loader = setInterval(() => {
-            p += 10; document.getElementById('bar').style.width = p + '%';
-            if(p >= 100) {
-                clearInterval(loader); document.getElementById('loading-screen').style.display='none';
-                document.getElementById('ui').style.display='block';
-                document.getElementById('bal').innerText = balance.toFixed(2);
-                document.getElementById('ava').src = (localStorage.getItem('userAva') || 1) + '.png';
-            }
-        }, 100);
+        
+        window.onload = () => {
+            let p = 0;
+            const loader = setInterval(() => {
+                p += 10; document.getElementById('bar').style.width = p + '%';
+                if(p >= 100) {
+                    clearInterval(loader); document.getElementById('loading-screen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('loading-screen').style.display='none';
+                        document.getElementById('ui').style.display='block';
+                        document.getElementById('bal').innerText = balance.toFixed(2);
+                        document.getElementById('ava').src = (localStorage.getItem('userAva') || 1) + '.png';
+                    }, 500);
+                }
+            }, 100);
+        };
+
+        setInterval(() => {
+            const c = document.getElementById('film-chaos');
+            const d = document.createElement('div');
+            d.className = Math.random() > 0.8 ? 'scratch' : 'dust';
+            d.style.left = Math.random() * 100 + '%';
+            if(d.className === 'dust') { d.style.top = Math.random() * 100 + '%'; d.style.width = d.style.height = (Math.random()*5+2)+'px'; }
+            c.appendChild(d); setTimeout(()=>d.remove(), 800);
+        }, 150);
     </script>
 </body>
 </html>
