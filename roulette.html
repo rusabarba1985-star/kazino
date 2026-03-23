@@ -3,47 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Roulette Pro - Noir Sync</title>
+    <title>Roulette Pro - Noir Sync Fixed</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
         :root { 
             --bg: #000; --font: 'Luckiest Guy', cursive; 
             --spring: cubic-bezier(0.68, -0.6, 0.32, 1.6); 
             --soft: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --grey-bet: #888; --black-bet: #000; 
         }
         body, html { margin:0; padding:0; width:100%; height:100%; background:#000; color:#fff; font-family:var(--font); overflow:hidden; }
         
-        /* ПЛЕНКА */
-        .noise { position:fixed; inset:0; opacity:0.15; pointer-events:none; z-index:10000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .noise { position:fixed; inset:0; opacity:0.18; pointer-events:none; z-index:10000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 10001; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
         @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; } }
 
+        #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9000; transition: opacity 0.5s; }
+        .drawn-title { font-size: 4rem; text-align: center; line-height: 0.85; color: #fff; animation: title-jump 0.8s infinite var(--spring); -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0px #fff, 8px 8px 0px #333; }
+        #bar-container { width: 220px; height: 14px; border: 4px solid #fff; border-radius: 15px; margin-top: 40px; overflow: hidden; background: #222; }
+        #bar { height: 100%; width: 0%; background: #fff; transition: width 0.3s; }
+
         .game-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; }
 
         /* ВЕРХНЯЯ ЧАСТЬ */
-        .roulette-top { display: flex; align-items: center; justify-content: center; height: 45%; width: 100%; transition: transform 0.8s var(--soft); z-index: 5; }
+        .roulette-top { display: flex; align-items: center; justify-content: center; height: 45%; width: 100%; transition: transform 0.8s var(--soft); z-index: 5; position: relative; }
         .roulette-top.away { transform: translateY(-160%); } 
 
-        @media (min-width: 1024px) { .roulette-top { flex-direction: row; gap: 60px; } }
+        @media (min-width: 1024px) { .roulette-top { flex-direction: row; gap: 80px; } }
         @media (max-width: 1023px) { .roulette-top { flex-direction: column; gap: 10px; } }
 
-        .mickey-gif { width: 130px; height: 130px; object-fit: contain; background: none; border: none; }
+        .mickey-gif { width: 160px; height: 160px; object-fit: contain; }
 
-        /* КОЛЕСО */
-        .wheel-wrap { position: relative; width: 330px; height: 330px; border-radius: 50%; }
+        /* КОЛЕСО И СТОЛБ */
+        .wheel-wrap { position: relative; width: 340px; height: 340px; z-index: 10; }
         #wheel { width: 100%; height: 100%; background: url('wheel.png') no-repeat center; background-size: contain; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.2, 1); }
         
-        /* СТРЕЛКА И СТОЛБ */
-        .arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 35px; height: 45px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 200; border: 2px solid #000; }
+        .arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 35px; height: 45px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 200; border: 2px solid #000; }
         
+        /* СТОЛБ Г-ОБРАЗНЫЙ (ПК) */
         @media (min-width: 1024px) {
-            .wheel-pillar {
-                position: absolute; width: 120px; height: 200px;
-                border-top: 15px solid #fff; border-right: 15px solid #fff;
-                border-radius: 0 40px 0 0; top: -30px; left: 50%; transform: translateX(-100%);
-                z-index: 150; pointer-events: none;
+            .pillar {
+                position: absolute; width: 150px; height: 180px;
+                border-top: 18px solid #fff; border-right: 18px solid #fff;
+                border-radius: 0 40px 0 0; top: -40px; left: 50%; 
+                transform: translateX(-100%); z-index: 50; pointer-events: none;
             }
         }
 
@@ -56,27 +59,27 @@
         .bet-board.active { height: 92%; transform: translateY(0); }
         .bet-board.spring-out { transform: translateY(115%); }
 
-        .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 5px; height: 82%; }
+        .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 5px; height: 80%; }
         @media (min-width: 1024px) { .bet-board.active { max-width: 440px; left: 50%; transform: translateX(-50%); border-left: 5px solid #fff; border-right: 5px solid #fff; } }
 
         .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 70px; }
-        .cell { height: 100%; border: 2.5px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
+        .cell { height: 100%; border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
         
-        .cell.grey { background: #888; color: #000; }
-        .cell.black { background: #000; color: #fff; }
+        .cell.grey-btn { background: #888; color: #000; }
+        .cell.black-btn { background: #111; color: #fff; }
         .cell.num-grey { background: #666; color: #fff; }
         .cell.num-black { background: #1a1a1a; color: #fff; }
-        .cell.zero { background:#fff; color:#000; height: 45px; border-radius: 40% 40% 0 0; font-size: 1.3rem; margin-bottom: 4px; }
-        .cell.outside { font-size: 0.65rem; text-transform: uppercase; }
+        .cell.zero { background:#fff; color:#000; height: 40px; border-radius: 40% 40% 0 0; font-size: 1.3rem; margin-bottom: 4px; }
         
         /* ИСПРАВЛЕННАЯ ФИШКА НА ПОЛЕ */
         .cell.has-bet::after { 
             content: attr(data-sum); position: absolute; 
-            top: 50%; left: 50%; transform: translate(-50%, -50%); /* ИДЕАЛЬНЫЙ ЦЕНТР */
-            width: 26px; height: 26px; background: #111; color: #fff; 
-            border-radius: 50%; border: 2px solid #fff; font-size: 8px; 
+            bottom: 4px; right: 4px; /* ПОЗИЦИЯ РЯДОМ */
+            width: 25px; height: 25px; background: #fff; color: #000; 
+            border-radius: 50%; border: 2px solid #000; font-size: 8px; 
             display: flex; align-items: center; justify-content: center; 
-            z-index: 10; font-weight: bold; box-shadow: inset 0 0 0 2px #fff;
+            z-index: 10; font-weight: bold; box-shadow: inset 0 0 0 2px #fff, 0 2px 4px rgba(0,0,0,0.5);
+            line-height: 1; padding: 0;
         }
 
         /* УПРАВЛЕНИЕ */
@@ -84,11 +87,11 @@
         .undo-draw::before { content: ''; position: absolute; top: 15px; left: 10px; width: 12px; height: 8px; border-left: 4px solid #000; border-top: 4px solid #000; transform: rotate(-45deg); }
         .undo-draw::after { content: ''; position: absolute; top: 18px; left: 14px; width: 15px; height: 10px; border-top: 4px solid #000; border-right: 4px solid #000; border-radius: 0 8px 0 0; }
 
-        .chip-main { width: 80px; height: 80px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; z-index: 1100; }
+        .chip-main { width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; z-index: 1100; }
         .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
         
-        /* УВЕЛИЧЕНО РАССТОЯНИЕ МЕЖДУ ФИШКАМИ */
-        .sub-chip { position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0); pointer-events: none; }
+        /* ВЫЛЕТ ВВЕРХ-ЛЕВО */
+        .sub-chip { position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0); pointer-events: none; }
         .active .sub-chip { opacity: 1; transform: scale(1); pointer-events: auto; }
 
         #wait-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 8000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
@@ -121,7 +124,7 @@
         <div class="roulette-top away" id="wheelArea">
             <img src="ruolet.gif" class="mickey-gif">
             <div class="wheel-wrap">
-                <div class="wheel-pillar"></div> <!-- СТОЛБ ДЛЯ ПК -->
+                <div class="pillar"></div>
                 <div class="arrow"></div>
                 <div id="wheel"></div>
             </div>
@@ -130,12 +133,12 @@
         <div class="bet-board active" id="betBoard">
             <div class="grid-layout">
                 <div class="side-panel">
-                    <div class="cell outside" data-target="1-18">1-18</div>
+                    <div class="cell outside" data-target="1-18">1to18</div>
                     <div class="cell outside" data-target="even">EVEN</div>
-                    <div class="cell outside grey" data-target="grey">GREY</div>
-                    <div class="cell outside black" data-target="black">BLACK</div>
+                    <div class="cell outside grey-btn" data-target="grey">GREY</div>
+                    <div class="cell outside black-btn" data-target="black">BLACK</div>
                     <div class="cell outside" data-target="odd">ODD</div>
-                    <div class="cell outside" data-target="19-36">19-36</div>
+                    <div class="cell outside" data-target="19-36">19to36</div>
                 </div>
                 <div style="display:flex; flex-direction:column; flex:1;">
                     <div class="cell zero" data-target="0">0</div>
@@ -146,13 +149,13 @@
             <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:20px;">
                 <div class="undo-draw" onclick="undo()"></div>
                 <div class="chip-main" id="mainChip" onclick="toggleChips()">
-                    <span id="curBetTxt">$0.1</span>
+                    <span id="curBetTxt">0.1</span>
                     <div id="radial" style="position:absolute; inset:0;">
-                        <div class="sub-chip" data-val="0.1">0.1</div>
-                        <div class="sub-chip" data-val="0.5">0.5</div>
-                        <div class="sub-chip" data-val="1">1</div>
-                        <div class="sub-chip" data-val="5">5</div>
-                        <div class="sub-chip" data-val="10">10</div>
+                        <div class="sub-chip" data-val="0.1" style="left:-60px; top:-60px;">0.1</div>
+                        <div class="sub-chip" data-val="0.5" style="left:0; top:-85px;">0.5</div>
+                        <div class="sub-chip" data-val="1" style="left:60px; top:-60px;">1</div>
+                        <div class="sub-chip" data-val="5" style="left:85px; top:0;">5</div>
+                        <div class="sub-chip" data-val="10" style="left:60px; top:60px;">10</div>
                     </div>
                 </div>
             </div>
@@ -165,22 +168,22 @@
         const CYCLE = 25000;
         const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
+        window.onload = () => {
+            let p = 0;
+            const loader = setInterval(() => {
+                p += 10; document.getElementById('bar').style.width = p + '%';
+                if(p >= 100) { clearInterval(loader); document.getElementById('loading-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('loading-screen').style.display='none'; init(); }, 500); }
+            }, 100);
+        };
+
         function toggleChips() {
             if(isRolling) return;
             const rad = document.getElementById('mainChip');
-            const isActive = rad.classList.toggle('active');
-            rad.querySelectorAll('.sub-chip').forEach((c, i) => {
-                // УВЕЛИЧЕНО РАССТОЯНИЕ (140) и УГОЛ
-                const angle = 150 + (i * 30); 
-                const dist = isActive ? 140 : 0;
-                const x = Math.cos(angle * Math.PI / 180) * dist;
-                const y = Math.sin(angle * Math.PI / 180) * dist;
-                c.style.transform = `translate(${x}px, ${y}px) scale(${isActive?1:0})`;
-            });
+            rad.classList.toggle('active');
         }
 
         document.querySelectorAll('.sub-chip').forEach(sc => {
-            sc.onclick = (e) => { e.stopPropagation(); curBet = parseFloat(sc.dataset.val); document.getElementById('curBetTxt').innerText = '$'+curBet; toggleChips(); };
+            sc.onclick = (e) => { e.stopPropagation(); curBet = parseFloat(sc.dataset.val); document.getElementById('curBetTxt').innerText = curBet; toggleChips(); };
         });
 
         function sync() {
@@ -197,14 +200,8 @@
                 timerEl.innerText = Math.ceil((15000 - elapsed) / 1000);
                 board.className = 'bet-board active';
                 wheelArea.className = 'roulette-top away';
-                
                 if (isRolling) {
-                    setTimeout(() => {
-                        wheel.style.transition = 'none';
-                        totalRot = 0;
-                        wheel.style.transform = `rotate(0deg)`;
-                        isRolling = false;
-                    }, 800);
+                    setTimeout(() => { wheel.style.transition = 'none'; totalRot = 0; wheel.style.transform = `rotate(0deg)`; isRolling = false; }, 800);
                 }
                 if (lastProcessedRound !== roundId) { resetRound(); lastProcessedRound = roundId; }
             } else {
@@ -227,7 +224,6 @@
             const x = Math.sin(seed) * 10000;
             const rand = x - Math.floor(x);
             const resIdx = rand < 0.01 ? 0 : Math.floor(((rand - 0.01) / 0.99) * 36) + 1;
-
             const wheel = document.getElementById('wheel');
             const snd = document.getElementById('spinSound');
             snd.play();
@@ -268,6 +264,7 @@
             const t = el.dataset.target;
             const opposites = { 'grey': 'black', 'black': 'grey', 'even': 'odd', 'odd': 'even', '1-18': '19-36', '19-36': '1-18' };
             if (opposites[t] && activeBets.some(b => b.target === opposites[t])) return;
+
             balance -= curBet;
             let bet = activeBets.find(b => b.target === t);
             if(bet) bet.amount = parseFloat((bet.amount + curBet).toFixed(1));
@@ -310,9 +307,7 @@
             d.style.left = Math.random() * 100 + '%';
             if(d.className === 'dust') { d.style.top = Math.random() * 100 + '%'; d.style.width = d.style.height = (Math.random()*5+2)+'px'; }
             c.appendChild(d); setTimeout(()=>d.remove(), 800);
-        }, 200);
-
-        window.onload = init;
+        }, 150);
     </script>
 </body>
 </html>
