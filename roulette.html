@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Roulette - Cartoon Pro Sync</title>
+    <title>Roulette - Global Sync</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
         :root { 
@@ -14,80 +14,64 @@
         }
         body, html { margin:0; padding:0; width:100%; height:100%; background:#000; color:#fff; font-family:var(--font); overflow:hidden; }
         
-        /* ГРЯЗНАЯ ПЛЕНКА */
         .noise { position:fixed; inset:0; opacity:0.12; pointer-events:none; z-index:9000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 9001; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
-        .scratch { width: 1px; height: 100%; opacity: 0.3; }
         @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; } }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 9002; pointer-events: none; }
 
         .game-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; }
 
-        /* КОЛЕСО */
-        .roulette-top { 
-            display: flex; align-items: center; justify-content: center; 
-            height: 45%; width: 100%; transition: transform 0.8s var(--spring);
-            z-index: 5; position: relative;
-        }
+        .roulette-top { display: flex; align-items: center; justify-content: center; height: 45%; width: 100%; transition: transform 0.8s var(--spring); z-index: 5; }
         .roulette-top.away { transform: translateY(-150%); } 
 
         .wheel-wrap { position: relative; width: 340px; height: 340px; border-radius: 50%; }
-        #wheel { 
-            width: 100%; height: 100%; 
-            background: url('wheel.png') no-repeat center; 
-            background-size: contain; border-radius: 50%;
-            transition: transform 5s cubic-bezier(0.15, 0, 0.2, 1);
-        }
+        #wheel { width: 100%; height: 100%; background: url('wheel.png') no-repeat center; background-size: contain; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.2, 1); }
         .arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 35px; height: 45px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 200; border: 2px solid #000; }
 
-        /* ПОЛЕ СТАВОК */
-        .bet-board {
-            position: absolute; bottom: 0; width: 100%; height: 65%; 
-            background: rgba(0,0,0,0.98); border-top: 5px solid #fff; 
-            border-radius: 40px 40px 0 0;
-            transition: all 0.7s var(--soft); 
-            z-index: 1000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box;
-        }
-        .bet-board.active { height: 92%; transform: translateY(0); }
+        .bet-board { position: absolute; bottom: 0; width: 100%; height: 65%; background: rgba(0,0,0,0.98); border-top: 5px solid #fff; border-radius: 40px 40px 0 0; transition: all 0.7s var(--soft); z-index: 1000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; }
+        .bet-board.active { height: 90%; transform: translateY(0); }
         .bet-board.spring-out { transform: translateY(115%); }
 
-        /* СЕТКА (Узкая и длинная на ПК) */
         .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 10px; }
-        @media (min-width: 1024px) {
-            .bet-board.active { max-width: 420px; left: 50%; transform: translateX(-50%); border-left: 5px solid #fff; border-right: 5px solid #fff; }
-            .grid-layout { transform: scale(1.05); }
-        }
+        @media (min-width: 1024px) { .bet-board.active { max-width: 420px; left: 50%; transform: translateX(-50%); border-left: 5px solid #fff; border-right: 5px solid #fff; } .grid-layout { transform: scale(1.1); } }
         @media (max-width: 1023px) { .grid-layout { transform: scale(0.8); } }
 
         .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 65px; }
-        .num-grid-box { display: flex; flex-direction: column; flex: 1; }
         .cell { border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; position: relative; }
         .cell.grey { background: var(--grey); color: #000; }
         .cell.black { background: #111; color: #fff; }
         .cell.has-bet::after { content: attr(data-sum); position: absolute; inset: 0; margin: auto; width: 24px; height: 24px; background: #fff; color: #000; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #000; font-weight: bold; }
 
-        /* ФИШКИ (ВЕЕР ВЛЕВО) */
-        .chip-main { width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; font-size: 1rem; z-index: 1100; }
+        .chip-main { width: 75px; height: 75px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; z-index: 1100; }
         .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; }
-        .sub-chip { position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: all 0.5s var(--spring); transform: scale(0); pointer-events: none; }
+        .sub-chip { position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0); pointer-events: none; }
         .active .sub-chip { opacity: 1; transform: scale(1); pointer-events: auto; }
 
-        .undo-btn { width: 45px; height: 45px; background: #fff; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #000; font-size: 1.5rem; cursor: pointer; }
+        /* ОКНО ОЖИДАНИЯ */
+        #wait-screen { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            z-index: 8000; display: none; justify-content: center; align-items: center; 
+            backdrop-filter: blur(5px);
+        }
+        .wait-box { 
+            background: #fff; color: #000; padding: 30px; border-radius: 30px; 
+            border: 8px solid #000; font-size: 1.5rem; text-align: center;
+            animation: wait-spring 0.6s var(--spring) forwards;
+        }
+        @keyframes wait-spring { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
 
-        .stats-area { text-align: center; font-size: 0.75rem; color: #ffd966; padding-bottom: 10px; line-height: 1.4; margin-top: auto; }
-
-        #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 25px; text-align: center; z-index: 8000; transition: 0.4s var(--spring); min-width: 220px; }
+        #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 25px; text-align: center; z-index: 9000; transition: 0.4s var(--spring); min-width: 220px; }
         #roul-res.show { transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
 <body onclick="document.getElementById('bgMusic').play()">
     <div class="noise"></div>
-    <div class="vignette"></div>
     <div id="film-chaos"></div>
     
     <audio id="bgMusic" loop><source src="music2.mp3" type="audio/mpeg"></audio>
     <audio id="spinSound"><source src="soundroulet.mp3" type="audio/mpeg"></audio>
+
+    <div id="wait-screen"><div class="wait-box">Ждите следующую игру...</div></div>
 
     <div id="roul-res">
         <div id="res-num" style="font-size:3.5rem;">?</div>
@@ -99,14 +83,11 @@
         <div style="width:100%; display:flex; justify-content:space-between; padding:15px; box-sizing:border-box; z-index: 2000;">
             <div style="font-size:1.5rem;">$<span id="bal">1000.00</span></div>
             <div id="timer" style="color:#ff0; font-size:1.8rem;">15</div>
-            <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer; padding:5px 15px;" onclick="window.location.href='index.html'">EXIT</button>
+            <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer;" onclick="window.location.href='index.html'">EXIT</button>
         </div>
 
         <div class="roulette-top" id="wheelArea">
-            <div class="wheel-wrap">
-                <div class="arrow"></div>
-                <div id="wheel"></div>
-            </div>
+            <div class="wheel-wrap"><div class="arrow"></div><div id="wheel"></div></div>
         </div>
 
         <div class="bet-board active" id="betBoard">
@@ -119,168 +100,135 @@
                     <div class="cell outside" data-target="odd">ODD</div>
                     <div class="cell outside" data-target="19-36">19to36</div>
                 </div>
-                <div class="num-grid-box">
+                <div style="display:flex; flex-direction:column; flex:1;">
                     <div class="cell" data-target="0" style="background:#fff; color:#000; height:45px; border-radius:40% 40% 0 0; font-size: 1.5rem;">0</div>
                     <div id="numGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; flex:1;"></div>
                 </div>
             </div>
             
-            <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:20px; padding-bottom:20px;">
-                <div class="undo-btn" onclick="undo()">↩</div>
-                <div class="chip-main" id="mainChip" onclick="toggleChips()">
-                    $0.1
-                    <div id="radial" style="position:absolute; inset:0;">
-                        <div class="sub-chip" data-val="0.1">0.1</div>
-                        <div class="sub-chip" data-val="0.5">0.5</div>
-                        <div class="sub-chip" data-val="1">1</div>
-                        <div class="sub-chip" data-val="5">5</div>
-                        <div class="sub-chip" data-val="10">10</div>
-                    </div>
-                </div>
+            <div style="display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:30px;">
+                <div style="width:45px; height:45px; background:#fff; color:#000; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #000; font-size:1.5rem;" onclick="undo()">↩</div>
+                <div class="chip-main" id="mainChip" onclick="toggleChips()">$0.1<div id="radial" style="position:absolute; inset:0;"></div></div>
             </div>
-            <div class="stats-area" id="statsInfo">Waiting for bets...</div>
         </div>
     </div>
 
     <script>
         let balance = parseFloat(localStorage.getItem('balance')) || 1000;
-        let activeBets = [], betHistory = [], timer = 15, isRolling = false, curBet = 0.1, totalRot = 0;
+        let activeBets = [], betHistory = [], isRolling = false, curBet = 0.1, lastProcessedRound = -1;
+        const CYCLE = 25000; // 25 секунд полный цикл
         const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
-        function toggleChips() {
-            const rad = document.getElementById('mainChip');
-            const isActive = rad.classList.toggle('active');
-            rad.querySelectorAll('.sub-chip').forEach((c, i) => {
-                const angle = 110 + (i * 35); 
-                const dist = isActive ? 130 : 0;
-                const x = Math.cos(angle * Math.PI / 180) * dist;
-                const y = Math.sin(angle * Math.PI / 180) * dist;
-                c.style.transform = `translate(${x}px, ${y}px) scale(${isActive?1:0})`;
-            });
+        // ДЕТЕРМИНИРОВАННЫЙ РАНДОМ (одинаковый для всех)
+        function getSyncedResult(roundId) {
+            let seed = roundId * 1234567;
+            let x = Math.sin(seed) * 10000;
+            let rand = x - Math.floor(x);
+            if (rand < 0.01) return 0; // 1% на Зеро
+            return Math.floor(((rand - 0.01) / 0.99) * 36) + 1;
         }
 
-        document.querySelectorAll('.sub-chip').forEach(sc => {
-            sc.onclick = (e) => { e.stopPropagation(); curBet = parseFloat(sc.dataset.val); document.getElementById('mainChip').childNodes[0].textContent = '$'+curBet; toggleChips(); };
-        });
+        function sync() {
+            const now = Date.now();
+            const elapsed = now % CYCLE;
+            const roundId = Math.floor(now / CYCLE);
+            const timerEl = document.getElementById('timer');
+            const board = document.getElementById('betBoard');
+            const wheelArea = document.getElementById('wheelArea');
+            const waitScreen = document.getElementById('wait-screen');
 
-        function init() {
-            const grid = document.getElementById('numGrid');
-            for(let i=1; i<=36; i++) {
-                const c = document.createElement('div');
-                const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-                c.className = `cell ${reds.includes(i) ? 'grey' : 'black'}`;
-                c.innerText = i; c.dataset.target = i;
-                c.onclick = () => placeBet(c); grid.appendChild(c);
+            if (elapsed < 15000) { // ФАЗА СТАВОК (15 сек)
+                timerEl.innerText = Math.ceil((15000 - elapsed) / 1000);
+                board.className = 'bet-board active';
+                wheelArea.className = 'roulette-top away';
+                waitScreen.style.display = 'none';
+                if (lastProcessedRound !== roundId) resetRound();
+                isRolling = false;
+            } 
+            else if (elapsed < 21000) { // ФАЗА ВРАЩЕНИЯ (6 сек)
+                timerEl.innerText = "0";
+                if (!isRolling) {
+                    if (activeBets.length === 0) waitScreen.style.display = 'flex';
+                    board.className = 'bet-board spring-out';
+                    wheelArea.className = 'roulette-top';
+                    startSpin(roundId);
+                }
+            } 
+            else { // ФАЗА РЕЗУЛЬТАТА (4 сек)
+                waitScreen.style.display = 'none';
             }
-            document.querySelectorAll('.cell.outside, [data-target="0"]').forEach(el => el.onclick = () => placeBet(el));
-            updateUI(); startCycle();
+            requestAnimationFrame(sync);
         }
 
-        function placeBet(el) {
-            if(isRolling || timer <= 0) return;
-            const t = el.dataset.target;
-            if(activeBets.length >= 5 && !activeBets.find(b => b.target === t)) return;
-            const opposites = [['even','odd'],['grey','black'],['1-18','19-36']];
-            for(let p of opposites) if(p.includes(t) && activeBets.some(b => b.target === p.find(x => x !== t))) return;
-            if(balance < curBet) return;
-            balance -= curBet;
-            let bet = activeBets.find(b => b.target === t);
-            if(bet) bet.amount = parseFloat((bet.amount + curBet).toFixed(1));
-            else { bet = { target: t, amount: curBet, el }; activeBets.push(bet); el.classList.add('has-bet'); }
-            el.setAttribute('data-sum', bet.amount); betHistory.push({t, v: curBet}); updateUI();
-        }
-
-        function undo() {
-            if(isRolling || betHistory.length === 0) return;
-            const last = betHistory.pop();
-            const bet = activeBets.find(b => b.target === last.t);
-            balance += last.v; bet.amount = parseFloat((bet.amount - last.v).toFixed(1));
-            if(bet.amount <= 0) { bet.el.classList.remove('has-bet'); activeBets = activeBets.filter(b => b.target !== last.t); }
-            else bet.el.setAttribute('data-sum', bet.amount); updateUI();
-        }
-
-        function startCycle() {
-            timer = 15;
-            document.getElementById('betBoard').className = 'bet-board active';
-            document.getElementById('wheelArea').className = 'roulette-top away';
-            const t = setInterval(() => {
-                timer--; document.getElementById('timer').innerText = timer;
-                if(timer === 1) document.getElementById('wheelArea').className = 'roulette-top';
-                if(timer <= 0) { clearInterval(t); document.getElementById('betBoard').className = 'bet-board spring-out'; setTimeout(spin, 800); }
-            }, 1000);
-        }
-
-        function spin() {
-            isRolling = true; document.getElementById('spinSound').play();
+        function startSpin(roundId) {
+            if (isRolling || lastProcessedRound === roundId) return;
+            isRolling = true;
+            lastProcessedRound = roundId;
+            const resIdx = getSyncedResult(roundId);
             const wheel = document.getElementById('wheel');
-            let resIdx = Math.random() < 0.01 ? 0 : Math.floor(Math.random() * 36) + 1;
+            const snd = document.getElementById('spinSound');
             
-            // Подкрутка
-            let grey$ = activeBets.filter(b=>b.target==='grey').reduce((s,b)=>s+b.amount,0);
-            let black$ = activeBets.filter(b=>b.target==='black').reduce((s,b)=>s+b.amount,0);
-            if(grey$ > black$ * 2 && Math.random() < 0.6) resIdx = 2; // Black
-
-            const sector = 360 / 37;
-            totalRot += (360 * 8) + (360 - (resIdx * sector)); 
-            wheel.style.transform = `rotate(${totalRot}deg)`;
+            snd.play();
+            wheel.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.2, 1)';
+            wheel.style.transform = `rotate(${(360 * 10) + (360 - (resIdx * (360/37)))}deg)`;
 
             setTimeout(() => {
-                document.getElementById('spinSound').pause(); document.getElementById('spinSound').currentTime = 0;
+                snd.pause(); snd.currentTime = 0;
                 const n = nums[resIdx];
                 const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
                 const col = n === 0 ? 'WHITE' : (reds.includes(n) ? 'GREY' : 'BLACK');
+                
                 let won = 0;
                 activeBets.forEach(b => {
                     let m = 0;
                     if(b.target == n) m = (n == 0 ? 20 : 10);
                     else if(b.target==='grey' && col==='GREY') m=2;
                     else if(b.target==='black' && col==='BLACK') m=2;
-                    else if(b.target==='even' && n%2===0 && n!==0) m=2;
-                    else if(b.target==='odd' && n%2!==0) m=2;
                     won += b.amount * m;
                 });
+
                 balance += won;
                 document.getElementById('res-num').innerText = n;
                 document.getElementById('res-col').innerText = col;
                 document.getElementById('res-win').innerText = won > 0 ? `+$${won.toFixed(1)}` : "";
                 document.getElementById('roul-res').classList.add('show');
-                
-                const stats = document.getElementById('statsInfo');
-                const bWin = Math.floor(Math.random()*500 + 133);
-                const bCount = Math.floor(Math.random()*30 + 23);
-                stats.innerHTML = `${bCount} players won $${bWin} last round<br>` + (won > 0 ? `YOU WON: $${won.toFixed(1)}` : "YOU LOST");
-                
                 updateUI();
+
                 setTimeout(() => {
                     document.getElementById('roul-res').classList.remove('show');
-                    isRolling = false;
-                    
-                    // СБРОС К НУЛЮ
                     wheel.style.transition = 'none';
-                    totalRot = 0;
                     wheel.style.transform = `rotate(0deg)`;
-                    
-                    activeBets.forEach(b => b.el.classList.remove('has-bet'));
-                    activeBets = []; betHistory = [];
-                    setTimeout(() => {
-                        wheel.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.2, 1)';
-                        startCycle();
-                    }, 50);
-                }, 2000);
+                }, 3000);
             }, 5000);
         }
 
-        function updateUI() { document.getElementById('bal').innerText = balance.toFixed(2); localStorage.setItem('balance', balance); }
-        
-        setInterval(() => {
-            const c = document.getElementById('film-chaos');
-            const d = document.createElement('div');
-            d.className = Math.random() > 0.8 ? 'scratch' : 'dust';
-            d.style.left = Math.random() * 100 + '%';
-            if(d.className === 'dust') { d.style.top = Math.random() * 100 + '%'; d.style.width = d.style.height = (Math.random()*5+2)+'px'; }
-            c.appendChild(d); setTimeout(()=>d.remove(), 800);
-        }, 200);
+        function resetRound() {
+            activeBets.forEach(b => b.el.classList.remove('has-bet'));
+            activeBets = []; betHistory = [];
+        }
 
+        function placeBet(el) {
+            if (isRolling || balance < curBet || activeBets.length >= 5 && !activeBets.find(b => b.target === el.dataset.target)) return;
+            balance -= curBet;
+            let bet = activeBets.find(b => b.target === el.dataset.target);
+            if(bet) bet.amount = parseFloat((bet.amount + curBet).toFixed(1));
+            else { bet = { target: el.dataset.target, amount: curBet, el }; activeBets.push(bet); el.classList.add('has-bet'); }
+            el.setAttribute('data-sum', bet.amount); updateUI();
+        }
+
+        function init() {
+            const grid = document.getElementById('numGrid');
+            for(let i=1; i<=36; i++) {
+                const c = document.createElement('div');
+                c.className = `cell ${[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(i) ? 'grey' : 'black'}`;
+                c.innerText = i; c.dataset.target = i;
+                c.onclick = () => placeBet(c); grid.appendChild(c);
+            }
+            document.querySelectorAll('.cell.outside, [data-target="0"]').forEach(el => el.onclick = () => placeBet(el));
+            updateUI(); sync();
+        }
+
+        function updateUI() { document.getElementById('bal').innerText = balance.toFixed(2); localStorage.setItem('balance', balance); }
         window.onload = init;
     </script>
 </body>
