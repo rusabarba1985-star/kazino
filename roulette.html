@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Roulette Pro - Noir Sync Fixed</title>
+    <title>Roulette Pro - Giant Noir</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
         :root { 
@@ -14,14 +14,14 @@
         }
         body, html { margin:0; padding:0; width:100%; height:100%; background:#000; color:#fff; font-family:var(--font); overflow:hidden; }
         
-        /* ПЛЕНКА (Z-INDEX 10000) */
+        /* ПЛЕНКА ПОВЕРХ ВСЕГО */
         .noise { position:fixed; inset:0; opacity:0.18; pointer-events:none; z-index:10000; background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         #film-chaos { position: fixed; inset: 0; pointer-events: none; z-index: 10001; }
         .dust, .scratch { position: absolute; background: rgba(255,255,255,0.4); pointer-events: none; animation: fadeOut 0.8s forwards; }
         @keyframes fadeOut { 0% { opacity: 0.6; transform: scale(0.8); } 100% { opacity: 0; } }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 150%); z-index: 10002; pointer-events: none; }
 
-        /* ЭКРАН ЗАГРУЗКИ */
+        /* ЗАГРУЗКА */
         #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 15000; transition: opacity 0.5s; }
         .drawn-title { font-size: 4rem; text-align: center; line-height: 0.85; color: #fff; animation: title-jump 0.8s infinite var(--spring); -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0px #fff, 8px 8px 0px #333; }
         @keyframes title-jump { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.1, 0.9) rotate(3deg); } }
@@ -31,37 +31,25 @@
         .game-screen { height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; }
 
         /* ВЕРХНЯЯ ЧАСТЬ (КОЛЕСО И ГИФКА) */
-        .roulette-top { display: flex; align-items: center; justify-content: center; height: 45%; width: 100%; transition: transform 0.8s var(--soft); z-index: 50; position: relative; }
+        .roulette-top { display: flex; align-items: center; justify-content: center; width: 100%; transition: transform 0.8s var(--soft); z-index: 50; position: relative; }
         .roulette-top.away { transform: translateY(-160%); } 
 
         @media (min-width: 1024px) { 
-            .roulette-top { flex-direction: row; gap: 80px; } 
-            .mickey-gif { order: 1; }
-            .wheel-wrap { order: 2; }
+            .roulette-top { flex-direction: row; gap: 100px; height: 50%; } 
+            .mickey-gif { width: 320px; height: 320px; } /* В 2 раза больше */
+            .wheel-wrap { width: 600px; height: 600px; } /* В 2 раза больше */
         }
         @media (max-width: 1023px) { 
-            .roulette-top { flex-direction: column; gap: 15px; } 
-            .mickey-gif { order: 2; width: 120px; height: 120px; } /* ГИФКА ПОД КОЛЕСОМ */
-            .wheel-wrap { order: 1; transform: scale(0.9); }
+            .roulette-top { flex-direction: column; gap: 5px; height: 45%; padding-top: 30px; } /* Чуть ниже */
+            .mickey-gif { width: 120px; height: 120px; order: 2; }
+            .wheel-wrap { width: 300px; height: 300px; order: 1; }
         }
 
-        .mickey-gif { width: 160px; height: 160px; object-fit: contain; }
+        .mickey-gif { object-fit: contain; background: none; }
 
-        /* КОЛЕСО */
-        .wheel-wrap { position: relative; width: 340px; height: 340px; z-index: 100; }
+        .wheel-wrap { position: relative; z-index: 100; }
         #wheel { width: 100%; height: 100%; background: url('wheel.png') no-repeat center; background-size: contain; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.2, 1); }
-        
-        .arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 35px; height: 45px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 300; border: 2px solid #000; }
-        
-        /* СТОЛБ (ТОЛЬКО ПК) */
-        @media (min-width: 1024px) {
-            .pillar {
-                position: absolute; width: 140px; height: 160px;
-                border-top: 15px solid #fff; border-right: 15px solid #fff;
-                border-radius: 0 30px 0 0; top: -45px; left: 50%; 
-                transform: translateX(-105%); z-index: 50; pointer-events: none;
-            }
-        }
+        .arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 55px; background: #fff; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 300; border: 2px solid #000; }
 
         /* ПОЛЕ СТАВОК */
         .bet-board {
@@ -73,29 +61,29 @@
         .bet-board.spring-out { transform: translateY(115%); }
 
         .grid-layout { display: flex; gap: 5px; justify-content: center; transform-origin: top; margin-top: 5px; height: 80%; }
-        @media (min-width: 1024px) { .bet-board.active { max-width: 420px; left: 50%; transform: translateX(-50%); border-left: 5px solid #fff; border-right: 5px solid #fff; } }
+        @media (min-width: 1024px) { .bet-board.active { max-width: 440px; left: 50%; transform: translateX(-50%); border-left: 5px solid #fff; border-right: 5px solid #fff; } }
 
         .side-panel { display: grid; grid-template-rows: repeat(6, 1fr); gap: 4px; width: 70px; }
-        .cell { height: 100%; border: 2.5px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
+        .cell { height: 100%; border: 2px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; position: relative; }
         
         .cell.grey-btn { background: #888; color: #000; }
         .cell.black-btn { background: #000; color: #fff; }
         .cell.num-grey { background: #666; color: #fff; }
         .cell.num-black { background: #1a1a1a; color: #fff; }
-        .cell.zero { background:#fff; color:#000; height: 40px; border-radius: 40% 40% 0 0; font-size: 1.3rem; margin-bottom: 4px; }
+        .cell.zero { background:#fff; color:#000; height: 45px; border-radius: 40% 40% 0 0; font-size: 1.4rem; margin-bottom: 4px; }
         
-        /* ФИШКА НА ПОЛЕ */
+        /* ФИШКА НА ПОЛЕ (РЯДОМ С ТЕКСТОМ) */
         .cell.has-bet::after { 
             content: attr(data-sum); position: absolute; 
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 25px; height: 25px; background: #111; color: #fff; 
-            border-radius: 50%; border: 2px solid #fff; font-size: 8px; 
+            bottom: 4px; right: 4px; /* Позиция в углу */
+            width: 25px; height: 25px; background: #fff; color: #000; 
+            border-radius: 50%; border: 2px solid #000; font-size: 8px; 
             display: flex; align-items: center; justify-content: center; 
             z-index: 10; font-weight: bold; box-shadow: inset 0 0 0 2px #fff;
         }
 
         /* УПРАВЛЕНИЕ */
-        .bet-controls { display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:20px; }
+        .bet-controls { display:flex; justify-content:center; align-items:center; gap:25px; margin-top:auto; padding-bottom:15px; }
         .undo-draw { width: 50px; height: 50px; background: #fff; border-radius: 50%; border: 3px solid #000; position: relative; cursor: pointer; box-shadow: 0 4px 0 #333; }
         .undo-draw::before { content: ''; position: absolute; top: 15px; left: 10px; width: 12px; height: 8px; border-left: 4px solid #000; border-top: 4px solid #000; transform: rotate(-45deg); }
         .undo-draw::after { content: ''; position: absolute; top: 18px; left: 14px; width: 15px; height: 10px; border-top: 4px solid #000; border-right: 4px solid #000; border-radius: 0 8px 0 0; }
@@ -103,11 +91,12 @@
         .chip-main { width: 80px; height: 80px; border: 4px solid #fff; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; z-index: 1100; }
         .chip-main::after { content: ''; position: absolute; inset: 0; border: 6px dashed #fff; border-radius: 50%; pointer-events: none; }
         
-        .sub-chip { position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: 0.5s var(--spring); transform: scale(0); pointer-events: none; }
+        /* ВЫБОР ФИШЕК (ВЕЕР ВЛЕВО КАК В КУБАХ) */
+        .sub-chip { position: absolute; width: 55px; height: 55px; background: #222; border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: all 0.5s var(--spring); transform: scale(0); pointer-events: none; }
         .active .sub-chip { opacity: 1; transform: scale(1); pointer-events: auto; }
 
         #wait-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .wait-box { background: #fff; color: #000; padding: 30px; border-radius: 30px; border: 8px solid #000; font-size: 1.8rem; animation: wait-spring 0.6s var(--spring) forwards; }
+        .wait-box { background: #fff; color: #000; padding: 30px; border-radius: 30px; border: 8px solid #000; font-size: 2rem; animation: wait-spring 0.6s var(--spring) forwards; }
 
         #roul-res { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #000; border: 8px solid #000; border-radius: 35px; padding: 25px; text-align: center; z-index: 11000; transition: 0.4s var(--spring); min-width: 220px; }
         #roul-res.show { transform: translate(-50%, -50%) scale(1); }
@@ -118,13 +107,12 @@
     <div id="film-chaos"></div>
     <div class="vignette"></div>
 
-    <!-- ЗАГРУЗКА -->
     <div id="loading-screen">
         <div class="drawn-title">CARTOON<br>GAME</div>
         <div id="bar-container"><div id="bar"></div></div>
     </div>
 
-    <audio id="bgMusic" loop><source src="music2.mp3" type="audio/mpeg"></audio>
+    <audio id="bgMusic" loop preload="auto"><source src="music2.mp3" type="audio/mpeg"></audio>
     <audio id="spinSound"><source src="soundroulet.mp3" type="audio/mpeg"></audio>
 
     <div id="wait-screen"><div class="wait-box">WAIT NEXT GAME</div></div>
@@ -136,18 +124,17 @@
 
     <div class="game-screen">
         <div style="width:100%; display:flex; justify-content:space-between; padding:15px; box-sizing:border-box; z-index: 2000;">
-            <div style="font-size:1.5rem;">$<span id="bal">1000.00</span></div>
+            <div style="font-size:1.6rem;">$<span id="bal">1000.00</span></div>
             <div id="timer" style="color:#ff0; font-size:2rem; display: none;">15</div>
             <button style="background:none; border:3px solid #fff; color:#fff; border-radius:10px; font-family:var(--font); cursor:pointer;" onclick="window.location.href='index.html'">EXIT</button>
         </div>
 
         <div class="roulette-top away" id="wheelArea">
+            <img src="ruolet.gif" class="mickey-gif">
             <div class="wheel-wrap">
-                <div class="pillar"></div>
                 <div class="arrow"></div>
                 <div id="wheel"></div>
             </div>
-            <img src="ruolet.gif" class="mickey-gif">
         </div>
 
         <div class="bet-board active" id="betBoard">
@@ -170,11 +157,12 @@
                 <div class="chip-main" id="mainChip" onclick="toggleChips()">
                     <span id="curBetTxt">0.1</span>
                     <div id="radial" style="position:absolute; inset:0;">
-                        <div class="sub-chip" data-val="0.1" style="left:-60px; top:-60px;">0.1</div>
-                        <div class="sub-chip" data-val="0.5" style="left:0; top:-85px;">0.5</div>
-                        <div class="sub-chip" data-val="1" style="left:60px; top:-60px;">1</div>
-                        <div class="sub-chip" data-val="5" style="left:85px; top:0;">5</div>
-                        <div class="sub-chip" data-val="10" style="left:60px; top:60px;">10</div>
+                        <!-- Вылет влево как в кубах -->
+                        <div class="sub-chip" data-val="0.1">0.1</div>
+                        <div class="sub-chip" data-val="0.5">0.5</div>
+                        <div class="sub-chip" data-val="1">1</div>
+                        <div class="sub-chip" data-val="5">5</div>
+                        <div class="sub-chip" data-val="10">10</div>
                     </div>
                 </div>
             </div>
@@ -187,17 +175,27 @@
         const CYCLE = 25000;
         const nums = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
-        // ПОЛНАЯ ЗАГРУЗКА
         window.onload = () => {
             let p = 0;
-            const bar = document.getElementById('bar');
             const loader = setInterval(() => {
-                p += 5; bar.style.width = p + '%';
+                p += 5; document.getElementById('bar').style.width = p + '%';
                 if(p >= 100) { clearInterval(loader); document.getElementById('loading-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('loading-screen').style.display='none'; init(); }, 500); }
-            }, 150);
+            }, 100);
         };
 
-        function toggleChips() { if(!isRolling) document.getElementById('mainChip').classList.toggle('active'); }
+        function toggleChips() {
+            if(isRolling) return;
+            const rad = document.getElementById('mainChip');
+            const isActive = rad.classList.toggle('active');
+            const chips = rad.querySelectorAll('.sub-chip');
+            chips.forEach((c, i) => {
+                const angle = 110 + (i * 35); // Веер влево
+                const dist = isActive ? 140 : 0;
+                const x = Math.cos(angle * Math.PI / 180) * dist;
+                const y = Math.sin(angle * Math.PI / 180) * dist;
+                c.style.transform = `translate(${x}px, ${y}px) scale(${isActive?1:0})`;
+            });
+        }
 
         document.querySelectorAll('.sub-chip').forEach(sc => {
             sc.onclick = (e) => { e.stopPropagation(); curBet = parseFloat(sc.dataset.val); document.getElementById('curBetTxt').innerText = curBet; toggleChips(); };
@@ -254,13 +252,13 @@
                 const col = n === 0 ? 'WHITE' : (reds.includes(n) ? 'GREY' : 'BLACK');
                 let won = 0;
                 activeBets.forEach(b => {
-                    let m = 0;
-                    if(b.target == n) m = n==0?20:10;
-                    else if(b.target==='grey' && col==='GREY') m=2;
-                    else if(b.target==='black' && col==='BLACK') m=2;
-                    else if(b.target==='even' && n%2===0 && n!==0) m=2;
-                    else if(b.target==='odd' && n%2!==0) m=2;
-                    won += b.amount * m;
+                    let win = false;
+                    if(b.target == n) win = true;
+                    else if(b.target === 'grey' && col === 'GREY') win = true;
+                    else if(b.target === 'black' && col === 'BLACK') win = true;
+                    else if(b.target === 'even' && n%2===0 && n!==0) win = true;
+                    else if(b.target === 'odd' && n%2!==0) win = true;
+                    if (win) won += b.amount * (b.target == n ? (n==0?20:10) : 2);
                 });
                 balance += won; updateUI();
                 document.getElementById('res-num').innerText = n;
@@ -317,7 +315,7 @@
             d.style.left = Math.random() * 100 + '%';
             if(d.className === 'dust') { d.style.top = Math.random() * 100 + '%'; d.style.width = d.style.height = (Math.random()*5+2)+'px'; }
             c.appendChild(d); setTimeout(()=>d.remove(), 800);
-        }, 200);
+        }, 150);
     </script>
 </body>
 </html>
